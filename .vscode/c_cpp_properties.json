@@ -1,0 +1,18 @@
+{
+    "configurations": [
+        {
+            "name": "STM32L4",
+            "includePath": [
+                "${workspaceFolder}/**"
+            ],
+            "defines": [
+                "USE_HAL_DRIVER",
+                "STM32L496xx"
+            ],
+            "cStandard": "c11",
+            "cppStandard": "c++17",
+            "intelliSenseMode": "gcc-arm"
+        }
+    ],
+    "version": 4
+}

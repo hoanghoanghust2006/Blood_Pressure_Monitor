@@ -1,0 +1,19 @@
+// Install Cortex-Debug 0.4.x
+{
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "STM32L4",
+            "cwd": "${workspaceRoot}",
+            "executable": "./build/config_stm32l496.elf",
+            "request": "launch",
+            "type": "cortex-debug",
+            "servertype": "stlink",
+            "runToMain": false,
+            "preLaunchTask": "Build"
+        },
+    ]
+}
