@@ -126,8 +126,8 @@ void StartDefaultTask(void *argument)
 /* USER CODE BEGIN Application */
 void vApplicationStackOverflowHook( TaskHandle_t *pxTask, signed char *pcTaskName )
 {
-  trace_line();
-  trace("[ERROR] Task %s is stack overflow\n", pcTaskName);
+  trace_error();
+  trace("Task %s is stack overflow\r\n", pcTaskName);
   while (1) 
   {
 
@@ -136,7 +136,7 @@ void vApplicationStackOverflowHook( TaskHandle_t *pxTask, signed char *pcTaskNam
 
 void vApplicationMallocFailedHook (void)
 {
-  trace_line();
+  trace_error();
   while (1) 
   {
 

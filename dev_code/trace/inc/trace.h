@@ -56,13 +56,18 @@ extern "C"
         }                                      \
     }
 
-#define TRACE_INFO(...)                      \
+#define trace_info(...)                      \
     {                                        \
         if (TRACE_LEVEL >= TRACE_LEVEL_INFO) \
         {                                    \
             printf(__VA_ARGS__);             \
         }                                    \
     }
+
+#define trace_error()                                                 \
+    {                                                                 \
+        printf("[ERROR] Func: %s, line: %d\r\n", __func__, __LINE__); \
+    }                                                                 \
 
 /* Type definitions (Typedef, enum, struct) -----------------------------------------------*/
 
