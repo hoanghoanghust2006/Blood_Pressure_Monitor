@@ -1,8 +1,8 @@
 /*
- * Title : < Name of the file. >
- * Copyright : < Company Name of the file owner. >
- * Author : < Name of the author. >
- * Creation Date : < Date in DD/MMM/YY format >
+ * Title : app.c
+ * Copyright : HCL
+ * Author : nguyen_trung
+ * Creation Date : 31/01/2023
  * Description : < Briefly describe the purpose of the file. >
  * Limitations : < Any limitations. >
  * Dependencies : < H/W, S/W( Operating System, Compiler) >
