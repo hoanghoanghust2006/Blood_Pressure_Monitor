@@ -14,6 +14,8 @@
 #include <stdio.h>
 
 /* Local Include ------------------------------------------------------------------------*/
+#include "trace.h"
+#include "FreeRTOS.h"
 #include "driver_task.h"
 
 /* Private define constants -------------------------------------------------------------*/
@@ -39,11 +41,6 @@ void APP_voInit(void)
     DRIV_voTaskInit();
 
     /* Create test tasks */
-#ifdef TEST_BAT
-    printf("Unit test for battery component\r\n");
-    BAT_voTaskTestInit();
-#endif
-
 #ifdef TEST_STO
     printf("Unit test for storage component\r\n");
     STO_voTaskTestInit();
@@ -54,14 +51,11 @@ void APP_voInit(void)
     RTC_voTaskTestInit();
 #endif
 
-#ifdef TEST_AUDI
-    printf("Unit test for Audio component\r\n");
-    printf("Press User button to play audio\r\n");
-    AUDI_voTaskTestInit();
-#endif
-
 #ifdef TEST_BLOOD_PRESSURE
     printf("Unit test for blood pressure component\r\n");
     PRE_voTaskTestInit();
 #endif
+
+    /* Add heap size check for freeRTOS */
+    // trace("Heap remain size: %d\r\n", xPortGetFreeHeapSize());
 }

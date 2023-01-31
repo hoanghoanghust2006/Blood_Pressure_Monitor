@@ -10,3 +10,4 @@ DEV_CODE_INCLUDES = \
 -Idev_code/led/inc \
 -Idev_code/driver_task/inc \
 -Idev_code/trace/inc \
+-Idev_code/common/inc \

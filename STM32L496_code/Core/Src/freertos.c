@@ -25,7 +25,7 @@
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-
+#include "trace.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -124,6 +124,23 @@ void StartDefaultTask(void *argument)
 
 /* Private application code --------------------------------------------------*/
 /* USER CODE BEGIN Application */
+void vApplicationStackOverflowHook( TaskHandle_t *pxTask, signed char *pcTaskName )
+{
+  trace_line();
+  trace("[ERROR] Task %s is stack overflow\n", pcTaskName);
+  while (1) 
+  {
 
+  }
+}
+
+void vApplicationMallocFailedHook (void)
+{
+  trace_line();
+  while (1) 
+  {
+
+  }  
+}
 /* USER CODE END Application */
 
