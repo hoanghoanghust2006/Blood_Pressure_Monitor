@@ -4,15 +4,14 @@
  * Author : < Name of the author. >
  * Creation Date : < Date in DD/MMM/YY format >
  * Description : < Briefly describe the purpose of the file. >
- * Limitations : < Any limitations. >
- * Dependencies : < H/W, S/W( Operating System, Compiler) >
- * Modifications History : VERSION WHO WHEN WHY
  * ------- ---------- --------
  */
 
 /* System Include -----------------------------------------------------------------------*/
 
 /* Local Include ------------------------------------------------------------------------*/
+#include "common.h"
+#include "trace.h"
 
 /* Private define constants -------------------------------------------------------------*/
 

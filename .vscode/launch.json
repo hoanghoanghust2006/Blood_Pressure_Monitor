@@ -8,11 +8,15 @@
         {
             "name": "STM32L4",
             "cwd": "${workspaceRoot}",
-            "executable": "./build/config_stm32l496.elf",
+            "executable": "./build/bpm_application.elf",
             "request": "launch",
             "type": "cortex-debug",
-            "servertype": "stlink",
-            "runToMain": false,
+            "servertype": "openocd",
+            "configFiles": [
+                "interface/stlink.cfg",
+                "board/stm32l496g-disco.cfg"
+            ],
+            "runToMain": true,
             "preLaunchTask": "Build"
         },
     ]

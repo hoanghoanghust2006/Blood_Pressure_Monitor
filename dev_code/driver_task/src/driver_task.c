@@ -26,7 +26,7 @@
 osThreadId_t         DRIV_pvoTaskHandle;
 const osThreadAttr_t stDriverTask = {
     .name       = "DriverTask",
-    .stack_size = 128 * 4,
+    .stack_size = 1024 * 4,
     .priority   = (osPriority_t)osPriorityHigh,
 };
 
@@ -53,7 +53,6 @@ static void DRIV_voTask(void *pvoArgument)
 
         osDelayUntil(u32DriverTaskStartTick + DRV_TASK_DELAY_TIME_MS);
     }
-    /* USER CODE END 5 */
 }
 
 /* Export functions definition   --------------------------------------------------------*/

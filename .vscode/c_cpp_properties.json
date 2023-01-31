@@ -7,7 +7,8 @@
             ],
             "defines": [
                 "USE_HAL_DRIVER",
-                "STM32L496xx"
+                "STM32L496xx",
+                "HAL_UART_MODULE_ENABLED"
             ],
             "cStandard": "c11",
             "cppStandard": "c++17",
