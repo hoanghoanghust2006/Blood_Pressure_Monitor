@@ -3,7 +3,8 @@
         {
             "name": "STM32L4",
             "includePath": [
-                "${workspaceFolder}/**"
+                "${workspaceFolder}/dev_code/**",
+                "${workspaceFolder}/STM32L496/**"
             ],
             "defines": [
                 "USE_HAL_DRIVER",

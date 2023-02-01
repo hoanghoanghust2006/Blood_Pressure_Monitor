@@ -5,4 +5,7 @@
     "C_Cpp.autoAddFileAssociations": false,
     "editor.formatOnSave": true,
     "editor.formatOnSaveMode": "modifications",
+    "search.exclude": {
+        "**/generated/**": true
+    }
 }

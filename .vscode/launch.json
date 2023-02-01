@@ -6,9 +6,9 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "STM32L4",
+            "name": "OpenOCD",
             "cwd": "${workspaceRoot}",
-            "executable": "./build/bpm_application.elf",
+            "executable": "./build/blood_pressure_monitor_v2.elf",
             "request": "launch",
             "type": "cortex-debug",
             "servertype": "openocd",
@@ -16,6 +16,16 @@
                 "interface/stlink.cfg",
                 "board/stm32l496g-disco.cfg"
             ],
+            "runToMain": true,
+            "preLaunchTask": "Build"
+        },
+        {
+            "name": "STLink",
+            "cwd": "${workspaceRoot}",
+            "executable": "./build/blood_pressure_monitor_v2.elf",
+            "request": "launch",
+            "type": "cortex-debug",
+            "servertype": "stlink",
             "runToMain": true,
             "preLaunchTask": "Build"
         },

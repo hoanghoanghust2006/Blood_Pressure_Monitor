@@ -18,7 +18,7 @@ include dev_code/dev_code.mk
 ######################################
 # target
 ######################################
-TARGET = bpm_application
+TARGET = blood_pressure_monitor_v2
 
 
 ######################################
