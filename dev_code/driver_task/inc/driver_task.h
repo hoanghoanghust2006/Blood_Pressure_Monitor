@@ -21,6 +21,6 @@
 /* Type definitions (Typedef, enum, struct) -----------------------------------------------*/
 
 /* Export Function Declarations -----------------------------------------------------------*/
-void DRIV_voTaskInit(void);
+void DRIV_voInitTask(void);
 
 #endif

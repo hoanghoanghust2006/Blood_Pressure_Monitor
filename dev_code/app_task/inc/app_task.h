@@ -1,15 +1,10 @@
 /*
-* Title : app.h
-* Copyright : HCL
-* Author : nguyen_trung
-* Creation Date : 8/30/2022
-* Requirements : < Which other header files needs be included to include this header file. >
-* Description : < Briefly describe the purpose of the file. >
-* Limitations : < Any limitations. >
-* Dependencies : < H/W, S/W( Operating System, Compiler) >
-* Modifications History : VERSION WHO WHEN WHY
-* ------- ---------- --------
-*/
+ * Title : app.h
+ * Copyright : HCL
+ * Author : < Name of the author. >
+ * Creation Date : < Date in DD/MMM/YY format >
+ * ------- ---------- --------
+ */
 
 #ifndef _APP_H_
 #define _APP_H_
@@ -19,15 +14,17 @@ extern "C"
 {
 #endif
 /* Include --------------------------------------------------------------------------------*/
+#include "common.h"
 
 /* Define constants -----------------------------------------------------------------------*/
 
 /* Type definitions (Typedef, enum, struct) -----------------------------------------------*/
 
 /* Export Function Declarations -----------------------------------------------------------*/
-void APP_voInit(void);
+tenStatus APP_enInitTask(void);
 
 #ifdef __cplusplus
 }
 #endif
+
 #endif

@@ -17,7 +17,7 @@
 #include "led.h"
 
 /* Private define constants -------------------------------------------------------------*/
-#define DRV_TASK_DELAY_TIME_MS 10
+#define DRV_TASK_DELAY_TIME_MS 5
 /* Private macros -----------------------------------------------------------------------*/
 
 /* Private type definitions  ------------------------------------------------------------*/
@@ -56,7 +56,7 @@ static void DRIV_voTask(void *pvoArgument)
 }
 
 /* Export functions definition   --------------------------------------------------------*/
-void DRIV_voTaskInit(void)
+void DRIV_voInitTask(void)
 {
     DRIV_pvoTaskHandle = osThreadNew(DRIV_voTask, NULL, &stDriverTask);
 }

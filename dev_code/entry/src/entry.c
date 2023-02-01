@@ -1,5 +1,5 @@
 /*
- * Title : app.c
+ * Title : task.c
  * Copyright : HCL
  * Author : nguyen_trung
  * Creation Date : 31/01/2023
@@ -17,6 +17,7 @@
 #include "trace.h"
 #include "FreeRTOS.h"
 #include "driver_task.h"
+#include "app_task.h"
 
 /* Private define constants -------------------------------------------------------------*/
 
@@ -31,29 +32,27 @@
 /* Private functions definition   -------------------------------------------------------*/
 
 /* Export functions definition   --------------------------------------------------------*/
-void APP_voInit(void)
+void ENTRY_voInit(void)
 {
     printf("\033\143");
     printf("\033[3J");
     printf("**************** Firmware started ****************\r\n");
 
     /* Create driver task */
-    DRIV_voTaskInit();
+    DRIV_voInitTask();
 
     /* Create test tasks */
 #ifdef TEST_STO
     printf("Unit test for storage component\r\n");
     STO_voTaskTestInit();
-#endif
-
-#ifdef TEST_RTC
+#elif TEST_RTC
     printf("Unit test for RTC component\r\n");
     RTC_voTaskTestInit();
-#endif
-
-#ifdef TEST_BLOOD_PRESSURE
+#elif TEST_BLOOD_PRESSURE
     printf("Unit test for blood pressure component\r\n");
     PRE_voTaskTestInit();
+#else
+    APP_enInitTask();
 #endif
 
     /* Add heap size check for freeRTOS */
