@@ -20,6 +20,7 @@ extern "C"
 #endif
 /* Include --------------------------------------------------------------------------------*/
 #include <stdint.h>
+#include <stdbool.h>
 
 /* Define constants -----------------------------------------------------------------------*/
 
@@ -34,28 +35,6 @@ typedef struct
     uint8_t  u8Hour;
 } tstTime;
 
-typedef enum
-{
-    eMSGDATETIME_FALSE,
-    eMSGTIME_TRUE,
-    eMSGDATE_TRUE
-} tenUIMsgDateTime;
-
-typedef struct
-{
-    uint8_t  u8CountNb;
-    uint8_t  u8SaveStatus;
-    uint8_t  u8Box;
-    uint16_t u16SumValue;
-} tstUIKeyBoard;
-
-typedef enum
-{
-    eRTC_FALSE,
-    eRTC_TRUE,
-    eBAT_FALSE,
-    eBAT_TRUE
-} tenMsgStatusBR;
 typedef enum
 {
     eSUCCESS = 0,

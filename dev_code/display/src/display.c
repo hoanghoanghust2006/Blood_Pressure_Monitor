@@ -1,5 +1,5 @@
 /*
- * Title : < Name of the file. >
+ * Title : display.c
  * Copyright : HCL
  * Author : < Name of the author. >
  * Creation Date : < Date in DD/MMM/YY format >
