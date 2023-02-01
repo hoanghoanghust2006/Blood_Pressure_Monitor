@@ -42,7 +42,6 @@ BUILD_DIR = build
 # C sources
 C_SOURCES =  \
 STM32L496/Core/Src/main.c \
-STM32L496/Core/Src/gpio.c \
 STM32L496/Core/Src/freertos.c \
 STM32L496/Core/Src/stm32l4xx_it.c \
 STM32L496/Core/Src/stm32l4xx_hal_msp.c \
