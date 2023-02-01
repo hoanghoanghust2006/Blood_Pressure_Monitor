@@ -8,11 +8,12 @@
             "defines": [
                 "USE_HAL_DRIVER",
                 "STM32L496xx",
-                "HAL_UART_MODULE_ENABLED"
+                "HAL_UART_MODULE_ENABLED",
+                "__cplusplus"
             ],
             "cStandard": "c11",
-            "cppStandard": "c++17",
-            "intelliSenseMode": "gcc-arm"
+            "intelliSenseMode": "gcc-arm",
+            "compilerPath": "C://Program Files (x86)//GNU Arm Embedded Toolchain//10 2021.10//bin//arm-none-eabi-gcc"
         }
     ],
     "version": 4
