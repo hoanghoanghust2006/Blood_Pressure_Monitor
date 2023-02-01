@@ -41,48 +41,48 @@ BUILD_DIR = build
 ######################################
 # C sources
 C_SOURCES =  \
-STM32L496_code/Core/Src/main.c \
-STM32L496_code/Core/Src/gpio.c \
-STM32L496_code/Core/Src/freertos.c \
-STM32L496_code/Core/Src/stm32l4xx_it.c \
-STM32L496_code/Core/Src/stm32l4xx_hal_msp.c \
-STM32L496_code/Core/Src/stm32l4xx_hal_timebase_tim.c \
-STM32L496_code/Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal.c \
-STM32L496_code/Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_i2c.c \
-STM32L496_code/Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_i2c_ex.c \
-STM32L496_code/Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_rcc.c \
-STM32L496_code/Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_rcc_ex.c \
-STM32L496_code/Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_flash.c \
-STM32L496_code/Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_flash_ex.c \
-STM32L496_code/Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_flash_ramfunc.c \
-STM32L496_code/Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_gpio.c \
-STM32L496_code/Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_dma.c \
-STM32L496_code/Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_dma_ex.c \
-STM32L496_code/Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_pwr.c \
-STM32L496_code/Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_pwr_ex.c \
-STM32L496_code/Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_cortex.c \
-STM32L496_code/Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_exti.c \
-STM32L496_code/Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_tim.c \
-STM32L496_code/Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_tim_ex.c \
-STM32L496_code/Core/Src/system_stm32l4xx.c \
-STM32L496_code/Middlewares/Third_Party/FreeRTOS/Source/croutine.c \
-STM32L496_code/Middlewares/Third_Party/FreeRTOS/Source/event_groups.c \
-STM32L496_code/Middlewares/Third_Party/FreeRTOS/Source/list.c \
-STM32L496_code/Middlewares/Third_Party/FreeRTOS/Source/queue.c \
-STM32L496_code/Middlewares/Third_Party/FreeRTOS/Source/stream_buffer.c \
-STM32L496_code/Middlewares/Third_Party/FreeRTOS/Source/tasks.c \
-STM32L496_code/Middlewares/Third_Party/FreeRTOS/Source/timers.c \
-STM32L496_code/Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS_V2/cmsis_os2.c \
-STM32L496_code/Middlewares/Third_Party/FreeRTOS/Source/portable/MemMang/heap_4.c \
-STM32L496_code/Middlewares/Third_Party/FreeRTOS/Source/portable/GCC/ARM_CM4F/port.c \
-STM32L496_code/Core/Src/usart.c \
-STM32L496_code/Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_uart.c \
-STM32L496_code/Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_uart_ex.c \
+STM32L496/Core/Src/main.c \
+STM32L496/Core/Src/gpio.c \
+STM32L496/Core/Src/freertos.c \
+STM32L496/Core/Src/stm32l4xx_it.c \
+STM32L496/Core/Src/stm32l4xx_hal_msp.c \
+STM32L496/Core/Src/stm32l4xx_hal_timebase_tim.c \
+STM32L496/Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal.c \
+STM32L496/Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_i2c.c \
+STM32L496/Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_i2c_ex.c \
+STM32L496/Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_rcc.c \
+STM32L496/Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_rcc_ex.c \
+STM32L496/Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_flash.c \
+STM32L496/Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_flash_ex.c \
+STM32L496/Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_flash_ramfunc.c \
+STM32L496/Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_gpio.c \
+STM32L496/Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_dma.c \
+STM32L496/Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_dma_ex.c \
+STM32L496/Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_pwr.c \
+STM32L496/Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_pwr_ex.c \
+STM32L496/Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_cortex.c \
+STM32L496/Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_exti.c \
+STM32L496/Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_tim.c \
+STM32L496/Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_tim_ex.c \
+STM32L496/Core/Src/system_stm32l4xx.c \
+STM32L496/Middlewares/Third_Party/FreeRTOS/Source/croutine.c \
+STM32L496/Middlewares/Third_Party/FreeRTOS/Source/event_groups.c \
+STM32L496/Middlewares/Third_Party/FreeRTOS/Source/list.c \
+STM32L496/Middlewares/Third_Party/FreeRTOS/Source/queue.c \
+STM32L496/Middlewares/Third_Party/FreeRTOS/Source/stream_buffer.c \
+STM32L496/Middlewares/Third_Party/FreeRTOS/Source/tasks.c \
+STM32L496/Middlewares/Third_Party/FreeRTOS/Source/timers.c \
+STM32L496/Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS_V2/cmsis_os2.c \
+STM32L496/Middlewares/Third_Party/FreeRTOS/Source/portable/MemMang/heap_4.c \
+STM32L496/Middlewares/Third_Party/FreeRTOS/Source/portable/GCC/ARM_CM4F/port.c \
+STM32L496/Core/Src/usart.c \
+STM32L496/Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_uart.c \
+STM32L496/Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_uart_ex.c \
 $(DEV_CODE_SOURCES)
 
 # ASM sources
 ASM_SOURCES =  \
-STM32L496_code/startup_stm32l496xx.s
+STM32L496/startup_stm32l496xx.s
 
 
 #######################################
@@ -136,14 +136,14 @@ AS_INCLUDES =  \
 
 # C includes
 C_INCLUDES =  \
--ISTM32L496_code/Core/Inc \
--ISTM32L496_code/Drivers/STM32L4xx_HAL_Driver/Inc \
--ISTM32L496_code/Drivers/STM32L4xx_HAL_Driver/Inc/Legacy \
--ISTM32L496_code/Middlewares/Third_Party/FreeRTOS/Source/include \
--ISTM32L496_code/Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS_V2 \
--ISTM32L496_code/Middlewares/Third_Party/FreeRTOS/Source/portable/GCC/ARM_CM4F \
--ISTM32L496_code/Drivers/CMSIS/Device/ST/STM32L4xx/Include \
--ISTM32L496_code/Drivers/CMSIS/Include \
+-ISTM32L496/Core/Inc \
+-ISTM32L496/Drivers/STM32L4xx_HAL_Driver/Inc \
+-ISTM32L496/Drivers/STM32L4xx_HAL_Driver/Inc/Legacy \
+-ISTM32L496/Middlewares/Third_Party/FreeRTOS/Source/include \
+-ISTM32L496/Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS_V2 \
+-ISTM32L496/Middlewares/Third_Party/FreeRTOS/Source/portable/GCC/ARM_CM4F \
+-ISTM32L496/Drivers/CMSIS/Device/ST/STM32L4xx/Include \
+-ISTM32L496/Drivers/CMSIS/Include \
 $(DEV_CODE_INCLUDES)
 
 
@@ -165,7 +165,7 @@ CFLAGS += -MMD -MP -MF"$(@:%.o=%.d)"
 # LDFLAGS
 #######################################
 # link script
-LDSCRIPT = STM32L496_code/STM32L496AGIx_FLASH.ld
+LDSCRIPT = STM32L496/STM32L496AGIx_FLASH.ld
 
 # libraries
 LIBS = -lc -lm -lnosys 
@@ -227,8 +227,6 @@ clean:
 stm32cube_programmer_path := STMicroelectronics/STM32Cube/STM32CubeProgrammer/bin
 stm32cube_programmer_filename := STM32_Programmer_CLI.exe
 stm32cube_programmer_filepath := $(stm32cube_programmer_path)/$(stm32cube_programmer_filename)
-stm32cube_loader_relative_path := ExternalLoader/$(stldr)
-stm32cube_loader := $(stm32cube_programmer_path)/$(stm32cube_loader_relative_path)
 
 program_files_win32 = /c/Program Files (x86)
 program_files_win64 = /c/Program Files
@@ -242,7 +240,6 @@ endif
 
 st_stm32cube_programmer_path := $(program_files_path)/$(stm32cube_programmer_path)
 st_stm32cube_programmer_filepath := $(program_files_path)/$(stm32cube_programmer_filepath)
-st_stm32cube_external_loader := $(program_files_path)/$(stm32cube_loader)
 
 flash: all
 	"$(st_stm32cube_programmer_path)/$(stm32cube_programmer_filename)" -c port=SWD -d build/$(TARGET).elf -hardRst
