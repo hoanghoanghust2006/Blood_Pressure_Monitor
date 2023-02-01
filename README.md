@@ -1,14 +1,24 @@
 # Blood Pressure Monitor V2
 
-## Build command
+## Support feature
 
-```bash
-# Build project
-make -j12
+Visual Studio Code:
 
-# Build and flash 
-make flash -j12
-```
+- Auto format new codes when saving files
+- Debug breakpoints style with Cortex-Debug extension
+- Ignore **generated** folder when searching and indexing
+
+Source code:
+
+- Build with Makefile
+- Debug with led blink (if led is blinked, code is running without crash, otherwise)
+- Debug with trace log through UART
+- Detect **Hardfault Exception** through **trace log**
+- Detect Lack of Heap memory through **trace log**
+- Detect Stack overflow of freeRTOS tasks through **trace log**
+- Generate STM32 peripheral configuration with no conflict
+- Build smoke test (unit test) with minimum effort
+- Reserve APIs prototypes for all components
 
 ## Setup environment
 
@@ -21,10 +31,12 @@ make flash -j12
   - **STM32CubeMX**
   - **GNU Arm Embedded Toolchain**
   - **Openocd**
+  - **Cortex-Debug v0.4.7 extension** of **Visual Studio Code**
+  - **C/C++ extension** of **Visual Studio Code**
 
 - Add environment path for:
 
-  - **GNU make**: 
+  - **GNU make**
   - **GNU Arm Embedded Toolchain**
   - **Openocd**
 
@@ -37,3 +49,16 @@ make flash -j12
     arm-none-eabi-gcc --version
     ```
 
+## Build command
+
+```bash
+# Build project
+make -j12
+
+# Build and flash 
+make flash -j12
+
+## Rebuild
+make clean
+make -j12
+```
