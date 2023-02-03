@@ -33,7 +33,10 @@ static void APP_voTask(void *pvoArgument);
 /* Private functions definition   -------------------------------------------------------*/
 static void APP_voTask(void *pvoArgument)
 {
-    osDelay(500);
+    for (;;)
+    {
+        osDelay(500);
+    }
 }
 
 /* Export functions definition   --------------------------------------------------------*/
