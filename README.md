@@ -1,5 +1,10 @@
 # Blood Pressure Monitor V2
 
+## Clone project
+
+- **User name**: nguyen_trung
+- **Password**: ys2kphguaz2rnbi5x6lh3fpuv7qcv6tuelfz4kyfoy4d6br3ycvq
+
 ## Support feature
 
 Visual Studio Code:
