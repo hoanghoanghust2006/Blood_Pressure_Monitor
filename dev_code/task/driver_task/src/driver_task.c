@@ -38,18 +38,11 @@ static void DRIV_voTask(void *pvoArgument)
 {
     LED_voInit();
 
-#ifdef ENABLE_WATCHDOG
-    WDG_voInit();
-#endif
-
     for (;;)
     {
         uint32_t u32DriverTaskStartTick = osKernelGetTickCount();
-        LED_voMainFunction();
 
-#ifdef ENABLE_WATCHDOG
-        WDG_voMainFunction();
-#endif
+        LED_voMainFunction();
 
         osDelayUntil(u32DriverTaskStartTick + DRV_TASK_DELAY_TIME_MS);
     }

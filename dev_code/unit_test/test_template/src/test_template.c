@@ -1,9 +1,8 @@
 /*
- * Title :  watch.c
+ * Title : test_template.c
  * Copyright : HCL
- * Author :  minh.thach
- * Creation Date :  01/09/2022
- * Requirements : < Which other header files needs be included to include this header file. >
+ * Author : Nam Ngo
+ * Creation Date : 31/08/2022
  * Description : < Briefly describe the purpose of the file. >
  * Limitations : < Any limitations. >
  * Dependencies : < H/W, S/W( Operating System, Compiler) >
@@ -14,36 +13,36 @@
 /* System Include -----------------------------------------------------------------------*/
 
 /* Local Include ------------------------------------------------------------------------*/
-#include "watchdog.h"
-#include "stm32h7xx_hal.h"
+#include "cmsis_os.h"
 
 /* Private define constants -------------------------------------------------------------*/
-
+#define TEMP_TASK_DELAY_TIME_MS 5
 /* Private macros -----------------------------------------------------------------------*/
 
 /* Private type definitions  ------------------------------------------------------------*/
 
 /* Private file-local global variables   ------------------------------------------------*/
-extern IWDG_HandleTypeDef hiwdg1;
+osThreadId_t         TEMP_pvoTaskHandle;
+const osThreadAttr_t stTempTask = {
+    .name       = "TemplateTask",
+    .stack_size = 1024 * 4,
+    .priority   = (osPriority_t)osPriorityLow,
+};
 
 /* Private function prototypes declarations   -------------------------------------------*/
+static void TEMP_voTask(void *pvoArgument);
 
 /* Private functions definition   -------------------------------------------------------*/
-
-/* Export functions definition   --------------------------------------------------------*/
-void WDG_voInit(void)
+static void TEMP_voTask(void *pvoArgument)
 {
+    for (;;)
+    {
+
+    }
 }
 
-void WDG_voMainFunction(void)
+/* Export functions definition   --------------------------------------------------------*/
+void TEMP_voInitTask(void)
 {
-    /*
-     *  set up 1 second Refresh WDG
-     *  RL = (Time(ms)*32000)/(PR*1000) - 1
-     *  RL is IWDG down-counter reload value
-     *  PR is IWDG Counter clock prescaler
-     *  IWDG down-counter reload value must be between 0 and 4095
-     *  Choose Time =5000, PR = 64 => RL = 2499
-     */
-    HAL_IWDG_Refresh(&hiwdg1);
+    TEMP_pvoTaskHandle = osThreadNew(TEMP_voTask, NULL, &stTempTask);
 }
