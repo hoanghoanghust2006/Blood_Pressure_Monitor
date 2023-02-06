@@ -6,8 +6,8 @@
  * ------- ---------- --------
  */
 
-#ifndef _TEMPLATE_H_
-#define _TEMPLATE_H_
+#ifndef _GLCD_H_
+#define _GLCD_H_
 
 #ifdef __cplusplus
 extern "C"
@@ -20,8 +20,8 @@ extern "C"
 /* Type definitions (Typedef, enum, struct) -----------------------------------------------*/
 
 /* Export Function Declarations -----------------------------------------------------------*/
-tenStatus      TEMP_enInit(void);
-void           TEMP_voMainFunction(uint32_t u32LoopTime);
+tenStatus      GLCD_enInit(void);
+void           GLCD_voMainFunction(uint32_t u32LoopTime);
 
 #ifdef __cplusplus
 }
