@@ -1,8 +1,8 @@
 /*
- * Title :  watchdog.h
+ * Title : test_template.h
  * Copyright : HCL
- * Author :  minh.thach
- * Creation Date :  01/09/2022
+ * Author : Nam Ngo
+ * Creation Date : 31/08/2022
  * Requirements : < Which other header files needs be included to include this header file. >
  * Description : < Briefly describe the purpose of the file. >
  * Limitations : < Any limitations. >
@@ -11,13 +11,9 @@
  * ------- ---------- --------
  */
 
-#ifndef _WATCHDOG_H_
-#define _WATCHDOG_H_
+#ifndef _TEMP_TASK_H_
+#define _TEMP_TASK_H_
 
-#ifdef __cplusplus
-extern "C"
-{
-#endif
 /* Include --------------------------------------------------------------------------------*/
 
 /* Define constants -----------------------------------------------------------------------*/
@@ -25,23 +21,6 @@ extern "C"
 /* Type definitions (Typedef, enum, struct) -----------------------------------------------*/
 
 /* Export Function Declarations -----------------------------------------------------------*/
-/*
- * Name : WDG_voInit
- * Description : Init watchdog
- * Parameters: void
- * Return: void
- */
-void WDG_voInit(void);
+void TEMP_voInitTask(void);
 
-/*
- * Name : WDG_voMainFunction
- * Description : Auto reset IWDG
- * Parameters: void
- * Return: void
- */
-void WDG_voMainFunction(void);
-
-#ifdef __cplusplus
-}
-#endif
 #endif

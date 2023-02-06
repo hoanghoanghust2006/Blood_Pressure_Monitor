@@ -1,5 +1,5 @@
 /*
- * Title : driver_task.c
+ * Title : test_template.c
  * Copyright : HCL
  * Author : Nam Ngo
  * Creation Date : 31/08/2022
@@ -14,42 +14,35 @@
 
 /* Local Include ------------------------------------------------------------------------*/
 #include "cmsis_os.h"
-#include "led.h"
 
 /* Private define constants -------------------------------------------------------------*/
-#define DRV_TASK_DELAY_TIME_MS 5
+#define TEMP_TASK_DELAY_TIME_MS 5
 /* Private macros -----------------------------------------------------------------------*/
 
 /* Private type definitions  ------------------------------------------------------------*/
 
 /* Private file-local global variables   ------------------------------------------------*/
-osThreadId_t         DRIV_pvoTaskHandle;
-const osThreadAttr_t stDriverTask = {
-    .name       = "DriverTask",
+osThreadId_t         TEMP_pvoTaskHandle;
+const osThreadAttr_t stTempTask = {
+    .name       = "TemplateTask",
     .stack_size = 1024 * 4,
-    .priority   = (osPriority_t)osPriorityHigh,
+    .priority   = (osPriority_t)osPriorityLow,
 };
 
 /* Private function prototypes declarations   -------------------------------------------*/
-static void DRIV_voTask(void *pvoArgument);
+static void TEMP_voTask(void *pvoArgument);
 
 /* Private functions definition   -------------------------------------------------------*/
-static void DRIV_voTask(void *pvoArgument)
+static void TEMP_voTask(void *pvoArgument)
 {
-    LED_voInit();
-
     for (;;)
     {
-        uint32_t u32DriverTaskStartTick = osKernelGetTickCount();
 
-        LED_voMainFunction();
-
-        osDelayUntil(u32DriverTaskStartTick + DRV_TASK_DELAY_TIME_MS);
     }
 }
 
 /* Export functions definition   --------------------------------------------------------*/
-void DRIV_voInitTask(void)
+void TEMP_voInitTask(void)
 {
-    DRIV_pvoTaskHandle = osThreadNew(DRIV_voTask, NULL, &stDriverTask);
+    TEMP_pvoTaskHandle = osThreadNew(TEMP_voTask, NULL, &stTempTask);
 }

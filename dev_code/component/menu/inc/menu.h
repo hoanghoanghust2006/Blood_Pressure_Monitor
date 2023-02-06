@@ -6,22 +6,23 @@
  * ------- ---------- --------
  */
 
-#ifndef _TEMPLATE_H_
-#define _TEMPLATE_H_
+#ifndef _HEADER_H_
+#define _HEADER_H_
 
 #ifdef __cplusplus
 extern "C"
 {
 #endif
+
 /* Include --------------------------------------------------------------------------------*/
 
 /* Define constants -----------------------------------------------------------------------*/
 
 /* Type definitions (Typedef, enum, struct) -----------------------------------------------*/
-
+typedef struct
+{
+} tstMenu;
 /* Export Function Declarations -----------------------------------------------------------*/
-tenStatus      TEMP_enInit(void);
-void           TEMP_voMainFunction(uint32_t u32LoopTime);
 
 #ifdef __cplusplus
 }
