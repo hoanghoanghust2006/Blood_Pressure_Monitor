@@ -66,4 +66,8 @@ make flash -j12
 ## Rebuild
 make clean
 make -j12
+
+## Build unit test
+make clean
+make -j12 test=-DTEST_BUTTON
 ```
