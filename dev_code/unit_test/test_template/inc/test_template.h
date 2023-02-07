@@ -21,6 +21,6 @@
 /* Type definitions (Typedef, enum, struct) -----------------------------------------------*/
 
 /* Export Function Declarations -----------------------------------------------------------*/
-void TEMP_voInitTask(void);
+void TEMP_voTaskTestInit(void);
 
 #endif

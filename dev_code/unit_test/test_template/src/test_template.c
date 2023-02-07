@@ -42,7 +42,7 @@ static void TEMP_voTask(void *pvoArgument)
 }
 
 /* Export functions definition   --------------------------------------------------------*/
-void TEMP_voInitTask(void)
+void TEMP_voTaskTestInit(void)
 {
     TEMP_pvoTaskHandle = osThreadNew(TEMP_voTask, NULL, &stTempTask);
 }
