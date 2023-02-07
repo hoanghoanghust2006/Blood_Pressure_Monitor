@@ -1,8 +1,8 @@
 /*
- * Title : task.c
+ * Title : test_button.c
  * Copyright : HCL
- * Author : nguyen_trung
- * Creation Date : 31/01/2023
+ * Author : Do Trang
+ * Creation Date : 07/02/2023
  * Description : < Briefly describe the purpose of the file. >
  * Limitations : < Any limitations. >
  * Dependencies : < H/W, S/W( Operating System, Compiler) >
@@ -11,54 +11,41 @@
  */
 
 /* System Include -----------------------------------------------------------------------*/
-#include <stdio.h>
 
 /* Local Include ------------------------------------------------------------------------*/
+#include "cmsis_os.h"
 #include "trace.h"
-#include "FreeRTOS.h"
-#include "driver_task.h"
-#include "app_task.h"
-#include "test_button.h"
 
 /* Private define constants -------------------------------------------------------------*/
-
+#define BTN_TASK_DELAY_TIME_MS 5
 /* Private macros -----------------------------------------------------------------------*/
 
 /* Private type definitions  ------------------------------------------------------------*/
 
 /* Private file-local global variables   ------------------------------------------------*/
+osThreadId_t         BTN_pvoTaskHandle;
+const osThreadAttr_t stBtnTask = {
+    .name       = "ButtonTask",
+    .stack_size = 1024 * 4,
+    .priority   = (osPriority_t)osPriorityLow,
+};
 
 /* Private function prototypes declarations   -------------------------------------------*/
+static void BTN_voTask(void *pvoArgument);
 
 /* Private functions definition   -------------------------------------------------------*/
+static void BTN_voTask(void *pvoArgument)
+{
+    for (;;)
+    {
+
+        trace("Hello from unit test button\r\n");
+        osDelay(500);
+    }
+}
 
 /* Export functions definition   --------------------------------------------------------*/
-void ENTRY_voInit(void)
+void BTN_voTaskTestInit(void)
 {
-    printf("\033\143");
-    printf("\033[3J");
-    printf("**************** Firmware started ****************\r\n");
-
-    /* Create driver task */
-    DRIV_voInitTask();
-
-    /* Create test tasks */
-#if defined(TEST_STO)
-    printf("Unit test for storage component\r\n");
-    STO_voTaskTestInit();
-#elif defined(TEST_RTC)
-    printf("Unit test for RTC component\r\n");
-    RTC_voTaskTestInit();
-#elif defined(TEST_BLOOD_PRESSURE)
-    printf("Unit test for blood pressure component\r\n");
-    PRE_voTaskTestInit();
-#elif defined(TEST_BUTTON)
-    printf("Unit test for button component\r\n");
-    BTN_voTaskTestInit();
-#else
-    APP_enInitTask();
-#endif
-
-    /* Add heap size check for freeRTOS */
-    // trace("Heap remain size: %d\r\n", xPortGetFreeHeapSize());
+    BTN_pvoTaskHandle = osThreadNew(BTN_voTask, NULL, &stBtnTask);
 }
