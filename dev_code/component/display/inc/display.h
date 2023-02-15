@@ -29,6 +29,20 @@ typedef struct
     uint8_t   u8Diastolic;
 } tstBloodPressureResult;
 
+typedef enum
+{
+    eDAY,
+    eMONTH,
+    eYEAR
+} tenDateSetupState;
+
+typedef enum
+{
+    eHOUR,
+    eMINUTE,
+    eSECOND
+} tenTimeSetupState;
+
 /* Export Function Declarations -----------------------------------------------------------*/
 tenStatus DPL_enInit(void);
 void      DPL_voMainFunction(void);
@@ -38,6 +52,6 @@ tenStatus DPL_enDisplayProcessMeasurement(uint8_t          u8AirPressure,
 tenStatus DPL_enDisplayResults(const tstBloodPressureResult* stResult);
 tenStatus DPL_enDisplayMenu(const tstMenu* stMenu);
 tenStatus DPL_enDisplayRecordHistory(const tstStorage* stStorage, uint8_t u8Index);
-tenStatus DPL_enDisplaySetupDate(const tstTime* stTime);
-tenStatus DPL_enDisplaySetupTime(const tstTime* stTime);
+tenStatus DPL_enDisplaySetupDate(const tstTime* stTime, tenDateSetupState enDateSetupState);
+tenStatus DPL_enDisplaySetupTime(const tstTime* stTime, tenTimeSetupState enTimeSetupState);
 #endif
