@@ -28,6 +28,8 @@
 #define PRESS_TIME_DETECT 50
 #define HOLD_TIME_DETECT  2000
 
+#define COUNTER_DELAY 100
+
 /* Private macros -----------------------------------------------------------------------*/
 
 /* Private type definitions  ------------------------------------------------------------*/
@@ -97,7 +99,7 @@ tenStatus BTN_enInit(void)
 
 void BTN_voMainFunction(uint32_t u32LoopTime)
 {
-    for (uint8_t u8Index = 0; u8Index < sizeof(astButton) / sizeof(tstButton); u8Index++)
+    for (uint8_t u8Index = 0; u8Index < (sizeof(astButton) / sizeof(tstButton)); u8Index++)
     {
         /* Detect the button is Pressed or not */
         if (HAL_GPIO_ReadPin(astButton[u8Index].pstBtnPort, astButton[u8Index].u32BtnPin) == GPIO_PIN_SET)
@@ -111,13 +113,13 @@ void BTN_voMainFunction(uint32_t u32LoopTime)
         }
 
         /* Check the button is Pressed or Held */
-        if (astButton[u8Index].u32PressCounter == PRESS_TIME_DETECT / u32LoopTime)
+        if (astButton[u8Index].u32PressCounter == (PRESS_TIME_DETECT / u32LoopTime))
         {
             astButton[u8Index].enBtnState = ePRESSED;
         }
-        else if (astButton[u8Index].u32PressCounter >= HOLD_TIME_DETECT / u32LoopTime)
+        else if (astButton[u8Index].u32PressCounter >= (HOLD_TIME_DETECT / u32LoopTime))
         {
-            astButton[u8Index].u32PressCounter -= 100;
+            astButton[u8Index].u32PressCounter -= COUNTER_DELAY;
             astButton[u8Index].enBtnState = eHOLD;
         }
         else
@@ -130,12 +132,13 @@ void BTN_voMainFunction(uint32_t u32LoopTime)
 tenButtonState BTN_voGetState(tenButtonType enButton)
 {
     tenButtonState enResult = eNONE;
-    for (uint8_t u8Index = 0; u8Index < sizeof(astButton) / sizeof(tstButton); u8Index++)
+    for (uint8_t u8Index = 0; u8Index < (sizeof(astButton) / sizeof(tstButton)); u8Index++)
     {
         if (enButton == astButton[u8Index].enBtnName)
         {
-            /* Get the State of button */
+            /* Get the state of button */
             enResult = astButton[u8Index].enBtnState;
+
             /* Return button state to default */
             astButton[u8Index].enBtnState = eNONE;
         }
