@@ -35,6 +35,10 @@ static void APP_voTask(void *pvoArgument)
 {
     for (;;)
     {
+        trace_line();
+        trace_error();
+        uint8_t a[5];
+        trace_hex("thong", a, 5);
         osDelay(500);
     }
 }

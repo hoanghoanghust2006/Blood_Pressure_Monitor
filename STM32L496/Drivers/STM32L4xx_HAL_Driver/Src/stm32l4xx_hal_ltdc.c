@@ -62,7 +62,7 @@
      (#) If needed, reconfigure and change the pixel format value, the alpha value
          value, the window size, the window position and the layer start address
          for foreground or/and background layer using respectively the following
-         functions: HAL_LTDC_SetPixelFormat(), HAL_LTDC_SetAlpha(), HAL_LTDC_SetWindowSize(),
+         functions: HAL_LTDC_GLCD_voSetPixelFormat(), HAL_LTDC_SetAlpha(), HAL_LTDC_SetWindowSize(),
          HAL_LTDC_SetWindowPosition() and HAL_LTDC_SetAddress().
 
      (#) Variant functions with _NoReload suffix allows to set the LTDC configuration/settings without immediate reload.
@@ -1264,7 +1264,7 @@ HAL_StatusTypeDef HAL_LTDC_SetWindowPosition(LTDC_HandleTypeDef *hltdc, uint32_t
   *                      LTDC_LAYER_1 (0) or LTDC_LAYER_2 (1).
   * @retval  HAL status
   */
-HAL_StatusTypeDef HAL_LTDC_SetPixelFormat(LTDC_HandleTypeDef *hltdc, uint32_t Pixelformat, uint32_t LayerIdx)
+HAL_StatusTypeDef HAL_LTDC_GLCD_voSetPixelFormat(LTDC_HandleTypeDef *hltdc, uint32_t Pixelformat, uint32_t LayerIdx)
 {
   LTDC_LayerCfgTypeDef *pLayerCfg;
 
@@ -1695,7 +1695,7 @@ HAL_StatusTypeDef HAL_LTDC_SetWindowPosition_NoReload(LTDC_HandleTypeDef *hltdc,
 
 /**
   * @brief  Reconfigure the pixel format without reloading.
-  *         Variant of the function HAL_LTDC_SetPixelFormat without immediate reload.
+  *         Variant of the function HAL_LTDC_GLCD_voSetPixelFormat without immediate reload.
   * @param  hltdc        pointer to a LTDC_HandleTypeDfef structure that contains
   *                      the configuration information for the LTDC.
   * @param  Pixelformat  new pixel format value.
@@ -1704,7 +1704,7 @@ HAL_StatusTypeDef HAL_LTDC_SetWindowPosition_NoReload(LTDC_HandleTypeDef *hltdc,
   *                      LTDC_LAYER_1 (0) or LTDC_LAYER_2 (1).
   * @retval  HAL status
   */
-HAL_StatusTypeDef HAL_LTDC_SetPixelFormat_NoReload(LTDC_HandleTypeDef *hltdc, uint32_t Pixelformat, uint32_t LayerIdx)
+HAL_StatusTypeDef HAL_LTDC_GLCD_voSetPixelFormat_NoReload(LTDC_HandleTypeDef *hltdc, uint32_t Pixelformat, uint32_t LayerIdx)
 {
   LTDC_LayerCfgTypeDef *pLayerCfg;
 

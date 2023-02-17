@@ -88,6 +88,7 @@ int main(void)
   MX_USART2_UART_Init();
   /* USER CODE BEGIN 2 */
   ENTRY_voInit();
+
   /* USER CODE END 2 */
 
   /* Init scheduler */

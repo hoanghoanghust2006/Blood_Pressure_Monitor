@@ -15,6 +15,7 @@
 /* Local Include ------------------------------------------------------------------------*/
 #include "cmsis_os.h"
 #include "led.h"
+#include "glcd.h"
 
 /* Private define constants -------------------------------------------------------------*/
 #define DRV_TASK_DELAY_TIME_MS 5
@@ -37,6 +38,7 @@ static void DRIV_voTask(void *pvoArgument);
 static void DRIV_voTask(void *pvoArgument)
 {
     LED_voInit();
+    GLCD_enInit();
 
     for (;;)
     {
