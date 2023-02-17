@@ -15,9 +15,11 @@
 /* Local Include ------------------------------------------------------------------------*/
 #include "cmsis_os.h"
 #include "led.h"
+#include "button.h"
 
 /* Private define constants -------------------------------------------------------------*/
 #define DRV_TASK_DELAY_TIME_MS 5
+
 /* Private macros -----------------------------------------------------------------------*/
 
 /* Private type definitions  ------------------------------------------------------------*/
@@ -37,12 +39,14 @@ static void DRIV_voTask(void *pvoArgument);
 static void DRIV_voTask(void *pvoArgument)
 {
     LED_voInit();
+    BTN_enInit();
 
     for (;;)
     {
         uint32_t u32DriverTaskStartTick = osKernelGetTickCount();
 
         LED_voMainFunction();
+        BTN_voMainFunction(DRV_TASK_DELAY_TIME_MS);
 
         osDelayUntil(u32DriverTaskStartTick + DRV_TASK_DELAY_TIME_MS);
     }

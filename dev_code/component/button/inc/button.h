@@ -1,7 +1,7 @@
 /*
  * Title : button.h
- * Copyright : HCL
- * Author : < Name of the author. >
+ * Copyright : HCLTech
+ * Author : Trang Do
  * Creation Date : 31/01/2023
  * ------- ---------- --------
  */
@@ -15,7 +15,7 @@ extern "C"
 #endif
 
     /* Include --------------------------------------------------------------------------------*/
-
+#include "common.h"
     /* Define constants -----------------------------------------------------------------------*/
 
     /* Type definitions (Typedef, enum, struct) -----------------------------------------------*/
