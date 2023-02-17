@@ -15,10 +15,14 @@
 /* Local Include ------------------------------------------------------------------------*/
 #include "cmsis_os.h"
 #include "led.h"
+#include "rtc.h"
+#include "trace.h"
 
 /* Private define constants -------------------------------------------------------------*/
 #define DRV_TASK_DELAY_TIME_MS 5
 /* Private macros -----------------------------------------------------------------------*/
+
+tstTime tstNewTime = {.u8Day = 31, .u8Month = 12, .u16Year = 23, .u8Hour = 23, .u8Minute = 59, .u8Second = 57};
 
 /* Private type definitions  ------------------------------------------------------------*/
 
@@ -37,13 +41,21 @@ static void DRIV_voTask(void *pvoArgument);
 static void DRIV_voTask(void *pvoArgument)
 {
     LED_voInit();
-
+    RTC_enInit();
+    if (eFAIL != RTC_enSetDateTime(&tstNewTime))
+    {
+        trace("Set time is OK\r\n");
+    }
+    else
+    {
+        trace("Set time isn't OK\r\n");
+    }
     for (;;)
     {
         uint32_t u32DriverTaskStartTick = osKernelGetTickCount();
 
         LED_voMainFunction();
-
+        RTC_voMainFunction(DRV_TASK_DELAY_TIME_MS);
         osDelayUntil(u32DriverTaskStartTick + DRV_TASK_DELAY_TIME_MS);
     }
 }

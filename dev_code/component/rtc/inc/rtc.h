@@ -11,6 +11,7 @@
 
 /* Include --------------------------------------------------------------------------------*/
 #include "common.h"
+#include "stm32l4xx_hal.h"
 
 /* Define constants -----------------------------------------------------------------------*/
 
@@ -19,6 +20,6 @@
 /* Export Function Declarations -----------------------------------------------------------*/
 tenStatus RTC_enInit(void);
 void      RTC_voMainFunction(uint32_t u32LoopTime);
-tenStatus RTC_enSetDateTime(tstTime stSetTime);
-
+tenStatus RTC_enSetDateTime(const tstTime* stSetTime);
+tenStatus RTC_enGetDateTime(tstTime* stGetTime);
 #endif

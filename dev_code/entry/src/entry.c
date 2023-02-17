@@ -19,6 +19,7 @@
 #include "driver_task.h"
 #include "app_task.h"
 #include "test_button.h"
+#include "test_rtc.h"
 
 /* Private define constants -------------------------------------------------------------*/
 
@@ -48,7 +49,7 @@ void ENTRY_voInit(void)
     STO_voTaskTestInit();
 #elif defined(TEST_RTC)
     printf("Unit test for RTC component\r\n");
-    RTC_voTaskTestInit();
+    // RTC_voTaskTestInit();
 #elif defined(TEST_BLOOD_PRESSURE)
     printf("Unit test for blood pressure component\r\n");
     PRE_voTaskTestInit();
@@ -56,7 +57,8 @@ void ENTRY_voInit(void)
     printf("Unit test for button component\r\n");
     BTN_voTaskTestInit();
 #else
-    APP_enInitTask();
+    // APP_enInitTask();
+    RTC_voTaskTestInit();
 #endif
 
     /* Add heap size check for freeRTOS */

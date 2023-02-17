@@ -35,6 +35,7 @@ static void APP_voTask(void *pvoArgument)
 {
     for (;;)
     {
+        trace("App running\r\n");
         osDelay(500);
     }
 }
