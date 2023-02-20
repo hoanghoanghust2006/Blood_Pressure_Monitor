@@ -1,8 +1,8 @@
 /*
  * Title : rtc.h
  * Copyright : HCL
- * Author : < Name of the author. >
- * Creation Date : < Date in DD/MMM/YY format >
+ * Author : Vu Hieu
+ * Creation Date : 20/02/2023
  * ------- ---------- --------
  */
 
@@ -10,8 +10,8 @@
 #define _RTC_H_
 
 /* Include --------------------------------------------------------------------------------*/
-#include "common.h"
 #include "stm32l4xx_hal.h"
+#include "common.h"
 
 /* Define constants -----------------------------------------------------------------------*/
 
@@ -22,4 +22,5 @@ tenStatus RTC_enInit(void);
 void      RTC_voMainFunction(uint32_t u32LoopTime);
 tenStatus RTC_enSetDateTime(const tstTime* stSetTime);
 tenStatus RTC_enGetDateTime(tstTime* stGetTime);
+
 #endif

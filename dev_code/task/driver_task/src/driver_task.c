@@ -24,8 +24,6 @@
 
 /* Private macros -----------------------------------------------------------------------*/
 
-tstTime tstNewTime = {.u8Day = 31, .u8Month = 12, .u16Year = 23, .u8Hour = 23, .u8Minute = 59, .u8Second = 57};
-
 /* Private type definitions  ------------------------------------------------------------*/
 
 /* Private file-local global variables   ------------------------------------------------*/
@@ -44,14 +42,6 @@ static void DRIV_voTask(void *pvoArgument)
 {
     LED_voInit();
     RTC_enInit();
-    if (eFAIL != RTC_enSetDateTime(&tstNewTime))
-    {
-        trace("Set time is OK\r\n");
-    }
-    else
-    {
-        trace("Set time isn't OK\r\n");
-    }
     BTN_enInit();
 
     for (;;)

@@ -1,8 +1,8 @@
 /*
- * Title : < Name of the file. >
- * Copyright : < Company Name of the file owner. >
- * Author : < Name of the author. >
- * Creation Date : < Date in DD/MMM/YY format >
+ * Title : rtc.c
+ * Copyright : HCLTech
+ * Author : Vu Hieu
+ * Creation Date : 20/02/2023
  * ------- ---------- --------
  */
 
@@ -12,23 +12,23 @@
 #include "common.h"
 #include "trace.h"
 #include "rtc.h"
+
 /* Private define constants -------------------------------------------------------------*/
-#define RTC_TASK_DELAY_TIME_MS 5
+
 /* Private macros -----------------------------------------------------------------------*/
 
 /* Private type definitions  ------------------------------------------------------------*/
 
 /* Private file-local global variables   ------------------------------------------------*/
-extern RTC_HandleTypeDef hrtc;
+static RTC_HandleTypeDef hrtc;
+
 /* Private function prototypes declarations   -------------------------------------------*/
 
 /* Private functions definition   -------------------------------------------------------*/
 
 /* Export functions definition   --------------------------------------------------------*/
-
 tenStatus RTC_enInit(void)
 {
-    tenStatus       status = eSUCCESS;
     RTC_TimeTypeDef sTime  = {0};
     RTC_DateTypeDef sDate  = {0};
 
@@ -45,7 +45,9 @@ tenStatus RTC_enInit(void)
     if (HAL_RTC_Init(&hrtc) != HAL_OK)
     {
         trace_error();
+        return eFAIL;
     }
+
     if (HAL_RTCEx_BKUPRead(&hrtc, RTC_BKP_DR1) != 0x2608)
     {
         sTime.Hours          = 23;
@@ -56,6 +58,7 @@ tenStatus RTC_enInit(void)
         if (HAL_RTC_SetTime(&hrtc, &sTime, RTC_FORMAT_BIN) != HAL_OK)
         {
             trace_error();
+            return eFAIL;
         }
         sDate.WeekDay = RTC_WEEKDAY_MONDAY;
         sDate.Month   = 01;
@@ -65,30 +68,12 @@ tenStatus RTC_enInit(void)
         if (HAL_RTC_SetDate(&hrtc, &sDate, RTC_FORMAT_BIN) != HAL_OK)
         {
             trace_error();
+            return eFAIL;
         }
         HAL_RTCEx_BKUPWrite(&hrtc, RTC_BKP_DR1, 0x2608);
     }
-    /* Initialize RTC and set the Time and Date */
-    sTime.Hours          = 12;
-    sTime.Minutes        = 00;
-    sTime.Seconds        = 00;
-    sTime.DayLightSaving = RTC_DAYLIGHTSAVING_NONE;
-    sTime.StoreOperation = RTC_STOREOPERATION_RESET;
 
-    if (HAL_RTC_SetTime(&hrtc, &sTime, RTC_FORMAT_BIN) != HAL_OK)
-    {
-        trace_error();
-    }
-    sDate.WeekDay = RTC_WEEKDAY_MONDAY;
-    sDate.Month   = 02;
-    sDate.Date    = 14;
-    sDate.Year    = 23;
-
-    if (HAL_RTC_SetDate(&hrtc, &sDate, RTC_FORMAT_BIN) != HAL_OK)
-    {
-        trace_error();
-    }
-    return status;
+    return eSUCCESS;
 }
 
 void RTC_voMainFunction(uint32_t u32LoopTime)
@@ -123,7 +108,6 @@ void HAL_RTC_MspDeInit(RTC_HandleTypeDef* rtcHandle)
 
 tenStatus RTC_enSetDateTime(const tstTime* stSetTime)
 {
-    tenStatus       status = eSUCCESS;
     RTC_TimeTypeDef sTime  = {0};
     RTC_DateTypeDef sDate  = {0};
 
@@ -133,35 +117,38 @@ tenStatus RTC_enSetDateTime(const tstTime* stSetTime)
 
     sDate.Month = stSetTime->u8Month;
     sDate.Date  = stSetTime->u8Day;
-    sDate.Year  = stSetTime->u16Year;
+    sDate.Year  = stSetTime->u16Year - 2000;
 
     if (HAL_RTC_SetTime(&hrtc, &sTime, RTC_FORMAT_BIN) != HAL_OK)
     {
         trace_error();
+        return eFAIL;
     }
 
     if (HAL_RTC_SetDate(&hrtc, &sDate, RTC_FORMAT_BIN) != HAL_OK)
     {
         trace_error();
+        return eFAIL;
     }
 
-    return status;
+    return eSUCCESS;
 }
 
 tenStatus RTC_enGetDateTime(tstTime* stGetTime)
 {
-    tenStatus       status = eSUCCESS;
     RTC_TimeTypeDef gTime  = {0};
     RTC_DateTypeDef gDate  = {0};
 
     if (HAL_RTC_GetTime(&hrtc, &gTime, RTC_FORMAT_BIN) != HAL_OK)
     {
         trace_error();
+        return eFAIL;
     }
 
     if (HAL_RTC_GetDate(&hrtc, &gDate, RTC_FORMAT_BIN) != HAL_OK)
     {
         trace_error();
+        return eFAIL;
     }
 
     stGetTime->u8Hour   = gTime.Hours;
@@ -170,7 +157,7 @@ tenStatus RTC_enGetDateTime(tstTime* stGetTime)
 
     stGetTime->u8Month = gDate.Month;
     stGetTime->u8Day   = gDate.Date;
-    stGetTime->u16Year = gDate.Year;
+    stGetTime->u16Year = gDate.Year + 2000;
 
-    return status;
+    return eSUCCESS;
 }
