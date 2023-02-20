@@ -15,7 +15,7 @@
 #include "cmsis_os2.h"
 
 /* Private define constants -------------------------------------------------------------*/
-#define SCLK_PORT GPIOC
+#define SCLK_PORT GPIOH
 #define SCLK_PIN  GPIO_PIN_2
 
 #define CS_PORT GPIOI
@@ -57,7 +57,7 @@ static tenStatus GLCD_enInitIO(void)
     __HAL_RCC_GPIOA_CLK_ENABLE();
     __HAL_RCC_GPIOI_CLK_ENABLE();
     __HAL_RCC_GPIOD_CLK_ENABLE();
-    __HAL_RCC_GPIOC_CLK_ENABLE();
+    __HAL_RCC_GPIOH_CLK_ENABLE();
 
     /* Configure GPIO pin Output Level */
     HAL_GPIO_WritePin(CS_PORT, CS_PIN, GPIO_PIN_RESET);

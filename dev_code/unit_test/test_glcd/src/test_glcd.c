@@ -166,11 +166,10 @@ const osThreadAttr_t stGlcdTask = {
 static void GLCD_voTask(void *pvoArgument);
 
 /* Private functions definition   -------------------------------------------------------*/
-
 static void GLCD_voTask(void *pvoArgument)
 {
     GLCD_enInit();
-    GLCD_voDisplayString(0, 0, "vjp");
+    GLCD_voDisplayString(0, 0, "Thong");
     osDelay(2000);
     GLCD_voClearScreen();
     GLCD_voSetGraphicMode(eENABLE);
