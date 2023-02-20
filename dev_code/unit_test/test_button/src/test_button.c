@@ -15,6 +15,7 @@
 /* Local Include ------------------------------------------------------------------------*/
 #include "cmsis_os.h"
 #include "trace.h"
+#include "test_button.h"
 #include "button.h"
 
 /* Private define constants -------------------------------------------------------------*/

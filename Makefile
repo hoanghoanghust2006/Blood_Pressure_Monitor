@@ -77,6 +77,8 @@ STM32L496/Middlewares/Third_Party/FreeRTOS/Source/portable/GCC/ARM_CM4F/port.c \
 STM32L496/Core/Src/usart.c \
 STM32L496/Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_uart.c \
 STM32L496/Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_uart_ex.c \
+STM32L496/Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_rtc.c \
+STM32L496/Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_rtc_ex.c \
 $(DEV_CODE_SOURCES)
 
 # ASM sources
