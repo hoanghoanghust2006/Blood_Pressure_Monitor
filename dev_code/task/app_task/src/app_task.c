@@ -63,8 +63,6 @@ static void APP_voTask(void *pvoArgument)
 {
     for (;;)
     {
-        trace("App running\r\n");
-        osDelay(500);
         uint32_t u32AppTaskStartTick = osKernelGetTickCount();
 
         /* Search in state handler lookup table for current state */
