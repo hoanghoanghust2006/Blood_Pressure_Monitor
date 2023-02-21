@@ -19,7 +19,6 @@
 #include "driver_task.h"
 #include "app_task.h"
 #include "test_button.h"
-#include "test_glcd.h"
 
 /* Private define constants -------------------------------------------------------------*/
 
@@ -47,18 +46,12 @@ void ENTRY_voInit(void)
 #if defined(TEST_STO)
     printf("Unit test for storage component\r\n");
     STO_voTaskTestInit();
-#elif defined(TEST_RTC)
-    printf("Unit test for RTC component\r\n");
-    RTC_voTaskTestInit();
 #elif defined(TEST_BLOOD_PRESSURE)
     printf("Unit test for blood pressure component\r\n");
     PRE_voTaskTestInit();
 #elif defined(TEST_BUTTON)
     printf("Unit test for button component\r\n");
     BTN_voTaskTestInit();
-#elif defined(TEST_GLCD)
-    printf("Unit test for lcd\r\n");
-    GLCD_voTaskTestInit();
 #else
     APP_enInitTask();
 #endif

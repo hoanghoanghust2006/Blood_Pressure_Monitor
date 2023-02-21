@@ -8,7 +8,10 @@ dev_code/component/glcd/src/glcd.c \
 dev_code/component/common/src/common.c \
 dev_code/unit_test/test_button/src/test_button.c \
 dev_code/unit_test/test_glcd/src/test_glcd.c
-
+dev_code/component/rtc/src/rtc.c \
+dev_code/unit_test/test_rtc/src/test_rtc.c \
+dev_code/component/button/src/button.c \
+dev_code/unit_test/test_button/src/test_button.c
 
 DEV_CODE_INCLUDES = \
 -Idev_code/entry/inc \
@@ -20,3 +23,8 @@ DEV_CODE_INCLUDES = \
 -Idev_code/component/common/inc \
 -Idev_code/unit_test/test_button/inc \
 -Idev_code/unit_test/test_glcd/inc
+-Idev_code/component/rtc/inc \
+-Idev_code/component/common/inc \
+-Idev_code/unit_test/test_rtc/inc \
+-Idev_code/component/button/inc \
+-Idev_code/unit_test/test_button/inc

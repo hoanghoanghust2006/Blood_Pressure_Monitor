@@ -77,6 +77,8 @@ STM32L496/Middlewares/Third_Party/FreeRTOS/Source/portable/GCC/ARM_CM4F/port.c \
 STM32L496/Core/Src/usart.c \
 STM32L496/Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_uart.c \
 STM32L496/Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_uart_ex.c \
+STM32L496/Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_rtc.c \
+STM32L496/Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_rtc_ex.c \
 $(DEV_CODE_SOURCES)
 
 # ASM sources
@@ -147,9 +149,9 @@ $(DEV_CODE_INCLUDES)
 
 
 # compile gcc flags
-ASFLAGS = $(MCU) $(AS_DEFS) $(AS_INCLUDES) $(OPT) -Wall -Wfatal-errors -fdata-sections -ffunction-sections
+ASFLAGS = $(MCU) $(AS_DEFS) $(AS_INCLUDES) $(OPT) -Wall -Wfatal-errors -fdata-sections -ffunction-sections -Wno-unused-function
 
-CFLAGS += $(MCU) $(C_DEFS) $(C_INCLUDES) $(OPT) -Wall -Wfatal-errors -fdata-sections -ffunction-sections ${test}
+CFLAGS += $(MCU) $(C_DEFS) $(C_INCLUDES) $(OPT) -Wall -Wfatal-errors -fdata-sections -ffunction-sections -Wno-unused-function ${test}
 
 ifeq ($(DEBUG), 1)
 CFLAGS += -g -gdwarf-2
