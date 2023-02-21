@@ -64,6 +64,7 @@ extern "C"
 
     /* Draw Filled Traingle with coordimates (x1, y1), (x2, y2), (x3, y3) */
     void GLCD_voDrawFilledTriangle(uint16_t u16X1, uint16_t u16Y1, uint16_t u16X2, uint16_t u16Y2, uint16_t u16X3, uint16_t u16Y3);
+    void GLCD_Delay_us(uint16_t u16Delay);
 
 #ifdef __cplusplus
 }

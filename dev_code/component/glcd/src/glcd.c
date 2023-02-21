@@ -18,42 +18,59 @@
 #define SCLK_PORT GPIOH
 #define SCLK_PIN  GPIO_PIN_2
 
-#define CS_PORT GPIOI
-#define CS_PIN  GPIO_PIN_3
+#define CS_PORT GPIOG
+#define CS_PIN  GPIO_PIN_7
 
-#define SID_PORT GPIOD
-#define SID_PIN  GPIO_PIN_3
+#define SID_PORT GPIOG
+#define SID_PIN  GPIO_PIN_8
 
-#define RST_PORT GPIOB
-#define RST_PIN  GPIO_PIN_7
+#define RST_PORT GPIOH
+#define RST_PIN  GPIO_PIN_15
 
 #define NUM_OF_ROWS    64
+#define HALF_OF_ROWS   32
 #define NUM_OF_COLUMNS 128
 
 #define NUM_BIT_OF_BYTE 8
 
 /* Private macros -----------------------------------------------------------------------*/
-
+extern TIM_HandleTypeDef htim1;
 /* Private type definitions  ------------------------------------------------------------*/
 
 /* Private file-local global variables   ------------------------------------------------*/
 static uint8_t   su8Image[(NUM_OF_COLUMNS * NUM_OF_ROWS) / 8];
-static tenStatus enGraphicCheck = eENABLE;
+static tenGraphicMode enGraphicCheck = eENABLE;
 
 /* Private function prototypes declarations   -------------------------------------------*/
 static tenStatus GLCD_enInitIO(void);
 static void      GLCD_voSendByteSpi(uint8_t u8byte);
 static void      GLCD_voSendCmd(uint8_t u8Cmd);
 static void      GLCD_voSendData(uint8_t u8Data);
+static void      GLCD_Delay_init(void);
 
 /* Private functions definition   -------------------------------------------------------*/
+static void GLCD_Delay_init(void)
+{
+    HAL_TIM_Base_Start(&htim1);
+}
+void delay_us(uint16_t delay)
+{
+    /* Reset the counter */
+    __HAL_TIM_SET_COUNTER(&htim1, 0);
+    while ((__HAL_TIM_GET_COUNTER(&htim1)) < delay)
+    {
+        /* Wait for the delay to complete */
+        ;
+    }
+}
+
 static tenStatus GLCD_enInitIO(void)
 {
     tenStatus        enStatus        = eSUCCESS;
     GPIO_InitTypeDef GPIO_InitStruct = {0};
 
     /* GPIO Ports Clock Enable */
-    __HAL_RCC_GPIOB_CLK_ENABLE();
+    __HAL_RCC_GPIOG_CLK_ENABLE();
     __HAL_RCC_GPIOA_CLK_ENABLE();
     __HAL_RCC_GPIOI_CLK_ENABLE();
     __HAL_RCC_GPIOD_CLK_ENABLE();
@@ -166,7 +183,7 @@ static void GLCD_voSendData(uint8_t u8Data)
 /* Export functions definition   --------------------------------------------------------*/
 tenStatus GLCD_enInit(void)
 {
-    GLCD_enInitIO();
+    GLCD_Delay_init();
     /* Init IO interface */
     if (GLCD_enInitIO() != eSUCCESS)
     {
@@ -183,7 +200,6 @@ tenStatus GLCD_enInit(void)
     GLCD_voSendCmd(0x30);
     osDelay(1);
 
-    /* 8bit mode */
     GLCD_voSendCmd(0x30);
     osDelay(1);
 
@@ -231,6 +247,7 @@ void GLCD_voDisplayString(uint8_t u8Row, uint8_t u8Column, char* cString)
             break;
     }
 
+    /* Send cmd to u8Clumn to display */
     GLCD_voSendCmd(u8Column);
 
     while (*cString)
@@ -241,12 +258,12 @@ void GLCD_voDisplayString(uint8_t u8Row, uint8_t u8Column, char* cString)
 
 void GLCD_voSetGraphicMode(tenGraphicMode enGraphicMode)
 {
+    /* 8bit mode */
+    GLCD_voSendCmd(0x30);
+    osDelay(1);
+
     if (enGraphicMode == eENABLE)
     {
-        /* 8 bit mode */
-        GLCD_voSendCmd(0x30);
-        osDelay(1);
-
         /* Switch to Extended instructions */
         GLCD_voSendCmd(0x34);
         osDelay(1);
@@ -261,10 +278,6 @@ void GLCD_voSetGraphicMode(tenGraphicMode enGraphicMode)
 
     else
     {
-        /* 8bit mode */
-        GLCD_voSendCmd(0x30);
-        osDelay(1);
-
         /* Update the variable */
         enGraphicCheck = eDISABLE;
     }
@@ -273,13 +286,13 @@ void GLCD_voSetGraphicMode(tenGraphicMode enGraphicMode)
 void GLCD_voDrawBitMap(const uint8_t* cu8Graphic)
 {
     uint8_t u8X, u8Y;
-    for (u8Y = 0; u8Y < 64; u8Y++)
+    for (u8Y = 0; u8Y < NUM_OF_ROWS; u8Y++)
     {
-        if (u8Y < 32)
+        if (u8Y < HALF_OF_ROWS)
         {
             /* Draws top half of the screen.
              In extended instruction mode, vertical and horizontal coordinates must be specified before sending data in. */
-            for (u8X = 0; u8X < 8; u8X++)
+            for (u8X = 0; u8X < NUM_BIT_OF_BYTE; u8X++)
             {
                 /* Vertical coordinate of the screen is specified first. (0-31) */
                 GLCD_voSendCmd(0x80 | u8Y);
@@ -297,11 +310,11 @@ void GLCD_voDrawBitMap(const uint8_t* cu8Graphic)
         else
         {
             /* Draws bottom half of the screen. */
-            for (u8X = 0; u8X < 8; u8X++)
+            for (u8X = 0; u8X < NUM_BIT_OF_BYTE; u8X++)
             {
                 /* Actions performed as same as the upper half screen,
                 Vertical coordinate must be scaled back to 0-31 as it is dealing with another half of the screen. */
-                GLCD_voSendCmd(0x80 | (u8Y - 32));
+                GLCD_voSendCmd(0x80 | (u8Y - HALF_OF_ROWS));
                 GLCD_voSendCmd(0x88 | u8X);
                 GLCD_voSendData(cu8Graphic[2 * u8X + 16 * u8Y]);
                 GLCD_voSendData(cu8Graphic[2 * u8X + 1 + 16 * u8Y]);
@@ -318,29 +331,28 @@ void GLCD_voUpdate(void)
 void GLCD_voClearScreen(void)
 {
     /* if the graphic mode is set */
-    if (enGraphicCheck)
+    if (enGraphicCheck == eENABLE)
     {
         uint8_t u8X, u8Y;
-        for (u8Y = 0; u8Y < 64; u8Y++)
+        for (u8Y = 0; u8Y < NUM_OF_ROWS; u8Y++)
         {
-            if (u8Y < 32)
+            if (u8Y < HALF_OF_ROWS)
             {
                 GLCD_voSendCmd(0x80 | u8Y);
                 GLCD_voSendCmd(0x80);
             }
             else
             {
-                GLCD_voSendCmd(0x80 | (u8Y - 32));
+                GLCD_voSendCmd(0x80 | (u8Y - HALF_OF_ROWS));
                 GLCD_voSendCmd(0x88);
             }
-            for (u8X = 0; u8X < 8; u8X++)
+            /* Send data to Rows */
+            for (u8X = 0; u8X < NUM_BIT_OF_BYTE; u8X++)
             {
-                GLCD_voSendData(0);
                 GLCD_voSendData(0);
             }
         }
     }
-
     else
     {
         /* Clear the display using command */
@@ -358,8 +370,8 @@ void GLCD_voSetPixel(uint8_t u8X, uint8_t u8Y)
 
     if (u8Y < NUM_OF_ROWS && u8X < NUM_OF_COLUMNS)
     {
-        uint8_t* p = su8Image + ((u8Y * (NUM_OF_COLUMNS / 8)) + (u8X / 8));
-        *p |= 0x80u >> (u8X % 8);
+        uint8_t* p = su8Image + ((u8Y * (NUM_OF_COLUMNS / NUM_BIT_OF_BYTE)) + (u8X / NUM_BIT_OF_BYTE));
+        *p |= 0x80u >> (u8X % NUM_BIT_OF_BYTE);
 
         *su8Image = *p;
 
