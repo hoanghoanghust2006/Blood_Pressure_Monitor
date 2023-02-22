@@ -14,6 +14,7 @@
 #include "trace.h"
 #include "menu.h"
 #include <string.h>
+
 /* Private define constants -------------------------------------------------------------*/
 
 /* Private macros -----------------------------------------------------------------------*/
@@ -31,8 +32,6 @@ void MENU_voCreateOption(tstOption* pstOptionVal, char* cName, void (*pvoDoWork)
     pstOptionVal->u8CurrentIndex    = 0;
     pstOptionVal->u8Size            = 0;
     pstOptionVal->pvoDoWork         = pvoDoWork;
-    pstOptionVal->pstParent         = NULL;
-    pstOptionVal->apstOptionList[0] = NULL;
 }
 
 void MENU_voAddOptionLink(tstOption* pstParent, tstOption* pstChild)
@@ -41,4 +40,5 @@ void MENU_voAddOptionLink(tstOption* pstParent, tstOption* pstChild)
     pstParent->apstOptionList[pstParent->u8Size] = pstChild;
     pstParent->u8Size++;
 }
+
 /* Export functions definition   --------------------------------------------------------*/

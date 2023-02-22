@@ -35,9 +35,11 @@ extern "C"
         tstOption* apstOptionList[OPTION_CAPACITY];
         void (*pvoDoWork)();
     };
+
     /* Export Function Declarations -----------------------------------------------------------*/
     void MENU_voCreateOption(tstOption* pstOptionVal, char* cName, void (*pvoDoWork)());
     void MENU_voAddOptionLink(tstOption* pstParent, tstOption* pstChild);
+
 #ifdef __cplusplus
 }
 #endif
