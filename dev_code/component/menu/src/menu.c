@@ -25,20 +25,20 @@
 /* Private function prototypes declarations   -------------------------------------------*/
 
 /* Private functions definition   -------------------------------------------------------*/
-void option_create(option* option_val, char* name, void (*DoWork)())
+void MENU_voCreateOption(tstOption* pstOptionVal, char* cName, void (*pvoDoWork)())
 {
-    strcpy(option_val->name, name);
-    option_val->current_index  = 0;
-    option_val->size           = 0;
-    option_val->DoWork         = DoWork;
-    option_val->parent         = NULL;
-    option_val->option_list[0] = NULL;
+    strcpy(pstOptionVal->cName, cName);
+    pstOptionVal->u8CurrentIndex    = 0;
+    pstOptionVal->u8Size            = 0;
+    pstOptionVal->pvoDoWork         = pvoDoWork;
+    pstOptionVal->pstParent         = NULL;
+    pstOptionVal->apstOptionList[0] = NULL;
 }
 
-void option_add_link(option* parent, option* child)
+void MENU_voAddOptionLink(tstOption* pstParent, tstOption* pstChild)
 {
-    child->parent                     = parent;
-    parent->option_list[parent->size] = child;
-    parent->size++;
+    pstChild->pstParent                          = pstParent;
+    pstParent->apstOptionList[pstParent->u8Size] = pstChild;
+    pstParent->u8Size++;
 }
 /* Export functions definition   --------------------------------------------------------*/

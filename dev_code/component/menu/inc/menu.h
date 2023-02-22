@@ -24,20 +24,20 @@ extern "C"
     {
     } tstMenu;
 
-    typedef struct option option;
+    typedef struct tstOption tstOption;
 
-    struct option
+    struct tstOption
     {
-        char    name[MAX_CHARACTER_LENGTH];
-        option* parent;
-        int     current_index;
-        int     size;
-        option* option_list[OPTION_CAPACITY];
-        void (*DoWork)();
+        char       cName[MAX_CHARACTER_LENGTH];
+        tstOption* pstParent;
+        uint8_t    u8CurrentIndex;
+        uint8_t    u8Size;
+        tstOption* apstOptionList[OPTION_CAPACITY];
+        void (*pvoDoWork)();
     };
     /* Export Function Declarations -----------------------------------------------------------*/
-    void option_create(option* option_val, char* name, void (*DoWork)());
-    void option_add_link(option* parent, option* child);
+    void MENU_voCreateOption(tstOption* pstOptionVal, char* cName, void (*pvoDoWork)());
+    void MENU_voAddOptionLink(tstOption* pstParent, tstOption* pstChild);
 #ifdef __cplusplus
 }
 #endif
