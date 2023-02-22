@@ -23,111 +23,124 @@
 /* Private macros -----------------------------------------------------------------------*/
 
 /* Private type definitions  ------------------------------------------------------------*/
-typedef struct link link;
-struct link
+
+typedef struct preOption
 {
     option *option_val;
     char    name[MAX_CHARACTER_LENGTH];
     void (*DoWork)();
-};
+} preOption;
 /* Private file-local global variables   ------------------------------------------------*/
-osThreadId_t         MENU_voTaskHandle;
+osThreadId_t         MENU_pvoTaskHandle;
 const osThreadAttr_t stMenuTask = {
     .name       = "MenuTask",
     .stack_size = 1024 * 4,
     .priority   = (osPriority_t)osPriorityLow,
 };
 
-option Topic0, Topic1, Topic2, Topic1_1, Topic1_2, Topic1_3, Topic1_4, Topic1_1_1, Topic1_1_2, Topic2_1;
+option  Topic0, Topic1, Topic2, Topic3, Topic1_1, Topic1_2, Topic1_3, Topic1_4, Topic1_1_1, Topic1_1_2, Topic2_1, Topic3_1, Topic3_2;
+option *current_option;
+uint8_t num_of_links, num_of_options;
 
-option  Topic0, Topic1, Topic2, Topic1_1, Topic1_2, Topic1_3, Topic1_4, Topic1_1_1, Topic1_1_2, Topic2_1;
-option *a[][MAX_LIST_OPTION] = {
-    {&Topic0, &Topic1, &Topic2},
-    {&Topic1, &Topic1_1, &Topic1_2, &Topic1_3, &Topic1_4},
-    {&Topic1_1, &Topic1_1_1, &Topic1_1_2},
-    {&Topic2, &Topic2_1},
-};
-link b[] = {
-    {&Topic0, "topic0", 0},
-    {&Topic1, "topic1", 0},
-    {&Topic2, "topic2", 0},
-    {&Topic2_1, "topic2_1", 0},
-    {&Topic1_1, "topic1_1", 0},
-    {&Topic1_2, "topic1_2", 0},
-    {&Topic1_3, "topic1_3", 0},
-    {&Topic1_4, "topic1_4", 0},
-    {&Topic1_1_1, "topic1_1_1", 0},
-    {&Topic1_1_2, "topic1_1_2", 0},
-};
-option *current_option = &Topic1;
-char    cKey;
-int     k           = 0;
-int     numberoftab = 0;
+preOption astPreOption[] =
+    {
+        {&Topic0, "topic0", 0},
+        {&Topic1, "topic1", 0},
+        {&Topic2, "topic2", 0},
+        {&Topic2_1, "topic2_1", 0},
+        {&Topic1_1, "topic1_1", 0},
+        {&Topic1_2, "topic1_2", 0},
+        {&Topic1_3, "topic1_3", 0},
+        {&Topic1_4, "topic1_4", 0},
+        {&Topic1_1_1, "topic1_1_1", 0},
+        {&Topic1_1_2, "topic1_1_2", 0},
+        {&Topic3, "topic3", 0},
+        {&Topic3_1, "topic3_1", 0},
+        {&Topic3_2, "topic3_2", 0}};
+
+option *pastAllOptionLink[][MAX_LIST_OPTION] =
+    {
+        {&Topic0, &Topic1, &Topic2, &Topic3},
+        {&Topic1, &Topic1_1, &Topic1_2, &Topic1_3, &Topic1_4},
+        {&Topic1_1, &Topic1_1_1, &Topic1_1_2},
+        {&Topic2, &Topic2_1},
+        {&Topic3, &Topic3_1, &Topic3_2}};
 
 /* Private function prototypes declarations   -------------------------------------------*/
 static void MENU_voTask(void *pvoArgument);
-static void printf_func();
-void        option_add_links(option **child, int size)
+static void all_option_create(preOption *astPreOption, uint8_t num_of_options);
+static void option_add_links(option **pastOption);
+static void option_add_all_links(option *pastAllOptionLink[][MAX_LIST_OPTION], uint8_t num_of_links);
+static void print_tabs(uint8_t current_option_level);
+static void display_option_tree(uint8_t num_of_options);
+
+/* Private functions definition   -------------------------------------------------------*/
+static void all_option_create(preOption *astPreOption, uint8_t num_of_options)
 {
-    for (int i = 1; i < size; i++)
+    for (uint8_t i = 0; i < num_of_options; i++)
     {
-        if (*(child + i) != NULL) option_add_link(*child, *(child + i));
+        option_create(astPreOption[i].option_val, astPreOption[i].name, astPreOption[i].DoWork);
     }
 }
-/* Private functions definition   -------------------------------------------------------*/
-void in(int numberoftab)
+
+static void option_add_links(option **pastOption)
 {
-    for (int i = 0; i < numberoftab; i++)
+    for (uint8_t i = 1; i < MAX_LIST_OPTION; i++)
+    {
+        if (*(pastOption + i) != NULL)
+            option_add_link(*pastOption, *(pastOption + i));
+        else
+        {
+            break;
+        }
+    }
+}
+
+static void print_tabs(uint8_t current_option_level)
+{
+    for (uint8_t i = 0; i < current_option_level; i++)
     {
         printf("\t");
     }
 }
-static void MENU_voTask(void *pvoArgument)
+static void option_add_all_links(option *pastAllOptionLink[][MAX_LIST_OPTION], uint8_t num_of_links)
 {
-    printf_func();
-    for (;;)
+    for (uint8_t i = 0; i < num_of_links; i++)
     {
-        // in(3);
-        // printf("hello\n\r");
-        // printf("hello  \t");
-        // printf("ok ");
-        // printf("\n\r");
-        // // trace("\r\t\n hello");
-        osDelay(MENU_TASK_DELAY_TIME_MS);
+        option_add_links(pastAllOptionLink[i]);
     }
 }
-// static void printf_func(option *option_val)
-// {
-//     for (int i = 0; i < option_val->parent->size; i++)
-//     {
-//         trace("%s\r\n", option_val->parent->option_list[i]->name);
-//     }
-// }
-static void printf_func()
+static void MENU_voTask(void *pvoArgument)
 {
-    for (int i = 0; i < 9; i++)
+    display_option_tree(num_of_options);
+    for (;;)
     {
-        in(numberoftab);
+    }
+}
+
+static void display_option_tree(uint8_t num_of_options)
+{
+    uint8_t current_option_level = 0;
+    for (uint8_t i = 0; i < num_of_options; i++)
+    {
+        print_tabs(current_option_level);
         printf("%s\n\r", current_option->name);
 
         if (current_option->option_list[0] == NULL)
         {
             if (current_option->parent->current_index < current_option->parent->size - 1)
             {
-                current_option->parent->current_index++;
-
-                current_option = current_option->parent->option_list[current_option->parent->current_index];
+                current_option = current_option->parent->option_list[++current_option->parent->current_index];
             }
             else
             {
-                numberoftab--;
-                current_option->parent->parent->current_index++;
-                current_option = current_option->parent->parent->option_list[current_option->parent->parent->current_index];
+                current_option_level--;
+                current_option = current_option->parent->parent->option_list[++current_option->parent->parent->current_index];
             }
         }
         else
         {
-            numberoftab++;
+            current_option_level++;
             current_option = current_option->option_list[0];
         }
     }
@@ -135,14 +148,11 @@ static void printf_func()
 /* Export functions definition   --------------------------------------------------------*/
 void MENU_voTaskTestInit(void)
 {
-    for (int i = 0; i < sizeof(b) / sizeof(b[0]); i++)
-    {
-        option_create(b[i].option_val, b[i].name, b[i].DoWork);
-    }
+    num_of_links   = sizeof(pastAllOptionLink) / sizeof(*pastAllOptionLink);
+    num_of_options = sizeof(astPreOption) / sizeof(astPreOption[0]);
 
-    for (int i = 0; i < sizeof(a) / sizeof(*a); i++)
-    {
-        option_add_links(a[i], MAX_LIST_OPTION);
-    }
-    MENU_voTaskHandle = osThreadNew(MENU_voTask, NULL, &stMenuTask);
+    all_option_create(astPreOption, num_of_options);
+    option_add_all_links(pastAllOptionLink, num_of_links);
+    current_option     = &Topic0;
+    MENU_pvoTaskHandle = osThreadNew(MENU_voTask, NULL, &stMenuTask);
 }
