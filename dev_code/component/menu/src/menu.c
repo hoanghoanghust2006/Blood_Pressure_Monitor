@@ -1,19 +1,19 @@
 /*
- * Title : < Name of the file. >
+ * Title : menu.c
  * Copyright : HCL
- * Author : < Name of the author. >
- * Creation Date : < Date in DD/MMM/YY format >
+ * Author :  HoangHoang
+ * Creation Date :  23/02/2023
  * ------- ---------- --------
  */
 
 /* System Include -----------------------------------------------------------------------*/
-
-/* Local Include ------------------------------------------------------------------------*/
 #include <stdio.h>
+#include <string.h>
+/* Local Include ------------------------------------------------------------------------*/
+
 #include "common.h"
 #include "trace.h"
 #include "menu.h"
-#include <string.h>
 
 /* Private define constants -------------------------------------------------------------*/
 
@@ -26,19 +26,33 @@
 /* Private function prototypes declarations   -------------------------------------------*/
 
 /* Private functions definition   -------------------------------------------------------*/
-void MENU_voCreateOption(tstOption* pstOptionVal, char* cName, void (*pvoDoWork)())
+void MENU_voCreate(tstMenu* pstMenuVal, char* cName, void (*pvoDoWork)())
 {
-    strcpy(pstOptionVal->cName, cName);
-    pstOptionVal->u8CurrentIndex    = 0;
-    pstOptionVal->u8Size            = 0;
-    pstOptionVal->pvoDoWork         = pvoDoWork;
+    if (sizeof(cName) <= MAX_CHARACTER_LENGTH)
+    {
+        strcpy(pstMenuVal->cName, cName);
+    }
+    else
+    {
+        printf("Exceed max character length");
+    }
+    pstMenuVal->u8CurrentIndex = 0;
+    pstMenuVal->u8Size         = 0;
+    pstMenuVal->pvoDoWork      = pvoDoWork;
 }
 
-void MENU_voAddOptionLink(tstOption* pstParent, tstOption* pstChild)
+void MENU_voAddLink(tstMenu* pstParent, tstMenu* pstChild)
 {
-    pstChild->pstParent                          = pstParent;
-    pstParent->apstOptionList[pstParent->u8Size] = pstChild;
-    pstParent->u8Size++;
+    if (pstParent->u8Size < MAX_MENU_LIST)
+    {
+        pstChild->pstParent                        = pstParent;
+        pstParent->apstMenuList[pstParent->u8Size] = pstChild;
+        pstParent->u8Size++;
+    }
+    else
+    {
+        printf("Exceed max menu list");
+    }
 }
 
 /* Export functions definition   --------------------------------------------------------*/

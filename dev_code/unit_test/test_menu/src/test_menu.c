@@ -2,11 +2,11 @@
  * Title : test_menu.c
  * Copyright : HCL
  * Author : HoangHoang
- * Creation Date : 21/02/2023
- * Description : < Briefly describe the purpose of the file. >
- * Limitations : < Any limitations. >
+ * Creation Date : 23/02/2023
+ * Description : Test menu
+ * Limitations :
  * Dependencies : < H/W, S/W( Operating System, Compiler) >
- * Modifications History : VERSION WHO WHEN WHY
+ * Modifications History :
  * ------- ---------- --------
  */
 
@@ -20,22 +20,21 @@
 
 /* Private define constants -------------------------------------------------------------*/
 #define MENU_TASK_DELAY_TIME_MS 500
-#define MAX_LIST_OPTION         5
 
 /* Private macros -----------------------------------------------------------------------*/
 
 /* Private type definitions  ------------------------------------------------------------*/
 typedef struct
 {
-    tstOption *pstOptionVal;
+    tstMenu   *pstMenuVal;
     char       cName[MAX_CHARACTER_LENGTH];
-    void (*pvoDoWork)();
-} tstPreOption;
+    void (*pvoDoWork)(void);
+} tstPreMenu;
 
 typedef enum
 {
     eDoNothing
-} tenOptionFunctionStatus;
+} tenMenuFunctionStatus;
 
 /* Private file-local global variables   ------------------------------------------------*/
 osThreadId_t         MENU_pvoTaskHandle;
@@ -45,64 +44,67 @@ const osThreadAttr_t stMenuTask = {
     .priority   = (osPriority_t)osPriorityLow,
 };
 
-static uint8_t u8NumOfLinks, u8NumOfOptions;
+static uint8_t u8NumOfLinks = 0;
+static uint8_t u8NumOfMenus = 0;
 
-tstOption  stTopic0, stTopic1, stTopic2, stTopic3, stTopic1_1, stTopic1_2, stTopic1_3, stTopic1_4, stTopic1_1_1, stTopic1_1_2, stTopic2_1, stTopic3_1, stTopic3_2;
-tstOption *pstCurrentOption;
+static tstMenu stMenu0;
+static tstMenu stMenu1, stMenu2, stMenu3;
+static tstMenu stMenu1_1, stMenu1_2, stMenu1_3, stMenu1_4, stMenu2_1, stMenu3_1, stMenu3_2;
+static tstMenu stMenu1_1_1, stMenu1_1_2;
 
-/* Array include the parameters of each option: address, name and the function*/
-tstPreOption astPreOption[] =
+/* Array includes the parameters of each option: address, name and the function*/
+static tstPreMenu astPreMenu[] =
     {
-        {&stTopic0, "topic0", eDoNothing},
-        {&stTopic1, "topic1", eDoNothing},
-        {&stTopic2, "topic2", eDoNothing},
-        {&stTopic3, "topic3", eDoNothing},
-        {&stTopic1_1, "topic1_1", eDoNothing},
-        {&stTopic1_2, "topic1_2", eDoNothing},
-        {&stTopic1_3, "topic1_3", eDoNothing},
-        {&stTopic1_4, "topic1_4", eDoNothing},
-        {&stTopic2_1, "topic2_1", eDoNothing},
-        {&stTopic3_1, "topic3_1", eDoNothing},
-        {&stTopic3_2, "topic3_2", eDoNothing},
-        {&stTopic1_1_1, "topic1_1_1", eDoNothing},
-        {&stTopic1_1_2, "topic1_1_2", eDoNothing},
-
+        {&stMenu0, "Menu0", eDoNothing},
+        {&stMenu1, "Menu1", eDoNothing},
+        {&stMenu2, "Menu2", eDoNothing},
+        {&stMenu3, "Menu3", eDoNothing},
+        {&stMenu1_1, "Menu1_1", eDoNothing},
+        {&stMenu1_2, "Menu1_2", eDoNothing},
+        {&stMenu1_3, "Menu1_3", eDoNothing},
+        {&stMenu1_4, "Menu1_4", eDoNothing},
+        {&stMenu2_1, "Menu2_1", eDoNothing},
+        {&stMenu3_1, "Menu3_1", eDoNothing},
+        {&stMenu3_2, "Menu3_2", eDoNothing},
+        {&stMenu1_1_1, "Menu1_1_1", eDoNothing},
+        {&stMenu1_1_2, "Menu1_1_2", eDoNothing},
 };
 
 /* 2D Array of pointers to options. The first indicates parent poiter, others are child pointers*/
-tstOption *apstAllOptionLink[][MAX_LIST_OPTION] =
+static tstMenu *apstAllMenuLink[][MAX_MENU_LIST + 1] =
     {
-        {&stTopic0, &stTopic1, &stTopic2, &stTopic3},
-        {&stTopic1, &stTopic1_1, &stTopic1_2, &stTopic1_3, &stTopic1_4},
-        {&stTopic1_1, &stTopic1_1_1, &stTopic1_1_2},
-        {&stTopic2, &stTopic2_1},
-        {&stTopic3, &stTopic3_1, &stTopic3_2}};
+        {&stMenu0, &stMenu1, &stMenu2, &stMenu3, NULL},
+        {&stMenu1, &stMenu1_1, &stMenu1_2, &stMenu1_3, &stMenu1_4, NULL},
+        {&stMenu1_1, &stMenu1_1_1, &stMenu1_1_2, NULL},
+        {&stMenu2, &stMenu2_1, NULL},
+        {&stMenu3, &stMenu3_1, &stMenu3_2, NULL}};
 
 /* Private function prototypes declarations   -------------------------------------------*/
 static void MENU_voTask(void *pvoArgument);
-static void MENU_voCreateAllOptions(tstPreOption *pastPreOption, uint8_t u8NumOfOptions);
-static void MENU_voOptionAddLinks(tstOption **pastOption);
-static void MENU_voOptionAddAllLinks(tstOption *apstAllOptionLink[][MAX_LIST_OPTION], uint8_t u8NumOfLinks);
-static void MENU_voPrintTabs(uint8_t u8CurrentOptionLevel);
-static void MENU_voDisplayOptionTree(uint8_t u8NumOfOptions);
+static void MENU_voCreateAll(tstPreMenu *pastPreMenu, uint8_t u8NumOfMenus);
+static void MENU_voAddLinks(tstMenu **pastMenu);
+static void MENU_voAddAllLinks(tstMenu *apstAllMenuLink[][MAX_MENU_LIST + 1], uint8_t u8NumOfLinks);
+static void MENU_voPrintTabs(uint8_t u8CurrentMenuLevel);
+static void MENU_voDisplayTree(uint8_t u8NumOfMenus);
 
 /* Private functions definition   -------------------------------------------------------*/
-
-static void MENU_voCreateAllOptions(tstPreOption *pastPreOption, uint8_t u8NumOfOptions)
+static void MENU_voCreateAll(tstPreMenu *pastPreMenu, uint8_t u8NumOfMenus)
 {
-    for (uint8_t i = 0; i < u8NumOfOptions; i++)
+    for (uint8_t i = 0; i < u8NumOfMenus; i++)
     {
-        MENU_voCreateOption(pastPreOption[i].pstOptionVal, pastPreOption[i].cName, pastPreOption[i].pvoDoWork);
+        MENU_voCreate(pastPreMenu[i].pstMenuVal, pastPreMenu[i].cName, pastPreMenu[i].pvoDoWork);
     }
 }
 
 /* Linking a parent option to child options*/
-static void MENU_voOptionAddLinks(tstOption **pastOption)
+static void MENU_voAddLinks(tstMenu **pastMenu)
 {
-    for (uint8_t i = 1; i < MAX_LIST_OPTION; i++)
+    for (uint8_t i = 1; i < MAX_MENU_LIST + 1; i++)
     {
-        if (*(pastOption + i) != NULL)
-            MENU_voAddOptionLink(*pastOption, *(pastOption + i));
+        if (*(pastMenu + i) != NULL)
+        {
+            MENU_voAddLink(*pastMenu, *(pastMenu + i));
+        }
         else
         {
             break;
@@ -110,65 +112,67 @@ static void MENU_voOptionAddLinks(tstOption **pastOption)
     }
 }
 
-static void MENU_voPrintTabs(uint8_t u8CurrentOptionLevel)
+static void MENU_voPrintTabs(uint8_t u8CurrentMenuLevel)
 {
-    for (uint8_t i = 0; i < u8CurrentOptionLevel; i++)
+    for (uint8_t i = 0; i < u8CurrentMenuLevel; i++)
     {
         printf("\t");
     }
 }
 
 /* Linking all parent options to their child options*/
-static void MENU_voOptionAddAllLinks(tstOption *apstAllOptionLink[][MAX_LIST_OPTION], uint8_t u8NumOfLinks)
+static void MENU_voAddAllLinks(tstMenu *apstAllMenuLink[][MAX_MENU_LIST + 1], uint8_t u8NumOfLinks)
 {
     for (uint8_t i = 0; i < u8NumOfLinks; i++)
     {
-        MENU_voOptionAddLinks(apstAllOptionLink[i]);
+        MENU_voAddLinks(apstAllMenuLink[i]);
     }
 }
 static void MENU_voTask(void *pvoArgument)
 {
-    MENU_voDisplayOptionTree(u8NumOfOptions);
+    MENU_voDisplayTree(u8NumOfMenus);
     for (;;)
     {
     }
 }
 
-static void MENU_voDisplayOptionTree(uint8_t u8NumOfOptions)
+static void MENU_voDisplayTree(uint8_t u8NumOfMenus)
 {
-    uint8_t u8CurrentOptionLevel = 0;
-    for (uint8_t i = 0; i < u8NumOfOptions; i++)
+    tstMenu *pstCurrentMenu     = &stMenu0;
+    uint8_t  u8CurrentMenuLevel = 0;
+    for (uint8_t i = 0; i < u8NumOfMenus; i++)
     {
-        MENU_voPrintTabs(u8CurrentOptionLevel);
-        printf("%s\n\r", pstCurrentOption->cName);
+        MENU_voPrintTabs(u8CurrentMenuLevel);
+        printf("%s\n\r", pstCurrentMenu->cName);
 
-        if (pstCurrentOption->apstOptionList[0] == NULL)
+        if (pstCurrentMenu->apstMenuList[0] == NULL)
         {
-            if (pstCurrentOption->pstParent->u8CurrentIndex < pstCurrentOption->pstParent->u8Size - 1)
+            if (pstCurrentMenu->pstParent->u8CurrentIndex < pstCurrentMenu->pstParent->u8Size - 1)
             {
-                pstCurrentOption = pstCurrentOption->pstParent->apstOptionList[++pstCurrentOption->pstParent->u8CurrentIndex];
+                pstCurrentMenu = pstCurrentMenu->pstParent->apstMenuList[++pstCurrentMenu->pstParent->u8CurrentIndex];
             }
             else
             {
-                u8CurrentOptionLevel--;
-                pstCurrentOption = pstCurrentOption->pstParent->pstParent->apstOptionList[++pstCurrentOption->pstParent->pstParent->u8CurrentIndex];
+                u8CurrentMenuLevel--;
+                pstCurrentMenu = pstCurrentMenu->pstParent->pstParent->apstMenuList[++pstCurrentMenu->pstParent->pstParent->u8CurrentIndex];
             }
         }
         else
         {
-            u8CurrentOptionLevel++;
-            pstCurrentOption = pstCurrentOption->apstOptionList[0];
+            u8CurrentMenuLevel++;
+            pstCurrentMenu = pstCurrentMenu->apstMenuList[0];
         }
     }
 }
+
 /* Export functions definition   --------------------------------------------------------*/
 void MENU_voTaskTestInit(void)
 {
-    u8NumOfLinks   = sizeof(apstAllOptionLink) / sizeof(*apstAllOptionLink);
-    u8NumOfOptions = sizeof(astPreOption) / sizeof(astPreOption[0]);
+    u8NumOfLinks = sizeof(apstAllMenuLink) / sizeof(*apstAllMenuLink);
+    u8NumOfMenus = sizeof(astPreMenu) / sizeof(astPreMenu[0]);
 
-    MENU_voCreateAllOptions(astPreOption, u8NumOfOptions);
-    MENU_voOptionAddAllLinks(apstAllOptionLink, u8NumOfLinks);
-    pstCurrentOption   = &stTopic0;
+    MENU_voCreateAll(astPreMenu, u8NumOfMenus);
+    MENU_voAddAllLinks(apstAllMenuLink, u8NumOfLinks);
+
     MENU_pvoTaskHandle = osThreadNew(MENU_voTask, NULL, &stMenuTask);
 }

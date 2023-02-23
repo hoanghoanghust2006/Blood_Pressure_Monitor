@@ -1,8 +1,8 @@
 /*
- * Title : < menu.h >
+ * Title :  menu.h
  * Copyright : HCL
- * Author : < Hoang Hoang. >
- * Creation Date : < 20/02/2023 format >
+ * Author :  Hoang Hoang
+ * Creation Date :  20/02/2023
  * ------- ---------- --------
  */
 
@@ -15,30 +15,26 @@ extern "C"
 #endif
 
 /* Include --------------------------------------------------------------------------------*/
-#define OPTION_CAPACITY      5
+#define MAX_MENU_LIST        5
 #define MAX_CHARACTER_LENGTH 20
+
     /* Define constants -----------------------------------------------------------------------*/
 
     /* Type definitions (Typedef, enum, struct) -----------------------------------------------*/
-    typedef struct
-    {
-    } tstMenu;
-
-    typedef struct tstOption tstOption;
-
-    struct tstOption
+    typedef struct tstMenu tstMenu;
+    struct tstMenu
     {
         char       cName[MAX_CHARACTER_LENGTH];
-        tstOption* pstParent;
+        tstMenu*   pstParent;
         uint8_t    u8CurrentIndex;
         uint8_t    u8Size;
-        tstOption* apstOptionList[OPTION_CAPACITY];
-        void (*pvoDoWork)();
+        tstMenu*   apstMenuList[MAX_MENU_LIST];
+        void (*pvoDoWork)(void);
     };
 
     /* Export Function Declarations -----------------------------------------------------------*/
-    void MENU_voCreateOption(tstOption* pstOptionVal, char* cName, void (*pvoDoWork)());
-    void MENU_voAddOptionLink(tstOption* pstParent, tstOption* pstChild);
+    void MENU_voCreate(tstMenu* pstMenuVal, char* cName, void (*pvoDoWork)(void));
+    void MENU_voAddLink(tstMenu* pstParent, tstMenu* pstChild);
 
 #ifdef __cplusplus
 }
