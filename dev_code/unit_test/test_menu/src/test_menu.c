@@ -67,8 +67,7 @@ static tstPreMenu astPreMenu[] =
         {&stMenu3_1, "Menu3_1", eDoNothing},
         {&stMenu3_2, "Menu3_2", eDoNothing},
         {&stMenu1_1_1, "Menu1_1_1", eDoNothing},
-        {&stMenu1_1_2, "Menu1_1_2", eDoNothing},
-};
+        {&stMenu1_1_2, "Menu1_1_2", eDoNothing}};
 
 /* 2D Array of pointers to options. The first indicates parent poiter, others are child pointers*/
 static tstMenu *apstAllMenuLink[][MAX_MENU_LIST + 1] =
@@ -169,7 +168,7 @@ static void MENU_voDisplayTree(uint8_t u8NumOfMenus)
 void MENU_voTaskTestInit(void)
 {
     u8NumOfLinks = sizeof(apstAllMenuLink) / sizeof(*apstAllMenuLink);
-    u8NumOfMenus = sizeof(astPreMenu) / sizeof(astPreMenu[0]);
+    u8NumOfMenus = sizeof(astPreMenu) / sizeof(*astPreMenu);
 
     MENU_voCreateAll(astPreMenu, u8NumOfMenus);
     MENU_voAddAllLinks(apstAllMenuLink, u8NumOfLinks);
