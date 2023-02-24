@@ -3,10 +3,10 @@
  * Copyright : HCL
  * Author : Hoang Hoang
  * Creation Date : Feb 20, 2023
- * Requirements : < Which other header files needs be included to include this header file. >
- * Description : < Briefly describe the purpose of the file. >
- * Limitations : < Any limitations. >
- * Dependencies : < H/W, S/W( Operating System, Compiler) >
+ * Requirements :
+ * Description :
+ * Limitations :
+ * Dependencies :
  * Modifications History : Version 1.0 by HoangHoang
  * ------- ---------- --------
  */
