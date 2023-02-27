@@ -12,9 +12,16 @@
 #include "common.h"
 #include "trace.h"
 #include "cmsis_os.h"
+#include "button.h"
+#include "display.h"
+#include "blood_pressure.h"
+#include "storage.h"
 
 /* Private define constants -------------------------------------------------------------*/
 #define APP_TASK_DELAY_TIME_MS 10
+#define PROCESS_TIMEOUT        700
+#define DISPLAY_TIMEOUT        1000
+
 /* Private macros -----------------------------------------------------------------------*/
 
 /* Private type definitions  ------------------------------------------------------------*/
@@ -58,6 +65,20 @@ tstAppStateHandler stAppStateHandler[] = {
 
 static tenAppState enAppState = eIDLE;
 
+static uint16_t u16InProcessCount = 0;
+
+tstBloodPressureResult stResult = {eSUCCESS, 100, 100, 100};
+
+static tstValueMeasurement stValueMeasurement = {.u8Pressure  = 0,
+                                                 .u8Systolic  = 0,
+                                                 .u8Diastolic = 0,
+                                                 .u8HeartBeat = 0};
+
+static tenPressureState enPressureState = eINFLATE;
+static bool             bRefreshAll     = false;
+static uint16_t         u16DisplayCount = 0;
+tstStorage              stNewRecord;
+
 /* Private functions definition   -------------------------------------------------------*/
 static void APP_voTask(void *pvoArgument)
 {
@@ -89,21 +110,123 @@ tenStatus APP_enInitTask(void)
 
 static void APP_voIdleStateHandler(void)
 {
-    // TODO: Do Trang
+    printf("\033\143");
+    printf("\033[3J");
+    u16DisplayCount   = 0;
+    u16InProcessCount = 0;
+    bRefreshAll       = false;
+
+    /* Event when button select is pressed */
+    if (BTN_voGetState(eBUTTON_SELECT) == ePRESSED)
+    {
+        PRE_voRequestStartProcess();
+        enAppState = eIN_PROCESS;
+    }
+
+    /* Event when button menu is pressed */
+    if (BTN_voGetState(eBUTTON_MENU) == ePRESSED)
+    {
+        enAppState = eMENU;
+    }
 }
 
 static void APP_voInProcessStateHandler(void)
 {
-    // TODO: Do Trang
+    /* Check process timeout */
+    if (u16InProcessCount <= PROCESS_TIMEOUT)
+    {
+        tenNotifyResponse enResponse = PRE_enGetStatusProcess(&stValueMeasurement);
+
+        /* Check processing status */
+        if (enResponse == eSUCCESSFUL)
+        {
+            stValueMeasurement.u8Pressure = 0;
+            STO_voSaveRecord(stNewRecord);
+            trace("result\r\n");
+            DPL_enDisplayResults(&stResult);
+            bRefreshAll = true;
+            enAppState  = eFINISH;
+        }
+        else if (enResponse == eFAILED)
+        {
+            trace("Error");
+        }
+        else if (enResponse == eBUSY)
+        {
+            /* Event when button select is pressed */
+            if (BTN_voGetState(eBUTTON_SELECT))
+            {
+                PRE_voRequestCancelProcess();
+                enAppState = eIDLE;
+            }
+
+            if (stValueMeasurement.u8Diastolic == 0)
+            {
+                enPressureState = eINFLATE;
+            }
+            else
+            {
+                enPressureState = eDEFLATE;
+            }
+
+            /* Display process measurement */
+            if (stValueMeasurement.u8Pressure % 10 == 0 && bRefreshAll == false)
+            {
+                DPL_enDisplayProcessMeasurement(stValueMeasurement.u8Pressure, enPressureState, bRefreshAll);
+            }
+        }
+        else
+        {
+            /*Do nothing*/
+        }
+        u16InProcessCount++;
+    }
+    else
+    {
+        printf("\033\143");
+        printf("\033[3J");
+        trace("Process timeout\r\n");
+        enAppState = eFINISH;
+    }
 }
 
 static void APP_voFinishStateHandler(void)
 {
-    // TODO: Do Trang
+    u16InProcessCount = 0;
+    bRefreshAll       = false;
+
+    /* Check display timeout */
+    if (u16DisplayCount <= DISPLAY_TIMEOUT)
+    {
+        /* Event when button select is pressed */
+        if (BTN_voGetState(eBUTTON_SELECT) == ePRESSED)
+        {
+            trace("Select is pressed\r\n");
+            enAppState = eIDLE;
+        }
+
+        /* Event when button menu is pressed */
+        if (BTN_voGetState(eBUTTON_MENU) == ePRESSED)
+        {
+            u16DisplayCount = 0;
+            enAppState      = eMENU;
+        }
+        u16DisplayCount++;
+    }
+    else
+    {
+        trace("back to idle mode\r\n");
+        enAppState = eIDLE;
+    }
 }
 
 static void APP_voMenuStateHandler(void)
 {
+    trace("menu\r\n");
+    if (BTN_voGetState(eBUTTON_BACK) == ePRESSED)
+    {
+        enAppState = eIDLE;
+    }
     // TODO: Hoang Hoang
 }
 

@@ -27,7 +27,7 @@ extern "C"
 /* Type definitions (Typedef, enum, struct) -----------------------------------------------*/
 typedef struct
 {
-    tstTime stRecordTime;
+    // tstTime stRecordTime;
     uint8_t u8Sys;
     uint8_t u8Dia;
     uint8_t u8HeartRate;
