@@ -31,11 +31,6 @@ typedef struct
     void (*pvoDoWork)(void);
 } tstPreMenu;
 
-typedef enum
-{
-    eDoNothing
-} tenMenuFunctionStatus;
-
 /* Private file-local global variables   ------------------------------------------------*/
 osThreadId_t         MENU_pvoTaskHandle;
 const osThreadAttr_t stMenuTask = {
@@ -43,9 +38,6 @@ const osThreadAttr_t stMenuTask = {
     .stack_size = 1024 * 4,
     .priority   = (osPriority_t)osPriorityLow,
 };
-
-static uint8_t u8NumOfLinks = 0;
-static uint8_t u8NumOfMenus = 0;
 
 static tstMenu stMenu0;
 static tstMenu stMenu1, stMenu2, stMenu3;
@@ -55,19 +47,19 @@ static tstMenu stMenu1_1_1, stMenu1_1_2;
 /* Array includes the parameters of each option: address, name and the function*/
 static tstPreMenu astPreMenu[] =
     {
-        {&stMenu0, "Menu0", eDoNothing},
-        {&stMenu1, "Menu1", eDoNothing},
-        {&stMenu2, "Menu2", eDoNothing},
-        {&stMenu3, "Menu3", eDoNothing},
-        {&stMenu1_1, "Menu1_1", eDoNothing},
-        {&stMenu1_2, "Menu1_2", eDoNothing},
-        {&stMenu1_3, "Menu1_3", eDoNothing},
-        {&stMenu1_4, "Menu1_4", eDoNothing},
-        {&stMenu2_1, "Menu2_1", eDoNothing},
-        {&stMenu3_1, "Menu3_1", eDoNothing},
-        {&stMenu3_2, "Menu3_2", eDoNothing},
-        {&stMenu1_1_1, "Menu1_1_1", eDoNothing},
-        {&stMenu1_1_2, "Menu1_1_2", eDoNothing}};
+        {&stMenu0, "Menu0", 0},
+        {&stMenu1, "Menu1", 0},
+        {&stMenu2, "Menu2", 0},
+        {&stMenu3, "Menu3", 0},
+        {&stMenu1_1, "Menu1_1", 0},
+        {&stMenu1_2, "Menu1_2", 0},
+        {&stMenu1_3, "Menu1_3", 0},
+        {&stMenu1_4, "Menu1_4", 0},
+        {&stMenu2_1, "Menu2_1", 0},
+        {&stMenu3_1, "Menu3_1", 0},
+        {&stMenu3_2, "Menu3_2", 0},
+        {&stMenu1_1_1, "Menu1_1_1", 0},
+        {&stMenu1_1_2, "Menu1_1_2", 0}};
 
 /* 2D Array of pointers to options. The first indicates parent poiter, others are child pointers*/
 static tstMenu *apstAllMenuLink[][MAX_MENU_LIST + 1] =
@@ -127,18 +119,12 @@ static void MENU_voAddAllLinks(tstMenu *apstAllMenuLink[][MAX_MENU_LIST + 1], ui
         MENU_voAddLinks(apstAllMenuLink[i]);
     }
 }
-static void MENU_voTask(void *pvoArgument)
-{
-    MENU_voDisplayTree(u8NumOfMenus);
-    for (;;)
-    {
-    }
-}
 
 static void MENU_voDisplayTree(uint8_t u8NumOfMenus)
 {
     tstMenu *pstCurrentMenu     = &stMenu0;
     uint8_t  u8CurrentMenuLevel = 0;
+    /*Loop for printing all menu options*/
     for (uint8_t i = 0; i < u8NumOfMenus; i++)
     {
         MENU_voPrintTabs(u8CurrentMenuLevel);
@@ -164,14 +150,23 @@ static void MENU_voDisplayTree(uint8_t u8NumOfMenus)
     }
 }
 
-/* Export functions definition   --------------------------------------------------------*/
-void MENU_voTaskTestInit(void)
+static void MENU_voTask(void *pvoArgument)
 {
-    u8NumOfLinks = sizeof(apstAllMenuLink) / sizeof(*apstAllMenuLink);
-    u8NumOfMenus = sizeof(astPreMenu) / sizeof(*astPreMenu);
+    uint8_t u8NumOfLinks = 0;
+    uint8_t u8NumOfMenus = 0;
+    u8NumOfLinks         = sizeof(apstAllMenuLink) / sizeof(*apstAllMenuLink);
+    u8NumOfMenus         = sizeof(astPreMenu) / sizeof(*astPreMenu);
 
     MENU_voCreateAll(astPreMenu, u8NumOfMenus);
     MENU_voAddAllLinks(apstAllMenuLink, u8NumOfLinks);
+    MENU_voDisplayTree(u8NumOfMenus);
+    for (;;)
+    {
+    }
+}
 
+/* Export functions definition   --------------------------------------------------------*/
+void MENU_voTaskTestInit(void)
+{
     MENU_pvoTaskHandle = osThreadNew(MENU_voTask, NULL, &stMenuTask);
 }

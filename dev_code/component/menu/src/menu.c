@@ -11,7 +11,6 @@
 #include <string.h>
 
 /* Local Include ------------------------------------------------------------------------*/
-
 #include "common.h"
 #include "trace.h"
 #include "menu.h"
@@ -29,7 +28,7 @@
 /* Private functions definition   -------------------------------------------------------*/
 void MENU_voCreate(tstMenu* pstMenuVal, char* cName, void (*pvoDoWork)())
 {
-    if (sizeof(cName) <= MAX_CHARACTER_LENGTH)
+    if (strlen(cName) <= MAX_CHARACTER_LENGTH)
     {
         strcpy(pstMenuVal->cName, cName);
     }
