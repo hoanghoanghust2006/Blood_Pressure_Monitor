@@ -1,7 +1,5 @@
 #include "display.h"
 #include "trace.h"
-#include "storage.h"
-// #include "menu.h"
 
 tenStatus DPL_enDisplayProcessMeasurement(uint8_t          u8AirPressure,
                                           tenPressureState enPressureState,
