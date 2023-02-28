@@ -18,6 +18,8 @@ extern "C"
 #define MAX_MENU_LIST        5
 #define MAX_CHARACTER_LENGTH 20
 
+#include "common.h"
+
     /* Define constants -----------------------------------------------------------------------*/
 
     /* Type definitions (Typedef, enum, struct) -----------------------------------------------*/
@@ -33,8 +35,8 @@ extern "C"
     };
 
     /* Export Function Declarations -----------------------------------------------------------*/
-    void MENU_voCreate(tstMenu* pstMenuVal, char* cName, void (*pvoDoWork)(void));
-    void MENU_voAddLink(tstMenu* pstParent, tstMenu* pstChild);
+    tenStatus MENU_enCreate(tstMenu* pstMenuVal, char* cName, void (*pvoDoWork)(void));
+    tenStatus MENU_enAddLink(tstMenu* pstParent, tstMenu* pstChild);
 
 #ifdef __cplusplus
 }

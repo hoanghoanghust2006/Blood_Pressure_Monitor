@@ -7,11 +7,9 @@
  */
 
 /* System Include -----------------------------------------------------------------------*/
-#include <stdio.h>
 #include <string.h>
 
 /* Local Include ------------------------------------------------------------------------*/
-#include "common.h"
 #include "trace.h"
 #include "menu.h"
 
@@ -26,7 +24,7 @@
 /* Private function prototypes declarations   -------------------------------------------*/
 
 /* Private functions definition   -------------------------------------------------------*/
-void MENU_voCreate(tstMenu* pstMenuVal, char* cName, void (*pvoDoWork)())
+tenStatus MENU_enCreate(tstMenu* pstMenuVal, char* cName, void (*pvoDoWork)())
 {
     if (strlen(cName) <= MAX_CHARACTER_LENGTH)
     {
@@ -35,13 +33,15 @@ void MENU_voCreate(tstMenu* pstMenuVal, char* cName, void (*pvoDoWork)())
     else
     {
         printf("Exceed max character length");
+        return eFAIL;
     }
     pstMenuVal->u8CurrentIndex = 0;
     pstMenuVal->u8Size         = 0;
     pstMenuVal->pvoDoWork      = pvoDoWork;
+    return eSUCCESS;
 }
 
-void MENU_voAddLink(tstMenu* pstParent, tstMenu* pstChild)
+tenStatus MENU_enAddLink(tstMenu* pstParent, tstMenu* pstChild)
 {
     if (pstParent->u8Size < MAX_MENU_LIST)
     {
@@ -52,7 +52,9 @@ void MENU_voAddLink(tstMenu* pstParent, tstMenu* pstChild)
     else
     {
         printf("Exceed max menu list");
+        return eFAIL;
     }
+    return eSUCCESS;
 }
 
 /* Export functions definition   --------------------------------------------------------*/

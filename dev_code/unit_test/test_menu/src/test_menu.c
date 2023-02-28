@@ -11,6 +11,7 @@
  */
 
 /* System Include -----------------------------------------------------------------------*/
+#include <stdio.h>
 
 /* Local Include ------------------------------------------------------------------------*/
 #include "cmsis_os.h"
@@ -42,7 +43,8 @@ const osThreadAttr_t stMenuTask = {
 static tstMenu stMenu0;
 static tstMenu stMenu1, stMenu2, stMenu3;
 static tstMenu stMenu1_1, stMenu1_2, stMenu1_3, stMenu1_4, stMenu2_1, stMenu3_1, stMenu3_2;
-static tstMenu stMenu1_1_1, stMenu1_1_2;
+static tstMenu stMenu1_1_1, stMenu1_1_2, stMenu2_1_1, stMenu2_1_2;
+static tstMenu stMenu1_1_2_1, stMenu1_1_2_2;
 
 /* Array includes the parameters of each option: address, name and the function*/
 static tstPreMenu astPreMenu[] =
@@ -59,47 +61,50 @@ static tstPreMenu astPreMenu[] =
         {&stMenu3_1, "Menu3_1", 0},
         {&stMenu3_2, "Menu3_2", 0},
         {&stMenu1_1_1, "Menu1_1_1", 0},
-        {&stMenu1_1_2, "Menu1_1_2", 0}};
+        {&stMenu1_1_2, "Menu1_1_2", 0},
+        {&stMenu2_1_1, "Menu2_1_1", 0},
+        {&stMenu2_1_2, "Menu2_1_2", 0},
+        {&stMenu1_1_2_1, "Menu1_1_2_1", 0},
+        {&stMenu1_1_2_2, "Menu1_1_2_2", 0}};
 
 /* 2D Array of pointers to options. The first indicates parent poiter, others are child pointers*/
 static tstMenu *apstAllMenuLink[][MAX_MENU_LIST + 1] =
     {
         {&stMenu0, &stMenu1, &stMenu2, &stMenu3, NULL},
-        {&stMenu1, &stMenu1_1, &stMenu1_2, &stMenu1_3, &stMenu1_4, NULL},
+        {&stMenu1, &stMenu1_1, &stMenu1_2, &stMenu1_3, &stMenu1_4},
         {&stMenu1_1, &stMenu1_1_1, &stMenu1_1_2, NULL},
+        {&stMenu2_1, &stMenu2_1_1, &stMenu2_1_2},
         {&stMenu2, &stMenu2_1, NULL},
-        {&stMenu3, &stMenu3_1, &stMenu3_2, NULL}};
+        {&stMenu3, &stMenu3_1, &stMenu3_2, NULL},
+        {&stMenu1_1_2, &stMenu1_1_2_1, &stMenu1_1_2_2, NULL}};
 
 /* Private function prototypes declarations   -------------------------------------------*/
 static void MENU_voTask(void *pvoArgument);
-static void MENU_voCreateAll(tstPreMenu *pastPreMenu, uint8_t u8NumOfMenus);
+static void MENU_voCreateAll(tstPreMenu *pastPreMenu);
 static void MENU_voAddLinks(tstMenu **pastMenu);
-static void MENU_voAddAllLinks(tstMenu *apstAllMenuLink[][MAX_MENU_LIST + 1], uint8_t u8NumOfLinks);
+static void MENU_voAddAllLinks(tstMenu *apstAllMenuLink[][MAX_MENU_LIST + 1]);
 static void MENU_voPrintTabs(uint8_t u8CurrentMenuLevel);
-static void MENU_voDisplayTree(uint8_t u8NumOfMenus);
+static void MENU_voDisplayTree();
 
 /* Private functions definition   -------------------------------------------------------*/
-static void MENU_voCreateAll(tstPreMenu *pastPreMenu, uint8_t u8NumOfMenus)
+static void MENU_voCreateAll(tstPreMenu *pastPreMenu)
 {
-    for (uint8_t i = 0; i < u8NumOfMenus; i++)
+    uint8_t i = 0;
+    while ((pastPreMenu + i)->pstMenuVal != NULL)
     {
-        MENU_voCreate(pastPreMenu[i].pstMenuVal, pastPreMenu[i].cName, pastPreMenu[i].pvoDoWork);
+        MENU_enCreate((pastPreMenu + i)->pstMenuVal, (pastPreMenu + i)->cName, (pastPreMenu + i)->pvoDoWork);
+        i++;
     }
 }
 
 /* Linking a parent option to child options*/
 static void MENU_voAddLinks(tstMenu **pastMenu)
 {
-    for (uint8_t i = 1; i < MAX_MENU_LIST + 1; i++)
+    uint8_t i = 1;
+    while (*(pastMenu + i) != NULL)
     {
-        if (*(pastMenu + i) != NULL)
-        {
-            MENU_voAddLink(*pastMenu, *(pastMenu + i));
-        }
-        else
-        {
-            break;
-        }
+        MENU_enAddLink(*pastMenu, *(pastMenu + i));
+        i++;
     }
 }
 
@@ -112,35 +117,37 @@ static void MENU_voPrintTabs(uint8_t u8CurrentMenuLevel)
 }
 
 /* Linking all parent options to their child options*/
-static void MENU_voAddAllLinks(tstMenu *apstAllMenuLink[][MAX_MENU_LIST + 1], uint8_t u8NumOfLinks)
+static void MENU_voAddAllLinks(tstMenu *apstAllMenuLink[][MAX_MENU_LIST + 1])
 {
-    for (uint8_t i = 0; i < u8NumOfLinks; i++)
+    uint8_t i = 0;
+    while ((apstAllMenuLink[i][MAX_MENU_LIST + 1]) != NULL)
     {
         MENU_voAddLinks(apstAllMenuLink[i]);
+        i++;
     }
 }
 
-static void MENU_voDisplayTree(uint8_t u8NumOfMenus)
+static void MENU_voDisplayTree()
 {
     tstMenu *pstCurrentMenu     = &stMenu0;
     uint8_t  u8CurrentMenuLevel = 0;
+
     /*Loop for printing all menu options*/
-    for (uint8_t i = 0; i < u8NumOfMenus; i++)
+    while (pstCurrentMenu != NULL)
     {
         MENU_voPrintTabs(u8CurrentMenuLevel);
         printf("%s\n\r", pstCurrentMenu->cName);
 
         if (pstCurrentMenu->apstMenuList[0] == NULL)
         {
-            if (pstCurrentMenu->pstParent->u8CurrentIndex < pstCurrentMenu->pstParent->u8Size - 1)
-            {
-                pstCurrentMenu = pstCurrentMenu->pstParent->apstMenuList[++pstCurrentMenu->pstParent->u8CurrentIndex];
-            }
-            else
+            pstCurrentMenu = pstCurrentMenu->pstParent;
+            while (pstCurrentMenu->u8CurrentIndex >= pstCurrentMenu->u8Size - 1)
             {
                 u8CurrentMenuLevel--;
-                pstCurrentMenu = pstCurrentMenu->pstParent->pstParent->apstMenuList[++pstCurrentMenu->pstParent->pstParent->u8CurrentIndex];
+                pstCurrentMenu = pstCurrentMenu->pstParent;
             }
+            pstCurrentMenu->u8CurrentIndex++;
+            pstCurrentMenu = pstCurrentMenu->apstMenuList[pstCurrentMenu->u8CurrentIndex];
         }
         else
         {
@@ -152,14 +159,9 @@ static void MENU_voDisplayTree(uint8_t u8NumOfMenus)
 
 static void MENU_voTask(void *pvoArgument)
 {
-    uint8_t u8NumOfLinks = 0;
-    uint8_t u8NumOfMenus = 0;
-    u8NumOfLinks         = sizeof(apstAllMenuLink) / sizeof(*apstAllMenuLink);
-    u8NumOfMenus         = sizeof(astPreMenu) / sizeof(*astPreMenu);
-
-    MENU_voCreateAll(astPreMenu, u8NumOfMenus);
-    MENU_voAddAllLinks(apstAllMenuLink, u8NumOfLinks);
-    MENU_voDisplayTree(u8NumOfMenus);
+    MENU_voCreateAll(astPreMenu);
+    MENU_voAddAllLinks(apstAllMenuLink);
+    MENU_voDisplayTree();
     for (;;)
     {
     }
