@@ -19,6 +19,7 @@
 #include "driver_task.h"
 #include "app_task.h"
 #include "test_button.h"
+#include "test_glcd.h"
 
 /* Private define constants -------------------------------------------------------------*/
 
@@ -52,6 +53,9 @@ void ENTRY_voInit(void)
 #elif defined(TEST_BUTTON)
     printf("Unit test for button component\r\n");
     BTN_voTaskTestInit();
+#elif defined(TEST_GLCD)
+    printf("Unit test for glcd component\r\n");
+    GLCD_voTaskTestInit();
 #else
     APP_enInitTask();
 #endif

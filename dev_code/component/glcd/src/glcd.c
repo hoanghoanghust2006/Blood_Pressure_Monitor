@@ -12,7 +12,9 @@
 #include "stm32l4xx_hal.h"
 #include "common.h"
 #include "glcd.h"
+#include "font_glcd.h"
 #include "cmsis_os2.h"
+#include "trace.h"
 
 /* Private define constants -------------------------------------------------------------*/
 #define SCLK_PORT GPIOH
@@ -39,7 +41,7 @@
 extern TIM_HandleTypeDef htim1;
 
 /* Private file-local global variables   ------------------------------------------------*/
-static uint8_t   su8Image[(NUM_OF_COLUMNS * NUM_OF_ROWS) / 8];
+uint8_t               su8Image[(NUM_OF_COLUMNS * NUM_OF_ROWS) / 8];
 static tenGraphicMode enGraphicCheck = eDISABLE;
 
 /* Private function prototypes declarations   -------------------------------------------*/
@@ -48,6 +50,12 @@ static void      GLCD_voSendByteSpi(uint8_t u8byte);
 static void      GLCD_voSendCmd(uint8_t u8Cmd);
 static void      GLCD_voSendData(uint8_t u8Data);
 static void      GLCD_Delay_init(void);
+static void      GLCD_voSendString5x7(uint8_t u8X, uint8_t u8Y, char* cString);
+static void      GLCD_voSendString3x5(uint8_t u8X, uint8_t u8Y, char* cString);
+static void      GLCD_voSendString7x9(uint8_t u8X, uint8_t u8Y, char* cString);
+static void      GLCD_voSendChar5x7(uint8_t u8X, uint8_t u8Y, char Character);
+static void      GLCD_voSendChar3x5(uint8_t u8X, uint8_t u8Y, char Character);
+static void      GLCD_voSendChar7x9(uint16_t u16X, uint16_t u16Y, char Character);
 
 /* Private functions definition   -------------------------------------------------------*/
 static void GLCD_TIM1_Init(void)
@@ -85,7 +93,6 @@ static void GLCD_Delay_init(void)
 
 static tenStatus GLCD_enInitIO(void)
 {
-    tenStatus        enStatus        = eSUCCESS;
     GPIO_InitTypeDef GPIO_InitStruct = {0};
 
     /* GPIO Ports Clock Enable */
@@ -135,9 +142,8 @@ static tenStatus GLCD_enInitIO(void)
     GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
     HAL_GPIO_Init(SCLK_PORT, &GPIO_InitStruct);
 
-    return enStatus;
+    return eSUCCESS;
 }
-
 static void GLCD_voSendByteSpi(uint8_t u8Byte)
 {
     for (uint8_t i = 0; i < NUM_BIT_OF_BYTE; i++)
@@ -200,6 +206,24 @@ static void GLCD_voSendData(uint8_t u8Data)
 }
 
 /* Export functions definition   --------------------------------------------------------*/
+void GLCD_voDisplayString(tenTextSize enSize, uint8_t u8X, uint8_t u8Y, char* cString)
+{
+    switch (enSize)
+    {
+        case eSMALL:
+            GLCD_voSendString3x5(u8X, u8Y, cString);
+            break;
+
+        case eMEDIUM:
+            GLCD_voSendString5x7(u8X, u8Y, cString);
+            break;
+
+        case eLARGE:
+            GLCD_voSendString7x9(u8X, u8Y, cString);
+            break;
+    }
+}
+
 void GLCD_Delay_us(uint16_t u16Delay)
 {
     /* Reset the counter */
@@ -215,6 +239,7 @@ tenStatus GLCD_enInit(void)
 {
     GLCD_Delay_init();
     GLCD_TIM1_Init();
+
     /* Init IO interface */
     if (GLCD_enInitIO() != eSUCCESS)
     {
@@ -257,33 +282,86 @@ tenStatus GLCD_enInit(void)
     return eSUCCESS;
 }
 
-void GLCD_voDisplayString(uint8_t u8Row, uint8_t u8Column, char* cString)
+static void GLCD_voSendChar5x7(uint8_t u8X, uint8_t u8Y, char Character)
 {
-    switch (u8Row)
+    uint8_t u8Idx;
+    uint8_t u8Idy;
+    uint8_t u8Arr;
+    for (u8Idx = 0; u8Idx < 5; u8Idx++)
     {
-        case 0:
-            u8Column |= 0x80;
-            break;
-        case 1:
-            u8Column |= 0x90;
-            break;
-        case 2:
-            u8Column |= 0x88;
-            break;
-        case 3:
-            u8Column |= 0x98;
-            break;
-        default:
-            u8Column |= 0x80;
-            break;
+        u8Arr = (uint8_t)u8Font5x7[Character - 32][u8Idx];
+        for (u8Idy = 0; u8Idy < 8; u8Idy++)
+        {
+            if (u8Arr & (1 << (7 - u8Idy)))
+            {
+                GLCD_voSetPixel(u8X + u8Idx, u8Y + 8 - u8Idy);
+            }
+        }
     }
+}
 
-    /* Send cmd to u8Clumn to display */
-    GLCD_voSendCmd(u8Column);
+static void GLCD_voSendChar3x5(uint8_t u8X, uint8_t u8Y, char Character)
+{
+    uint8_t u8Idx;
+    uint8_t u8Idy;
+    uint8_t u8Arr;
+    for (u8Idy = 0; u8Idy < 5; u8Idy++)
+    {
+        u8Arr = u8Font3x5[Character - '/'][u8Idy];
+        for (u8Idx = 0; u8Idx < 3; u8Idx++)
+        {
+            if (u8Arr & (0x01 << u8Idx))
+            {
+                GLCD_voSetPixel(u8X + u8Idx, u8Y + u8Idy);
+            }
+        }
+    }
+}
+static void GLCD_voSendChar7x9(uint16_t u16X, uint16_t u16Y, char Character)
+{
+    uint8_t u8Idx;
+    uint8_t u8Idy;
+    uint8_t u8Arr;
+    for (u8Idy = 0; u8Idy < 9; u8Idy++)
+    {
+        u8Arr = u8Font7x9[Character - '0'][u8Idy];
+        for (u8Idx = 0; u8Idx < 7; u8Idx++)
+        {
+            if (u8Arr & (0x01 << u8Idx))
+            {
+                GLCD_voSetPixel(u16X + u8Idx, u16Y + u8Idy);
+            }
+        }
+    }
+}
 
+static void GLCD_voSendString5x7(uint8_t u8X, uint8_t u8Y, char* cString)
+{
     while (*cString)
     {
-        GLCD_voSendData(*cString++);
+        GLCD_voSendChar5x7(u8X, u8Y, *cString);
+        cString++;
+        u8X = u8X + 6;
+    }
+}
+
+static void GLCD_voSendString3x5(uint8_t u8X, uint8_t u8Y, char* cString)
+{
+    while (*cString)
+    {
+        GLCD_voSendChar3x5(u8X, u8Y, *cString);
+        cString++;
+        u8X = u8Y + 4;
+    }
+}
+
+static void GLCD_voSendString7x9(uint8_t u8X, uint8_t u8Y, char* cString)
+{
+    while (*cString)
+    {
+        GLCD_voSendChar7x9(u8X, u8Y, *cString);
+        cString++;
+        u8X = u8X + 10;
     }
 }
 
@@ -393,6 +471,26 @@ void GLCD_voClearScreen(void)
     }
 }
 
+/* Parameter: Row, Column, Array, Weight, High */
+void GLCD_voDisplayImage(uint8_t u8X, uint8_t u8Y, uint8_t* u8P, uint8_t u8W, uint8_t u8H)
+{
+    uint32_t i = 0;
+    uint8_t  j = 0;
+    for (i = 0; i < (u8W * u8H) / 8; i++)
+    {
+        for (j = 0; j < 8; j++)
+        {
+            /* Read bit from array byte */
+            if (*u8P & (1 << (7 - j)))
+            {
+                GLCD_voSetPixel((u8X + (i % (u8W / 8)) * 8 + j), (u8Y + i / (u8W / 8)));
+            }
+        }
+        u8P++;
+    }
+    GLCD_voUpdate();
+}
+
 void GLCD_voSetPixel(uint8_t u8X, uint8_t u8Y)
 {
     uint8_t u8StartRow    = 0;
@@ -404,8 +502,6 @@ void GLCD_voSetPixel(uint8_t u8X, uint8_t u8Y)
     {
         uint8_t* p = su8Image + ((u8Y * (NUM_OF_COLUMNS / NUM_BIT_OF_BYTE)) + (u8X / NUM_BIT_OF_BYTE));
         *p |= 0x80u >> (u8X % NUM_BIT_OF_BYTE);
-
-        *su8Image = *p;
 
         /* Change the dirty rectangle to account for a pixel being dirty (we assume it was changed) */
         if (u8StartRow > u8Y)
@@ -556,7 +652,6 @@ void GLCD_voDrawCircle(uint8_t u8X0, uint8_t u8Y0, uint8_t u8Radius)
 }
 
 /* Draw Filled Circle */
-
 void GLCD_voDrawFilledCircle(int16_t u16X0, int16_t i16Y0, int16_t i16R)
 {
     int16_t u16F     = 1 - i16R;

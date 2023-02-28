@@ -24,22 +24,25 @@ extern "C"
         eDISABLE
     } tenGraphicMode;
 
+    typedef enum
+    {
+        eSMALL,
+        eMEDIUM,
+        eLARGE
+    } tenTextSize;
+
     /* Export Function Declarations -----------------------------------------------------------*/
     tenStatus GLCD_enInit(void);
-
-    /* Send the string to the LCD
-     * 'row' = starting ROW for the string (from 0 to 3)
-     * 'col' = starting COL for the string (from 0 to 7)
-     */
-    void GLCD_voDisplayString(uint8_t u8Row, uint8_t u8Column, char* cString);
     void GLCD_voSetGraphicMode(tenGraphicMode enGraphicMode);
-
+    void      GLCD_voDisplayImage(uint8_t u8X, uint8_t u8Y, uint8_t* u8P, uint8_t u8W, uint8_t u8H);
+    void      GLCD_voDisplayString(tenTextSize enSize, uint8_t u8X, uint8_t u8Y, char* cString);
     /* Clear screen in any mode */
     void GLCD_voClearScreen(void);
     void GLCD_voUpdate(void);
 
     /* Draw BitMap on the display */
     void GLCD_voDrawBitMap(const uint8_t* cu8Graphic);
+    void GLCD_voDrawImage(uint8_t u8H, uint8_t u8W, const uint8_t* cu8Graphic);
 
     /* Update the display with the selected graphics */
     void GLCD_voSetPixel(uint8_t u8X, uint8_t u8Y);

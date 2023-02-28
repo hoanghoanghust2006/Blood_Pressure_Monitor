@@ -15,7 +15,8 @@
 /* Local Include ------------------------------------------------------------------------*/
 #include "cmsis_os.h"
 #include "led.h"
-
+#include "button.h"
+#include "rtc.h"
 /* Private define constants -------------------------------------------------------------*/
 #define DRV_TASK_DELAY_TIME_MS 5
 
