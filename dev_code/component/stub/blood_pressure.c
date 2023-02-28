@@ -36,6 +36,11 @@ tenNotifyResponse PRE_enGetStatusProcess(tstValueMeasurement *stGetResult)
         u32Count  = 0;
     }
 
+    if (stGetResult->u8HeartBeat == 0)
+    {
+        enRespond = eFAILED;
+    }
+
     stGetResult->u8Pressure = u8SimPressure;
 
     return enRespond;

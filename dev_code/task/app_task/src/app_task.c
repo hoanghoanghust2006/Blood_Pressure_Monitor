@@ -67,19 +67,15 @@ tstAppStateHandler stAppStateHandler[] = {
 
 static tenAppState enAppState = eIDLE;
 
-static uint16_t u16InProcessCount = 0;
-
 tstBloodPressureResult stResult = {eSUCCESS, 100, 100, 100};
 
 static tstValueMeasurement stValueMeasurement = {.u8Pressure  = 0,
                                                  .u8Systolic  = 0,
                                                  .u8Diastolic = 0,
-                                                 .u8HeartBeat = 0};
+                                                 .u8HeartBeat = 88};
 
 static tenPressureState enPressureState = eINFLATE;
 static bool             bRefreshAll     = false;
-static uint16_t         u16DisplayCount = 0;
-tstStorage              stNewRecord;
 
 /* Private functions definition   -------------------------------------------------------*/
 static void APP_voTask(void *pvoArgument)
@@ -114,8 +110,6 @@ static void APP_voIdleStateHandler(void)
 {
     printf("\033\143");
     printf("\033[3J");
-    u16DisplayCount   = 0;
-    u16InProcessCount = 0;
     bRefreshAll       = false;
 
     /* Event when button select is pressed */
@@ -134,6 +128,10 @@ static void APP_voIdleStateHandler(void)
 
 static void APP_voInProcessStateHandler(void)
 {
+    static uint16_t u16InProcessCount = 0;
+
+    u16InProcessCount++;
+
     /* Check process timeout */
     if (u16InProcessCount <= PROCESS_TIMEOUT)
     {
@@ -142,16 +140,23 @@ static void APP_voInProcessStateHandler(void)
         /* Check processing status */
         if (enResponse == eSUCCESSFUL)
         {
+            tstStorage stNewRecord;
             stValueMeasurement.u8Pressure = 0;
+
+            stNewRecord.u8Sys       = stResult.u8Systolic;
+            stNewRecord.u8Dia       = stResult.u8Diastolic;
+            stNewRecord.u8HeartRate = stResult.u8HeartBeat;
             STO_voSaveRecord(stNewRecord);
-            trace("result\r\n");
+
             DPL_enDisplayResults(&stResult);
             bRefreshAll = true;
+            u16InProcessCount = 0;
             enAppState  = eFINISH;
         }
         else if (enResponse == eFAILED)
         {
-            trace("Error");
+            trace("Error\r\n");
+            enAppState = eFINISH;
         }
         else if (enResponse == eBUSY)
         {
@@ -159,6 +164,7 @@ static void APP_voInProcessStateHandler(void)
             if (BTN_voGetState(eBUTTON_SELECT) == ePRESSED)
             {
                 PRE_voRequestCancelProcess();
+                u16InProcessCount = 0;
                 enAppState = eIDLE;
             }
 
@@ -186,21 +192,23 @@ static void APP_voInProcessStateHandler(void)
         {
             /*Do nothing*/
         }
-        u16InProcessCount++;
     }
     else
     {
         printf("\033\143");
         printf("\033[3J");
         trace("Process timeout\r\n");
-        enAppState = eFINISH;
+        u16InProcessCount = 0;
+        enAppState        = eFINISH;
     }
 }
 
 static void APP_voFinishStateHandler(void)
 {
-    u16InProcessCount = 0;
-    bRefreshAll       = false;
+    static uint16_t u16DisplayCount = 0;
+    bRefreshAll                     = false;
+
+    u16DisplayCount++;
 
     /* Check display timeout */
     if (u16DisplayCount <= DISPLAY_TIMEOUT)
@@ -209,7 +217,8 @@ static void APP_voFinishStateHandler(void)
         if (BTN_voGetState(eBUTTON_SELECT) == ePRESSED)
         {
             trace("Select is pressed\r\n");
-            enAppState = eIDLE;
+            u16DisplayCount = 0;
+            enAppState      = eIDLE;
         }
 
         /* Event when button menu is pressed */
@@ -218,11 +227,11 @@ static void APP_voFinishStateHandler(void)
             u16DisplayCount = 0;
             enAppState      = eMENU;
         }
-        u16DisplayCount++;
     }
     else
     {
         trace("back to idle mode\r\n");
+        u16DisplayCount = 0;
         enAppState = eIDLE;
     }
 }
