@@ -21,6 +21,8 @@
 #define APP_TASK_DELAY_TIME_MS 10
 #define PROCESS_TIMEOUT        700
 #define DISPLAY_TIMEOUT        1000
+#define MAX_VALUE              150
+#define MIN_VALUE              0
 
 /* Private macros -----------------------------------------------------------------------*/
 
@@ -154,19 +156,24 @@ static void APP_voInProcessStateHandler(void)
         else if (enResponse == eBUSY)
         {
             /* Event when button select is pressed */
-            if (BTN_voGetState(eBUTTON_SELECT))
+            if (BTN_voGetState(eBUTTON_SELECT) == ePRESSED)
             {
                 PRE_voRequestCancelProcess();
                 enAppState = eIDLE;
             }
 
-            if (stValueMeasurement.u8Diastolic == 0)
+            /* Check motor status */
+            if (stValueMeasurement.u8Pressure == MIN_VALUE)
             {
                 enPressureState = eINFLATE;
             }
-            else
+            else if (stValueMeasurement.u8Pressure == MAX_VALUE)
             {
                 enPressureState = eDEFLATE;
+            }
+            else
+            {
+                /* Do nothing*/
             }
 
             /* Display process measurement */
