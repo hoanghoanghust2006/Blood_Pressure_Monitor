@@ -156,6 +156,7 @@ static void APP_voInProcessStateHandler(void)
         else if (enResponse == eFAILED)
         {
             trace("Error\r\n");
+            u16InProcessCount = 0;
             enAppState = eFINISH;
         }
         else if (enResponse == eBUSY)
