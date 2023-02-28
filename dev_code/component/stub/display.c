@@ -28,19 +28,19 @@ tenStatus DPL_enDisplayResults(const tstBloodPressureResult* stResult)
     }
 }
 
-// tenStatus DPL_enDisplayMenu(const tstMenu* stMenu)
-// {
-//     // TODO: Hoang Hoang
-// }
+tenStatus DPL_enDisplayMenu(const tstMenu* stMenu)
+{
+    // TODO: Hoang Hoang
+}
 
-// tenStatus DPL_enDisplayRecordHistory(const tstStorage* stStorage, uint8_t u8Index)
-// {
-// }
+tenStatus DPL_enDisplayRecordHistory(const tstStorage* stStorage, uint8_t u8Index)
+{
+}
 
-// tenStatus DPL_enDisplaySetupDate(const tstTime* stTime, tenDateSetupState enDateSetupState)
-// {
-// }
+tenStatus DPL_enDisplaySetupDate(const tstTime* stTime, tenDateSetupState enDateSetupState)
+{
+}
 
-// tenStatus DPL_enDisplaySetupTime(const tstTime* stTime, tenTimeSetupState enTimeSetupState)
-// {
-// }
+tenStatus DPL_enDisplaySetupTime(const tstTime* stTime, tenTimeSetupState enTimeSetupState)
+{
+}
