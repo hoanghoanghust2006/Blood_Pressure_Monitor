@@ -1,8 +1,8 @@
 /*
- * Title : < glcd.c >
+ * Title : glcd.c
  * Copyright : HCL
  * Author : < hoang.thong >
- * Creation Date : < Date in 14/02/2023 format >
+ * Creation Date : 14/02/2023
  * ------- ---------- --------
  */
 
@@ -10,10 +10,10 @@
 
 /* Local Include ------------------------------------------------------------------------*/
 #include "stm32l4xx_hal.h"
+#include "cmsis_os2.h"
 #include "common.h"
 #include "glcd.h"
 #include "font_glcd.h"
-#include "cmsis_os2.h"
 #include "trace.h"
 
 /* Private define constants -------------------------------------------------------------*/
@@ -33,15 +33,17 @@
 #define HALF_OF_ROWS   32
 #define NUM_OF_COLUMNS 128
 
+#define ROWS_OF_FONT 5
+
 #define NUM_BIT_OF_BYTE 8
 
 /* Private macros -----------------------------------------------------------------------*/
 
 /* Private type definitions  ------------------------------------------------------------*/
-extern TIM_HandleTypeDef htim1;
+static TIM_HandleTypeDef htim2;
 
 /* Private file-local global variables   ------------------------------------------------*/
-uint8_t               su8Image[(NUM_OF_COLUMNS * NUM_OF_ROWS) / 8];
+static uint8_t        su8Image[(NUM_OF_COLUMNS * NUM_OF_ROWS) / NUM_BIT_OF_BYTE];
 static tenGraphicMode enGraphicCheck = eDISABLE;
 
 /* Private function prototypes declarations   -------------------------------------------*/
@@ -49,46 +51,44 @@ static tenStatus GLCD_enInitIO(void);
 static void      GLCD_voSendByteSpi(uint8_t u8byte);
 static void      GLCD_voSendCmd(uint8_t u8Cmd);
 static void      GLCD_voSendData(uint8_t u8Data);
-static void      GLCD_Delay_init(void);
+static void      GLCD_voDelay_init(void);
 static void      GLCD_voSendString5x7(uint8_t u8X, uint8_t u8Y, char* cString);
 static void      GLCD_voSendString3x5(uint8_t u8X, uint8_t u8Y, char* cString);
 static void      GLCD_voSendString7x9(uint8_t u8X, uint8_t u8Y, char* cString);
-static void      GLCD_voSendChar5x7(uint8_t u8X, uint8_t u8Y, char Character);
-static void      GLCD_voSendChar3x5(uint8_t u8X, uint8_t u8Y, char Character);
-static void      GLCD_voSendChar7x9(uint16_t u16X, uint16_t u16Y, char Character);
+static void      GLCD_voSendChar5x7(uint8_t u8X, uint8_t u8Y, char i8Character);
+static void      GLCD_voSendChar3x5(uint8_t u8X, uint8_t u8Y, char i8Character);
+static void      GLCD_voSendChar7x9(uint16_t u16X, uint16_t u16Y, char i8Character);
+static void      GLCD_voDelay_us(uint16_t u16Delay_us);
+static void      GLCD_voSetGraphicMode(tenGraphicMode enGraphicMode);
 
 /* Private functions definition   -------------------------------------------------------*/
-static void GLCD_TIM1_Init(void)
+static tenStatus GLCD_TIM2_Init(void)
 {
     TIM_ClockConfigTypeDef  sClockSourceConfig = {0};
     TIM_MasterConfigTypeDef sMasterConfig      = {0};
-    htim1.Instance                             = TIM1;
-    htim1.Init.Prescaler                       = 80 - 1;
-    htim1.Init.CounterMode                     = TIM_COUNTERMODE_UP;
-    htim1.Init.Period                          = 0xffff - 1;
-    htim1.Init.ClockDivision                   = TIM_CLOCKDIVISION_DIV1;
-    htim1.Init.RepetitionCounter               = 0;
-    htim1.Init.AutoReloadPreload               = TIM_AUTORELOAD_PRELOAD_DISABLE;
-    if (HAL_TIM_Base_Init(&htim1) != HAL_OK)
+    htim2.Instance                             = TIM2;
+    htim2.Init.Prescaler                       = 80 - 1;
+    htim2.Init.CounterMode                     = TIM_COUNTERMODE_UP;
+    htim2.Init.Period                          = 0xffff - 1;
+    htim2.Init.ClockDivision                   = TIM_CLOCKDIVISION_DIV1;
+    htim2.Init.RepetitionCounter               = 0;
+    htim2.Init.AutoReloadPreload               = TIM_AUTORELOAD_PRELOAD_DISABLE;
+    if (HAL_TIM_Base_Init(&htim2) != HAL_OK)
     {
-        /* Do nothing */
+        return eFAIL;
     }
     sClockSourceConfig.ClockSource = TIM_CLOCKSOURCE_INTERNAL;
-    if (HAL_TIM_ConfigClockSource(&htim1, &sClockSourceConfig) != HAL_OK)
+    if (HAL_TIM_ConfigClockSource(&htim2, &sClockSourceConfig) != HAL_OK)
     {
-        /* Do nothing */
+        return eFAIL;
     }
     sMasterConfig.MasterOutputTrigger = TIM_TRGO_RESET;
     sMasterConfig.MasterSlaveMode     = TIM_MASTERSLAVEMODE_DISABLE;
-    if (HAL_TIMEx_MasterConfigSynchronization(&htim1, &sMasterConfig) != HAL_OK)
+    if (HAL_TIMEx_MasterConfigSynchronization(&htim2, &sMasterConfig) != HAL_OK)
     {
-        /* Do nothing */
+        return eFAIL;
     }
-}
-
-static void GLCD_Delay_init(void)
-{
-    HAL_TIM_Base_Start(&htim1);
+    return eSUCCESS;
 }
 
 static tenStatus GLCD_enInitIO(void)
@@ -182,7 +182,7 @@ static void GLCD_voSendCmd(uint8_t u8Cmd)
     GLCD_voSendByteSpi((u8Cmd << 4) & 0xf0);
 
     /* Delay 50us */
-    GLCD_Delay_us(50);
+    GLCD_voDelay_us(50);
 
     /* Pull the CS low */
     HAL_GPIO_WritePin(CS_PORT, CS_PIN, GPIO_PIN_RESET);
@@ -201,98 +201,33 @@ static void GLCD_voSendData(uint8_t u8Data)
 
     /* Send the lower nibble */
     GLCD_voSendByteSpi((u8Data << 4) & 0xf0);
-    GLCD_Delay_us(50);
+
+    GLCD_voDelay_us(50);
+
     HAL_GPIO_WritePin(CS_PORT, CS_PIN, GPIO_PIN_RESET);
 }
 
-/* Export functions definition   --------------------------------------------------------*/
-void GLCD_voDisplayString(tenTextSize enSize, uint8_t u8X, uint8_t u8Y, char* cString)
-{
-    switch (enSize)
-    {
-        case eSMALL:
-            GLCD_voSendString3x5(u8X, u8Y, cString);
-            break;
-
-        case eMEDIUM:
-            GLCD_voSendString5x7(u8X, u8Y, cString);
-            break;
-
-        case eLARGE:
-            GLCD_voSendString7x9(u8X, u8Y, cString);
-            break;
-    }
-}
-
-void GLCD_Delay_us(uint16_t u16Delay)
+/* Delay with microseconds */
+static void GLCD_voDelay_us(uint16_t u16Delay_us)
 {
     /* Reset the counter */
-    __HAL_TIM_SET_COUNTER(&htim1, 0);
-    while ((__HAL_TIM_GET_COUNTER(&htim1)) < u16Delay)
+    __HAL_TIM_SET_COUNTER(&htim2, 0);
+    while ((__HAL_TIM_GET_COUNTER(&htim2)) < u16Delay_us)
     {
         /* Wait for the delay to complete */
         ;
     }
 }
 
-tenStatus GLCD_enInit(void)
+static void GLCD_voSendChar5x7(uint8_t u8X, uint8_t u8Y, char i8Character)
 {
-    GLCD_Delay_init();
-    GLCD_TIM1_Init();
-
-    /* Init IO interface */
-    if (GLCD_enInitIO() != eSUCCESS)
+    uint8_t u8Char;
+    for (uint8_t u8Idx = 0; u8Idx < 5; u8Idx++)
     {
-        return eFAIL;
-    }
-
-    /* Set RESET = 0 then RESET = 1 */
-    HAL_GPIO_WritePin(RST_PORT, RST_PIN, GPIO_PIN_RESET);
-    osDelay(1);
-    HAL_GPIO_WritePin(RST_PORT, RST_PIN, GPIO_PIN_SET);
-    osDelay(1);
-
-    /* 8bit mode */
-    GLCD_voSendCmd(0x30);
-    GLCD_Delay_us(110);
-
-    GLCD_voSendCmd(0x30);
-    GLCD_Delay_us(40);
-
-    /* D = 0, C = 0, B = 0 */
-    GLCD_voSendCmd(0x08);
-    GLCD_Delay_us(110);
-
-    /* Clear screen */
-    GLCD_voSendCmd(0x01);
-    osDelay(12);
-
-    /* Cursor increment right no shift */
-    GLCD_voSendCmd(0x06);
-    osDelay(1);
-
-    /* D=1, C=0, B=0 */
-    GLCD_voSendCmd(0x0C);
-    osDelay(1);
-
-    /* Return to home */
-    GLCD_voSendCmd(0x02);
-    osDelay(1);
-
-    return eSUCCESS;
-}
-
-static void GLCD_voSendChar5x7(uint8_t u8X, uint8_t u8Y, char Character)
-{
-    uint8_t u8Idx;
-    uint8_t u8Idy;
-    uint8_t u8Arr;
-    for (u8Idx = 0; u8Idx < 5; u8Idx++)
-    {
-        u8Arr = (uint8_t)u8Font5x7[Character - 32][u8Idx];
-        for (u8Idy = 0; u8Idy < 8; u8Idy++)
+        u8Char = (uint8_t)u8Font5x7[i8Character - 32][u8Idx];
+        for (uint8_t u8Idy = 0; u8Idy < 8; u8Idy++)
         {
-            if (u8Arr & (1 << (7 - u8Idy)))
+            if (u8Char & (1 << (7 - u8Idy)))
             {
                 GLCD_voSetPixel(u8X + u8Idx, u8Y + 8 - u8Idy);
             }
@@ -300,34 +235,30 @@ static void GLCD_voSendChar5x7(uint8_t u8X, uint8_t u8Y, char Character)
     }
 }
 
-static void GLCD_voSendChar3x5(uint8_t u8X, uint8_t u8Y, char Character)
+static void GLCD_voSendChar3x5(uint8_t u8X, uint8_t u8Y, char i8Character)
 {
-    uint8_t u8Idx;
-    uint8_t u8Idy;
-    uint8_t u8Arr;
-    for (u8Idy = 0; u8Idy < 5; u8Idy++)
+    uint8_t u8Char;
+    for (uint8_t u8Idy = 0; u8Idy < 5; u8Idy++)
     {
-        u8Arr = u8Font3x5[Character - '/'][u8Idy];
-        for (u8Idx = 0; u8Idx < 3; u8Idx++)
+        u8Char = u8Font3x5[i8Character - '/'][u8Idy];
+        for (uint8_t u8Idx = 0; u8Idx < 3; u8Idx++)
         {
-            if (u8Arr & (0x01 << u8Idx))
+            if (u8Char & (0x01 << u8Idx))
             {
                 GLCD_voSetPixel(u8X + u8Idx, u8Y + u8Idy);
             }
         }
     }
 }
-static void GLCD_voSendChar7x9(uint16_t u16X, uint16_t u16Y, char Character)
+static void GLCD_voSendChar7x9(uint16_t u16X, uint16_t u16Y, char i8Character)
 {
-    uint8_t u8Idx;
-    uint8_t u8Idy;
-    uint8_t u8Arr;
-    for (u8Idy = 0; u8Idy < 9; u8Idy++)
+    uint8_t u8Char;
+    for (uint8_t u8Idy = 0; u8Idy < 9; u8Idy++)
     {
-        u8Arr = u8Font7x9[Character - '0'][u8Idy];
-        for (u8Idx = 0; u8Idx < 7; u8Idx++)
+        u8Char = u8Font7x9[i8Character - '0'][u8Idy];
+        for (uint8_t u8Idx = 0; u8Idx < 7; u8Idx++)
         {
-            if (u8Arr & (0x01 << u8Idx))
+            if (u8Char & (0x01 << u8Idx))
             {
                 GLCD_voSetPixel(u16X + u8Idx, u16Y + u8Idy);
             }
@@ -341,7 +272,7 @@ static void GLCD_voSendString5x7(uint8_t u8X, uint8_t u8Y, char* cString)
     {
         GLCD_voSendChar5x7(u8X, u8Y, *cString);
         cString++;
-        u8X = u8X + 6;
+        u8X += 6;
     }
 }
 
@@ -351,7 +282,7 @@ static void GLCD_voSendString3x5(uint8_t u8X, uint8_t u8Y, char* cString)
     {
         GLCD_voSendChar3x5(u8X, u8Y, *cString);
         cString++;
-        u8X = u8Y + 4;
+        u8X += 4;
     }
 }
 
@@ -361,11 +292,11 @@ static void GLCD_voSendString7x9(uint8_t u8X, uint8_t u8Y, char* cString)
     {
         GLCD_voSendChar7x9(u8X, u8Y, *cString);
         cString++;
-        u8X = u8X + 10;
+        u8X += 10;
     }
 }
 
-void GLCD_voSetGraphicMode(tenGraphicMode enGraphicMode)
+static void GLCD_voSetGraphicMode(tenGraphicMode enGraphicMode)
 {
     /* 8bit mode */
     GLCD_voSendCmd(0x30);
@@ -390,6 +321,76 @@ void GLCD_voSetGraphicMode(tenGraphicMode enGraphicMode)
         /* Update the variable */
         enGraphicCheck = eDISABLE;
     }
+}
+
+/* Export functions definition   --------------------------------------------------------*/
+void GLCD_voDisplayString(tenTextSize enSize, uint8_t u8X, uint8_t u8Y, char* cString)
+{
+    switch (enSize)
+    {
+        case eSMALL:
+            GLCD_voSendString3x5(u8X, u8Y, cString);
+            break;
+
+        case eMEDIUM:
+            GLCD_voSendString5x7(u8X, u8Y, cString);
+            break;
+
+        default:
+            GLCD_voSendString7x9(u8X, u8Y, cString);
+            break;
+    }
+}
+
+tenStatus GLCD_enInit(void)
+{
+    /* Delay init */
+    HAL_TIM_Base_Start(&htim2);
+    GLCD_TIM2_Init();
+
+    /* Turn on Graphic mode */
+    // GLCD_voSetGraphicMode(eENABLE);
+
+    /* Init IO interface */
+    if (GLCD_enInitIO() != eSUCCESS)
+    {
+        return eFAIL;
+    }
+
+    /* Set RESET = 0 then RESET = 1 */
+    HAL_GPIO_WritePin(RST_PORT, RST_PIN, GPIO_PIN_RESET);
+    osDelay(1);
+    HAL_GPIO_WritePin(RST_PORT, RST_PIN, GPIO_PIN_SET);
+    osDelay(1);
+
+    /* 8bit mode */
+    GLCD_voSendCmd(0x30);
+    GLCD_voDelay_us(110);
+
+    GLCD_voSendCmd(0x30);
+    GLCD_voDelay_us(40);
+
+    /* D = 0, C = 0, B = 0 */
+    GLCD_voSendCmd(0x08);
+    GLCD_voDelay_us(110);
+
+    /* Clear screen */
+    GLCD_voSendCmd(0x01);
+    osDelay(12);
+
+    /* Cursor increment right no shift */
+    GLCD_voSendCmd(0x06);
+    osDelay(1);
+
+    /* D=1, C=0, B=0 */
+    GLCD_voSendCmd(0x0C);
+    osDelay(1);
+
+    /* Return to home */
+    GLCD_voSendCmd(0x02);
+    osDelay(1);
+
+    return eSUCCESS;
 }
 
 void GLCD_voDrawBitMap(const uint8_t* cu8Graphic)
@@ -471,22 +472,22 @@ void GLCD_voClearScreen(void)
     }
 }
 
-/* Parameter: Row, Column, Array, Weight, High */
-void GLCD_voDisplayImage(uint8_t u8X, uint8_t u8Y, uint8_t* u8P, uint8_t u8W, uint8_t u8H)
+/* Parameter: Row, Column, Array, Width, High */
+void GLCD_voDisplayImage(uint8_t u8X, uint8_t u8Y, uint8_t* u8Image, uint8_t u8Width, uint8_t u8Height)
 {
-    uint32_t i = 0;
-    uint8_t  j = 0;
-    for (i = 0; i < (u8W * u8H) / 8; i++)
+    /* Find byte per line */
+    uint8_t u8Byte = u8Width / 8;
+    for (uint32_t i = 0; i < (u8Width * u8Height) / NUM_BIT_OF_BYTE; i++)
     {
-        for (j = 0; j < 8; j++)
+        for (uint8_t j = 0; j < NUM_BIT_OF_BYTE; j++)
         {
             /* Read bit from array byte */
-            if (*u8P & (1 << (7 - j)))
+            if (*u8Image & (1 << (7 - j)))
             {
-                GLCD_voSetPixel((u8X + (i % (u8W / 8)) * 8 + j), (u8Y + i / (u8W / 8)));
+                GLCD_voSetPixel((u8X + (i % u8Byte) * 8 + j), (u8Y + i / u8Byte));
             }
         }
-        u8P++;
+        u8Image++;
     }
     GLCD_voUpdate();
 }
@@ -500,7 +501,10 @@ void GLCD_voSetPixel(uint8_t u8X, uint8_t u8Y)
 
     if (u8Y < NUM_OF_ROWS && u8X < NUM_OF_COLUMNS)
     {
+        /* Identify the pixel */
         uint8_t* p = su8Image + ((u8Y * (NUM_OF_COLUMNS / NUM_BIT_OF_BYTE)) + (u8X / NUM_BIT_OF_BYTE));
+
+        /* Set the value for pixel */
         *p |= 0x80u >> (u8X % NUM_BIT_OF_BYTE);
 
         /* Change the dirty rectangle to account for a pixel being dirty (we assume it was changed) */

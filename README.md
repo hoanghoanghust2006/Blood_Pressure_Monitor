@@ -69,5 +69,6 @@ make -j12
 
 ## Build unit test
 make clean
+make -j12 test=-DTEST_BUTTON
 make -j12 test=-DTEST_GLCD
 ```

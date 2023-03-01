@@ -1,8 +1,8 @@
 /*
- * Title : test_template.h
+ * Title : test_glcd.h
  * Copyright : HCL
- * Author : Nam Ngo
- * Creation Date : 31/08/2022
+ * Author : hoang.thong
+ * Creation Date : 07/02/2023
  * Requirements : < Which other header files needs be included to include this header file. >
  * Description : < Briefly describe the purpose of the file. >
  * Limitations : < Any limitations. >

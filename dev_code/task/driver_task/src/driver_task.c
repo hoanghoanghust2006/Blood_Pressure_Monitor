@@ -39,6 +39,8 @@ static void DRIV_voTask(void *pvoArgument);
 static void DRIV_voTask(void *pvoArgument)
 {
     LED_voInit();
+    RTC_enInit();
+    BTN_enInit();
 
     for (;;)
     {

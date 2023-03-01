@@ -1,8 +1,8 @@
 /*
- * Title : < glcd.h >
+ * Title : glcd.h
  * Copyright : HCL
  * Author : < hoang.thong >
- * Creation Date : < Date in 14/02/2023 format >
+ * Creation Date : 14/02/2023
  * ------- ---------- --------
  */
 
@@ -33,9 +33,11 @@ extern "C"
 
     /* Export Function Declarations -----------------------------------------------------------*/
     tenStatus GLCD_enInit(void);
-    void GLCD_voSetGraphicMode(tenGraphicMode enGraphicMode);
-    void      GLCD_voDisplayImage(uint8_t u8X, uint8_t u8Y, uint8_t* u8P, uint8_t u8W, uint8_t u8H);
-    void      GLCD_voDisplayString(tenTextSize enSize, uint8_t u8X, uint8_t u8Y, char* cString);
+
+    /* Display customize */
+    void GLCD_voDisplayImage(uint8_t u8X, uint8_t u8Y, uint8_t* u8Image, uint8_t u8Width, uint8_t u8Height);
+    void GLCD_voDisplayString(tenTextSize enSize, uint8_t u8X, uint8_t u8Y, char* cString);
+
     /* Clear screen in any mode */
     void GLCD_voClearScreen(void);
     void GLCD_voUpdate(void);
@@ -67,7 +69,6 @@ extern "C"
 
     /* Draw Filled Traingle with coordimates (x1, y1), (x2, y2), (x3, y3) */
     void GLCD_voDrawFilledTriangle(uint16_t u16X1, uint16_t u16Y1, uint16_t u16X2, uint16_t u16Y2, uint16_t u16X3, uint16_t u16Y3);
-    void GLCD_Delay_us(uint16_t u16Delay);
 
 #ifdef __cplusplus
 }

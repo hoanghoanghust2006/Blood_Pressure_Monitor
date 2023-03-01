@@ -19,8 +19,42 @@
 #include "stm32l4xx_hal.h"
 /* Private define constants -------------------------------------------------------------*/
 #define GLCD_TASK_DELAY_TIME_MS 5
-uint8_t acu8BitMap128x64[] = {
 
+/* Private macros -----------------------------------------------------------------------*/
+
+/* Private type definitions  ------------------------------------------------------------*/
+
+/* Private file-local global variables   ------------------------------------------------*/
+osThreadId_t         GLCD_pvoTaskHandle;
+const osThreadAttr_t stGlcdTask = {
+    .name       = "GlcdlateTask",
+    .stack_size = 1024 * 4,
+    .priority   = (osPriority_t)osPriorityLow,
+};
+
+void GLCD_voSendData(uint8_t u8Data);
+
+/* Private function prototypes declarations   -------------------------------------------*/
+static void GLCD_voTask(void *pvoArgument);
+
+/* Private functions definition   -------------------------------------------------------*/
+static void GLCD_voTask(void *pvoArgument)
+{
+    GLCD_enInit();
+    GLCD_voClearScreen();
+    GLCD_voSetPixel(5, 5);
+    GLCD_voUpdate();
+    for (;;)
+    {
+    }
+}
+/* Export functions definition   --------------------------------------------------------*/
+void GLCD_voTaskTestInit(void)
+{
+    GLCD_pvoTaskHandle = osThreadNew(GLCD_voTask, NULL, &stGlcdTask);
+}
+
+uint8_t acu8BitMap128x64[] = {
     0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0x00, 0x00, 0x1f, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff,
     0xff, 0xff, 0xff, 0xff, 0xff, 0xf8, 0x00, 0x00, 0x00, 0x00, 0x1f, 0xff, 0xff, 0xff, 0xff, 0xff,
     0xff, 0xff, 0xff, 0xff, 0xfe, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x7f, 0xff, 0xff, 0xff, 0xff,
@@ -122,7 +156,6 @@ uint8_t acu8Logo64x64[] = {
     0xff, 0xff, 0xfc, 0x00, 0x00, 0x3f, 0xff, 0xff, 0xff, 0xff, 0xff, 0xc0, 0x03, 0xff, 0xff, 0xff};
 
 uint8_t acu8Logo32x32[] = {
-
     0xff, 0xf0, 0x0f, 0xff, 0xff, 0x80, 0x01, 0xff, 0xfe, 0x0f, 0xf0, 0x7f, 0xfc, 0x7f, 0xfe, 0x3f,
     0xf8, 0xff, 0xff, 0x1f, 0xf1, 0xff, 0xff, 0x8f, 0xe2, 0x1f, 0xf8, 0x47, 0xc6, 0x00, 0x00, 0x63,
     0xce, 0x60, 0x06, 0x73, 0x8e, 0x7f, 0xfe, 0x71, 0x9e, 0x7f, 0xfe, 0x79, 0x9e, 0x7f, 0xfe, 0x79,
@@ -149,46 +182,3 @@ uint8_t acu8Logo64x32[] = {
     0xff, 0x07, 0x80, 0x3f, 0xfc, 0x7f, 0xe0, 0xff, 0xff, 0xc0, 0xfe, 0x3f, 0xfc, 0x7f, 0x03, 0xff,
     0xff, 0xf0, 0x1e, 0x3f, 0xfc, 0x78, 0x0f, 0xff, 0xff, 0xfe, 0x00, 0x3f, 0xfc, 0x00, 0x7f, 0xff,
     0xff, 0xff, 0xc0, 0x00, 0x00, 0x03, 0xff, 0xff, 0xff, 0xff, 0xff, 0x00, 0x00, 0xff, 0xff, 0xff};
-
-/* Private macros -----------------------------------------------------------------------*/
-
-/* Private type definitions  ------------------------------------------------------------*/
-
-/* Private file-local global variables   ------------------------------------------------*/
-osThreadId_t         GLCD_pvoTaskHandle;
-const osThreadAttr_t stGlcdTask = {
-    .name       = "GlcdlateTask",
-    .stack_size = 1024 * 4,
-    .priority   = (osPriority_t)osPriorityLow,
-};
-
-void GLCD_voSendData(uint8_t u8Data);
-
-/* Private function prototypes declarations   -------------------------------------------*/
-static void GLCD_voTask(void *pvoArgument);
-
-extern uint8_t su8Image[];
-
-/* Private functions definition   -------------------------------------------------------*/
-static void GLCD_voTask(void *pvoArgument)
-{
-    GLCD_enInit();
-    GLCD_voDisplayString(eLARGE, 0, 0, "12345");
-    osDelay(2000);
-    GLCD_voClearScreen();
-    GLCD_voSetGraphicMode(eENABLE);
-
-    GLCD_voClearScreen();
-    GLCD_voDisplayImage(30, 20, acu8Logo64x32, 64, 32);
-    GLCD_voUpdate();
-
-    for (;;)
-    {
-        GLCD_Delay_us(100);
-    }
-}
-/* Export functions definition   --------------------------------------------------------*/
-void GLCD_voTaskTestInit(void)
-{
-    GLCD_pvoTaskHandle = osThreadNew(GLCD_voTask, NULL, &stGlcdTask);
-}
