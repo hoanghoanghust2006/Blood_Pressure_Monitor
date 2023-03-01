@@ -127,36 +127,36 @@ static void MENU_voAddAllLinks(tstMenu *apstAllMenuLink[][MAX_MENU_LIST + 1])
     }
 }
 
-/*Display all menu options with Tree view*/
+/* Display all menu options with Tree view*/
 static void MENU_voDisplayTree(void)
 {
     tstMenu *pstCurrentMenu     = &stMenu0;
     uint8_t  u8CurrentMenuLevel = 0;
 
-    /*A poitner scans through all options. If it equals to NULL, that means completed scanning, out loop*/
+    /* A poitner scans through all options. If it equals to NULL, that means completed scanning, out loop*/
     while (pstCurrentMenu != NULL)
     {
         MENU_voPrintTabs(u8CurrentMenuLevel);
         printf("%s\n\r", pstCurrentMenu->cName);
 
-        /*Check if current option has any child options.If yes, goto first child option. Else, goto next option that has the same level*/
+        /* Check if current option has any child options. If yes, goto first child option. Else, goto next option that has the same level*/
         if (pstCurrentMenu->apstMenuList[0] == NULL)
         {
             pstCurrentMenu = pstCurrentMenu->pstParent;
 
-            /*Recursive loop from a child option goback to the option that not be the last option in its parent list*/
+            /* Recursive loop from a child option goback to the option that not be the last option in its parent list*/
             while (pstCurrentMenu->u8CurrentIndex >= pstCurrentMenu->u8Size - 1)
             {
                 u8CurrentMenuLevel--;
                 pstCurrentMenu = pstCurrentMenu->pstParent;
             }
 
-            /*Goto next option that have the same level*/
+            /* Goto next option that have the same level*/
             pstCurrentMenu->u8CurrentIndex++;
             pstCurrentMenu = pstCurrentMenu->apstMenuList[pstCurrentMenu->u8CurrentIndex];
         }
 
-        /*Goto first child option*/
+        /* Goto first child option*/
         else
         {
             u8CurrentMenuLevel++;
