@@ -7,6 +7,8 @@ dev_code/component/trace/src/trace.c \
 dev_code/component/rtc/src/rtc.c \
 dev_code/unit_test/test_rtc/src/test_rtc.c \
 dev_code/component/button/src/button.c \
+dev_code/component/menu/src/menu.c \
+dev_code/unit_test/test_menu/src/test_menu.c \
 dev_code/unit_test/test_button/src/test_button.c
 
 DEV_CODE_INCLUDES = \
@@ -19,4 +21,6 @@ DEV_CODE_INCLUDES = \
 -Idev_code/component/common/inc \
 -Idev_code/unit_test/test_rtc/inc \
 -Idev_code/component/button/inc \
+-Idev_code/component/menu/inc \
+-Idev_code/unit_test/test_menu/inc \
 -Idev_code/unit_test/test_button/inc
