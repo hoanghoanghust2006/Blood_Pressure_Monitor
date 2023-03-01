@@ -84,7 +84,7 @@ static void MENU_voCreateAll(tstPreMenu *pastPreMenu);
 static void MENU_voAddLinks(tstMenu **pastMenu);
 static void MENU_voAddAllLinks(tstMenu *apstAllMenuLink[][MAX_MENU_LIST + 1]);
 static void MENU_voPrintTabs(uint8_t u8CurrentMenuLevel);
-static void MENU_voDisplayTree();
+static void MENU_voDisplayTree(void);
 
 /* Private functions definition   -------------------------------------------------------*/
 static void MENU_voCreateAll(tstPreMenu *pastPreMenu)
@@ -127,7 +127,8 @@ static void MENU_voAddAllLinks(tstMenu *apstAllMenuLink[][MAX_MENU_LIST + 1])
     }
 }
 
-static void MENU_voDisplayTree()
+/*Display all menu options with Tree view*/
+static void MENU_voDisplayTree(void)
 {
     tstMenu *pstCurrentMenu     = &stMenu0;
     uint8_t  u8CurrentMenuLevel = 0;
