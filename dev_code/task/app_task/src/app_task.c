@@ -153,6 +153,7 @@ static void APP_voInProcessStateHandler(void)
             DPL_enDisplayResults(&stResult);
             u16InProcessCount = 0;
             bRefreshAll       = true;
+            u16InProcessCount = 0;
             enAppState  = eFINISH;
         }
         else if (enResponse == eFAILED)
@@ -165,6 +166,7 @@ static void APP_voInProcessStateHandler(void)
         else if (enResponse == eBUSY)
         {
             bRefreshAll = false;
+
             /* Event when button select is pressed */
             if (BTN_voGetState(eBUTTON_SELECT) == ePRESSED)
             {
