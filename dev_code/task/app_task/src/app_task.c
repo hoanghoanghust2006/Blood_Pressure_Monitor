@@ -144,7 +144,16 @@ static void APP_voInProcessStateHandler(void)
             stResult.u8Diastolic = stValueMeasurement.u8Diastolic;
             stResult.u8HeartBeat = stValueMeasurement.u8HeartBeat;
 
-            tenStatus enDateTime    = RTC_enGetDateTime(&(stNewRecord.stRecordTime));
+            tenStatus enResultDateTime = RTC_enGetDateTime(&(stNewRecord.stRecordTime));
+            if (enResultDateTime == eFAIL)
+            {
+                // TO DO:
+            }
+            else
+            {
+                /* Do nothing */
+            }
+
             stNewRecord.u8Sys       = stResult.u8Systolic;
             stNewRecord.u8Dia       = stResult.u8Diastolic;
             stNewRecord.u8HeartRate = stResult.u8HeartBeat;
@@ -153,20 +162,17 @@ static void APP_voInProcessStateHandler(void)
             DPL_enDisplayResults(&stResult);
             u16InProcessCount = 0;
             bRefreshAll       = true;
-            u16InProcessCount = 0;
             enAppState  = eFINISH;
         }
         else if (enResponse == eFAILED)
         {
             trace("Error\r\n");
             u16InProcessCount = 0;
-            bRefreshAll       = false;
+            bRefreshAll       = true;
             enAppState = eFINISH;
         }
         else if (enResponse == eBUSY)
         {
-            bRefreshAll = false;
-
             /* Event when button select is pressed */
             if (BTN_voGetState(eBUTTON_SELECT) == ePRESSED)
             {
@@ -190,6 +196,15 @@ static void APP_voInProcessStateHandler(void)
                 /* Do nothing*/
             }
 
+            if (stValueMeasurement.u8Pressure == 150)
+            {
+                bRefreshAll = true;
+            }
+            else
+            {
+                bRefreshAll = false;
+            }
+
             /* Display process measurement */
             if (stValueMeasurement.u8Pressure % 10 == 0)
             {
@@ -207,7 +222,7 @@ static void APP_voInProcessStateHandler(void)
         printf("\033[3J");
         trace("Process timeout\r\n");
         u16InProcessCount = 0;
-        bRefreshAll       = false;
+        bRefreshAll       = true;
         enAppState        = eFINISH;
     }
 }
