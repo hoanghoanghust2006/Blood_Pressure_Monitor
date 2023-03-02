@@ -16,6 +16,7 @@
 #include "display.h"
 #include "blood_pressure.h"
 #include "storage.h"
+#include "rtc.h"
 
 /* Private define constants -------------------------------------------------------------*/
 #define APP_TASK_DELAY_TIME_MS 10
@@ -67,15 +68,10 @@ tstAppStateHandler stAppStateHandler[] = {
 
 static tenAppState enAppState = eIDLE;
 
-tstBloodPressureResult stResult = {eSUCCESS, 100, 100, 100};
-
 static tstValueMeasurement stValueMeasurement = {.u8Pressure  = 0,
                                                  .u8Systolic  = 0,
                                                  .u8Diastolic = 0,
                                                  .u8HeartBeat = 88};
-
-static tenPressureState enPressureState = eINFLATE;
-static bool             bRefreshAll     = false;
 
 /* Private functions definition   -------------------------------------------------------*/
 static void APP_voTask(void *pvoArgument)
@@ -110,7 +106,6 @@ static void APP_voIdleStateHandler(void)
 {
     printf("\033\143");
     printf("\033[3J");
-    bRefreshAll       = false;
 
     /* Event when button select is pressed */
     if (BTN_voGetState(eBUTTON_SELECT) == ePRESSED)
@@ -128,7 +123,11 @@ static void APP_voIdleStateHandler(void)
 
 static void APP_voInProcessStateHandler(void)
 {
-    static uint16_t u16InProcessCount = 0;
+    static uint16_t         u16InProcessCount = 0;
+    static tenPressureState enPressureState   = eINFLATE;
+    static bool             bRefreshAll       = false;
+    tstStorage              stNewRecord;
+    tstBloodPressureResult  stResult;
 
     u16InProcessCount++;
 
@@ -140,32 +139,38 @@ static void APP_voInProcessStateHandler(void)
         /* Check processing status */
         if (enResponse == eSUCCESSFUL)
         {
-            tstStorage stNewRecord;
-            stValueMeasurement.u8Pressure = 0;
+            stResult.enStatus    = eSUCCESS;
+            stResult.u8Systolic  = stValueMeasurement.u8Systolic;
+            stResult.u8Diastolic = stValueMeasurement.u8Diastolic;
+            stResult.u8HeartBeat = stValueMeasurement.u8HeartBeat;
 
+            tenStatus enDateTime    = RTC_enGetDateTime(&(stNewRecord.stRecordTime));
             stNewRecord.u8Sys       = stResult.u8Systolic;
             stNewRecord.u8Dia       = stResult.u8Diastolic;
             stNewRecord.u8HeartRate = stResult.u8HeartBeat;
             STO_voSaveRecord(stNewRecord);
 
             DPL_enDisplayResults(&stResult);
-            bRefreshAll = true;
             u16InProcessCount = 0;
+            bRefreshAll       = true;
             enAppState  = eFINISH;
         }
         else if (enResponse == eFAILED)
         {
             trace("Error\r\n");
             u16InProcessCount = 0;
+            bRefreshAll       = false;
             enAppState = eFINISH;
         }
         else if (enResponse == eBUSY)
         {
+            bRefreshAll = false;
             /* Event when button select is pressed */
             if (BTN_voGetState(eBUTTON_SELECT) == ePRESSED)
             {
                 PRE_voRequestCancelProcess();
                 u16InProcessCount = 0;
+                bRefreshAll       = true;
                 enAppState = eIDLE;
             }
 
@@ -184,7 +189,7 @@ static void APP_voInProcessStateHandler(void)
             }
 
             /* Display process measurement */
-            if (stValueMeasurement.u8Pressure % 10 == 0 && bRefreshAll == false)
+            if (stValueMeasurement.u8Pressure % 10 == 0)
             {
                 DPL_enDisplayProcessMeasurement(stValueMeasurement.u8Pressure, enPressureState, bRefreshAll);
             }
@@ -200,6 +205,7 @@ static void APP_voInProcessStateHandler(void)
         printf("\033[3J");
         trace("Process timeout\r\n");
         u16InProcessCount = 0;
+        bRefreshAll       = false;
         enAppState        = eFINISH;
     }
 }
@@ -207,7 +213,6 @@ static void APP_voInProcessStateHandler(void)
 static void APP_voFinishStateHandler(void)
 {
     static uint16_t u16DisplayCount = 0;
-    bRefreshAll                     = false;
 
     u16DisplayCount++;
 
