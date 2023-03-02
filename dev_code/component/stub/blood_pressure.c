@@ -1,6 +1,8 @@
 #include "blood_pressure.h"
 #include "trace.h"
 
+static uint32_t u32Count = 0;
+
 void PRE_voRequestStartProcess(void)
 {
     trace("Request to start blood pressure\r\n");
@@ -9,11 +11,11 @@ void PRE_voRequestStartProcess(void)
 void PRE_voRequestCancelProcess(void)
 {
     trace("Request to stop blood pressure\r\n");
+    u32Count = 0;
 }
 
 tenNotifyResponse PRE_enGetStatusProcess(tstValueMeasurement *stGetResult)
 {
-    static uint32_t   u32Count      = 0;
     uint8_t           u8SimPressure = 0;
     tenNotifyResponse enRespond     = eNOT_NOTI_RES;
 
@@ -31,6 +33,12 @@ tenNotifyResponse PRE_enGetStatusProcess(tstValueMeasurement *stGetResult)
     else
     {
         enRespond = eSUCCESSFUL;
+        u32Count  = 0;
+    }
+
+    if (stGetResult->u8HeartBeat == 0)
+    {
+        enRespond = eFAILED;
     }
 
     stGetResult->u8Pressure = u8SimPressure;

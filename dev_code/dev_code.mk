@@ -9,7 +9,10 @@ dev_code/unit_test/test_rtc/src/test_rtc.c \
 dev_code/component/button/src/button.c \
 dev_code/component/menu/src/menu.c \
 dev_code/unit_test/test_menu/src/test_menu.c \
-dev_code/unit_test/test_button/src/test_button.c
+dev_code/component/stub/display.c \
+dev_code/component/stub/blood_pressure.c \
+dev_code/unit_test/test_button/src/test_button.c \
+dev_code/component/stub/storage.c
 
 DEV_CODE_INCLUDES = \
 -Idev_code/entry/inc \
@@ -23,4 +26,7 @@ DEV_CODE_INCLUDES = \
 -Idev_code/component/button/inc \
 -Idev_code/component/menu/inc \
 -Idev_code/unit_test/test_menu/inc \
--Idev_code/unit_test/test_button/inc
+-Idev_code/component/display/inc \
+-Idev_code/component/blood_pressure/inc \
+-Idev_code/unit_test/test_button/inc \
+-Idev_code/component/storage/inc

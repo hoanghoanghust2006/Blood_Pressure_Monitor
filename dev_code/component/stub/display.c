@@ -14,7 +14,18 @@ tenStatus DPL_enDisplayProcessMeasurement(uint8_t          u8AirPressure,
 
 tenStatus DPL_enDisplayResults(const tstBloodPressureResult* stResult)
 {
-    // TODO: Do Trang
+    if (stResult->enStatus == eSUCCESS)
+    {
+        printf("\033\143");
+        printf("\033[3J");
+        trace("Systolic: %d\r\n", stResult->u8Systolic);
+        trace("HeartBeat: %d\r\n", stResult->u8HeartBeat);
+        trace("Diastolic: %d\r\n", stResult->u8Diastolic);
+    }
+    else
+    {
+        trace("Error\r\n");
+    }
 }
 
 tenStatus DPL_enDisplayMenu(const tstMenu* stMenu)
