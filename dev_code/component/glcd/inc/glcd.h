@@ -29,14 +29,30 @@ extern "C"
         eSMALL,
         eMEDIUM,
         eLARGE
-    } tenTextSize;
+    } tenSizeFont;
+
+    typedef enum
+    {
+        eVetical,
+        eHorizon
+    } tenPosition;
+
+    typedef struct
+    {
+        tenSizeFont enSize;
+        tenPosition enPosition;
+        uint8_t     u8Width;
+        uint8_t     u8Height;
+        uint8_t*    pu8Font;
+    } tstGlcdDislayFont;
 
     /* Export Function Declarations -----------------------------------------------------------*/
     tenStatus GLCD_enInit(void);
 
     /* Display customize */
     void GLCD_voDisplayImage(uint8_t u8X, uint8_t u8Y, uint8_t* u8Image, uint8_t u8Width, uint8_t u8Height);
-    void GLCD_voDisplayString(tenTextSize enSize, uint8_t u8X, uint8_t u8Y, char* cString);
+    void GLCD_voDisplayString(uint8_t u8X, uint8_t u8Y, char* cString, tstGlcdDislayFont enFont);
+    void GLCD_voClearImage(void);
 
     /* Clear screen in any mode */
     void GLCD_voClearScreen(void);

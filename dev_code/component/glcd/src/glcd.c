@@ -33,14 +33,41 @@
 #define HALF_OF_ROWS   32
 #define NUM_OF_COLUMNS 128
 
-#define ROWS_OF_FONT 5
+#define LAST_COL_OF_SMALL 3
+#define LAST_ROW_OF_SMALL 5
+
+#define LAST_COL_OF_MEDIUM 5
+#define LAST_ROW_OF_MEDIUM 7
+#define DEC_FIRST_MEDIUM   32
+
+#define LAST_COL_OF_LARGE 7
+#define LAST_ROW_OF_LARGE 9
+
+#define DISTANCE_PIXCEL_OF_SMALL  4
+#define DISTANCE_PIXCEL_OF_MEDIUM 6
+#define DISTANCE_PIXCEL_OF_LARGE  10
 
 #define NUM_BIT_OF_BYTE 8
+#define NUM_ZONE_OF_ROW 8
+
+#define EXTENDED_INSTRUCTION_ON 0x34
+#define GRAPHIC_MODE_ON         0x36
+#define DISPLAY_CONTROL_OFF     0x08
+#define SYNC_BIT                0xf8
+#define SYNC_4_BIT              0xf0
+#define DISPLAY_CONTROL_ON      0x0C
+#define ADDRESS_BASE            0x80
+#define ENTRY_MODE_SET          0x06
+#define LINE_BASE_DDRAM         0x88
+#define CLEAR_SCREEN            0x01
+#define CLEAR_VALUE             0x00
+#define END_INIT                0x02
+#define MODE_8_BIT              0x30
 
 /* Private macros -----------------------------------------------------------------------*/
 
 /* Private type definitions  ------------------------------------------------------------*/
-static TIM_HandleTypeDef htim2;
+TIM_HandleTypeDef htim2;
 
 /* Private file-local global variables   ------------------------------------------------*/
 static uint8_t        su8Image[(NUM_OF_COLUMNS * NUM_OF_ROWS) / NUM_BIT_OF_BYTE];
@@ -48,20 +75,61 @@ static tenGraphicMode enGraphicCheck = eDISABLE;
 
 /* Private function prototypes declarations   -------------------------------------------*/
 static tenStatus GLCD_enInitIO(void);
+static tenStatus GLCD_SystemClock_Config(void);
+
 static void      GLCD_voSendByteSpi(uint8_t u8byte);
 static void      GLCD_voSendCmd(uint8_t u8Cmd);
 static void      GLCD_voSendData(uint8_t u8Data);
-static void      GLCD_voDelay_init(void);
-static void      GLCD_voSendString5x7(uint8_t u8X, uint8_t u8Y, char* cString);
-static void      GLCD_voSendString3x5(uint8_t u8X, uint8_t u8Y, char* cString);
-static void      GLCD_voSendString7x9(uint8_t u8X, uint8_t u8Y, char* cString);
-static void      GLCD_voSendChar5x7(uint8_t u8X, uint8_t u8Y, char i8Character);
-static void      GLCD_voSendChar3x5(uint8_t u8X, uint8_t u8Y, char i8Character);
-static void      GLCD_voSendChar7x9(uint16_t u16X, uint16_t u16Y, char i8Character);
 static void      GLCD_voDelay_us(uint16_t u16Delay_us);
 static void      GLCD_voSetGraphicMode(tenGraphicMode enGraphicMode);
 
 /* Private functions definition   -------------------------------------------------------*/
+static tenStatus GLCD_SystemClock_Config(void)
+{
+    RCC_OscInitTypeDef RCC_OscInitStruct = {0};
+    RCC_ClkInitTypeDef RCC_ClkInitStruct = {0};
+
+    /** Configure the main internal regulator output voltage
+     */
+    if (HAL_PWREx_ControlVoltageScaling(PWR_REGULATOR_VOLTAGE_SCALE1) != HAL_OK)
+    {
+        return eFAIL;
+    }
+
+    /** Initializes the RCC Oscillators according to the specified parameters
+     * in the RCC_OscInitTypeDef structure.
+     */
+    RCC_OscInitStruct.OscillatorType      = RCC_OSCILLATORTYPE_MSI;
+    RCC_OscInitStruct.MSIState            = RCC_MSI_ON;
+    RCC_OscInitStruct.MSICalibrationValue = 0;
+    RCC_OscInitStruct.MSIClockRange       = RCC_MSIRANGE_6;
+    RCC_OscInitStruct.PLL.PLLState        = RCC_PLL_ON;
+    RCC_OscInitStruct.PLL.PLLSource       = RCC_PLLSOURCE_MSI;
+    RCC_OscInitStruct.PLL.PLLM            = 1;
+    RCC_OscInitStruct.PLL.PLLN            = 40;
+    RCC_OscInitStruct.PLL.PLLP            = RCC_PLLP_DIV2;
+    RCC_OscInitStruct.PLL.PLLQ            = RCC_PLLQ_DIV2;
+    RCC_OscInitStruct.PLL.PLLR            = RCC_PLLR_DIV2;
+    if (HAL_RCC_OscConfig(&RCC_OscInitStruct) != HAL_OK)
+    {
+        return eFAIL;
+    }
+
+    /** Initializes the CPU, AHB and APB buses clocks
+     */
+    RCC_ClkInitStruct.ClockType      = RCC_CLOCKTYPE_HCLK | RCC_CLOCKTYPE_SYSCLK | RCC_CLOCKTYPE_PCLK1 | RCC_CLOCKTYPE_PCLK2;
+    RCC_ClkInitStruct.SYSCLKSource   = RCC_SYSCLKSOURCE_PLLCLK;
+    RCC_ClkInitStruct.AHBCLKDivider  = RCC_SYSCLK_DIV1;
+    RCC_ClkInitStruct.APB1CLKDivider = RCC_HCLK_DIV1;
+    RCC_ClkInitStruct.APB2CLKDivider = RCC_HCLK_DIV1;
+
+    if (HAL_RCC_ClockConfig(&RCC_ClkInitStruct, FLASH_LATENCY_4) != HAL_OK)
+    {
+        return eFAIL;
+    }
+    return eSUCCESS;
+}
+
 static tenStatus GLCD_TIM2_Init(void)
 {
     TIM_ClockConfigTypeDef  sClockSourceConfig = {0};
@@ -71,7 +139,6 @@ static tenStatus GLCD_TIM2_Init(void)
     htim2.Init.CounterMode                     = TIM_COUNTERMODE_UP;
     htim2.Init.Period                          = 0xffff - 1;
     htim2.Init.ClockDivision                   = TIM_CLOCKDIVISION_DIV1;
-    htim2.Init.RepetitionCounter               = 0;
     htim2.Init.AutoReloadPreload               = TIM_AUTORELOAD_PRELOAD_DISABLE;
     if (HAL_TIM_Base_Init(&htim2) != HAL_OK)
     {
@@ -94,7 +161,6 @@ static tenStatus GLCD_TIM2_Init(void)
 static tenStatus GLCD_enInitIO(void)
 {
     GPIO_InitTypeDef GPIO_InitStruct = {0};
-
     /* GPIO Ports Clock Enable */
     __HAL_RCC_GPIOB_CLK_ENABLE();
     __HAL_RCC_GPIOA_CLK_ENABLE();
@@ -148,7 +214,7 @@ static void GLCD_voSendByteSpi(uint8_t u8Byte)
 {
     for (uint8_t i = 0; i < NUM_BIT_OF_BYTE; i++)
     {
-        if ((u8Byte << i) & 0x80)
+        if ((u8Byte << i) & ADDRESS_BASE)
         {
             /* SID = 1 or MOSI */
             HAL_GPIO_WritePin(SID_PORT, SID_PIN, GPIO_PIN_SET);
@@ -173,13 +239,13 @@ static void GLCD_voSendCmd(uint8_t u8Cmd)
     HAL_GPIO_WritePin(CS_PORT, CS_PIN, GPIO_PIN_SET);
 
     /* Send the SYNC + RS(0) */
-    GLCD_voSendByteSpi(0xf8 + (0 << 1));
+    GLCD_voSendByteSpi(SYNC_BIT + (0 << 1));
 
     /* Send the higher nibble first */
-    GLCD_voSendByteSpi(u8Cmd & 0xf0);
+    GLCD_voSendByteSpi(u8Cmd & SYNC_4_BIT);
 
     /* Send the lower nibble */
-    GLCD_voSendByteSpi((u8Cmd << 4) & 0xf0);
+    GLCD_voSendByteSpi((u8Cmd << 4) & SYNC_4_BIT);
 
     /* Delay 50us */
     GLCD_voDelay_us(50);
@@ -194,13 +260,13 @@ static void GLCD_voSendData(uint8_t u8Data)
     HAL_GPIO_WritePin(CS_PORT, CS_PIN, GPIO_PIN_SET);
 
     /* Send the SYNC + RS(1) */
-    GLCD_voSendByteSpi(0xf8 + (1 << 1));
+    GLCD_voSendByteSpi(SYNC_BIT + (1 << 1));
 
     /* Send the higher nibble first */
-    GLCD_voSendByteSpi(u8Data & 0xf0);
+    GLCD_voSendByteSpi(u8Data & SYNC_4_BIT);
 
     /* Send the lower nibble */
-    GLCD_voSendByteSpi((u8Data << 4) & 0xf0);
+    GLCD_voSendByteSpi((u8Data << 4) & SYNC_4_BIT);
 
     GLCD_voDelay_us(50);
 
@@ -219,103 +285,25 @@ static void GLCD_voDelay_us(uint16_t u16Delay_us)
     }
 }
 
-static void GLCD_voSendChar5x7(uint8_t u8X, uint8_t u8Y, char i8Character)
-{
-    uint8_t u8Char;
-    for (uint8_t u8Idx = 0; u8Idx < 5; u8Idx++)
-    {
-        u8Char = (uint8_t)u8Font5x7[i8Character - 32][u8Idx];
-        for (uint8_t u8Idy = 0; u8Idy < 8; u8Idy++)
-        {
-            if (u8Char & (1 << (7 - u8Idy)))
-            {
-                GLCD_voSetPixel(u8X + u8Idx, u8Y + 8 - u8Idy);
-            }
-        }
-    }
-}
-
-static void GLCD_voSendChar3x5(uint8_t u8X, uint8_t u8Y, char i8Character)
-{
-    uint8_t u8Char;
-    for (uint8_t u8Idy = 0; u8Idy < 5; u8Idy++)
-    {
-        u8Char = u8Font3x5[i8Character - '/'][u8Idy];
-        for (uint8_t u8Idx = 0; u8Idx < 3; u8Idx++)
-        {
-            if (u8Char & (0x01 << u8Idx))
-            {
-                GLCD_voSetPixel(u8X + u8Idx, u8Y + u8Idy);
-            }
-        }
-    }
-}
-static void GLCD_voSendChar7x9(uint16_t u16X, uint16_t u16Y, char i8Character)
-{
-    uint8_t u8Char;
-    for (uint8_t u8Idy = 0; u8Idy < 9; u8Idy++)
-    {
-        u8Char = u8Font7x9[i8Character - '0'][u8Idy];
-        for (uint8_t u8Idx = 0; u8Idx < 7; u8Idx++)
-        {
-            if (u8Char & (0x01 << u8Idx))
-            {
-                GLCD_voSetPixel(u16X + u8Idx, u16Y + u8Idy);
-            }
-        }
-    }
-}
-
-static void GLCD_voSendString5x7(uint8_t u8X, uint8_t u8Y, char* cString)
-{
-    while (*cString)
-    {
-        GLCD_voSendChar5x7(u8X, u8Y, *cString);
-        cString++;
-        u8X += 6;
-    }
-}
-
-static void GLCD_voSendString3x5(uint8_t u8X, uint8_t u8Y, char* cString)
-{
-    while (*cString)
-    {
-        GLCD_voSendChar3x5(u8X, u8Y, *cString);
-        cString++;
-        u8X += 4;
-    }
-}
-
-static void GLCD_voSendString7x9(uint8_t u8X, uint8_t u8Y, char* cString)
-{
-    while (*cString)
-    {
-        GLCD_voSendChar7x9(u8X, u8Y, *cString);
-        cString++;
-        u8X += 10;
-    }
-}
-
 static void GLCD_voSetGraphicMode(tenGraphicMode enGraphicMode)
 {
     /* 8bit mode */
-    GLCD_voSendCmd(0x30);
+    GLCD_voSendCmd(MODE_8_BIT);
     osDelay(1);
 
     if (enGraphicMode == eENABLE)
     {
         /* Switch to Extended instructions */
-        GLCD_voSendCmd(0x34);
+        GLCD_voSendCmd(EXTENDED_INSTRUCTION_ON);
         osDelay(1);
 
         /* Enable graphics */
-        GLCD_voSendCmd(0x36);
+        GLCD_voSendCmd(GRAPHIC_MODE_ON);
         osDelay(1);
 
         /* Update the variable */
         enGraphicCheck = eENABLE;
     }
-
     else
     {
         /* Update the variable */
@@ -324,32 +312,31 @@ static void GLCD_voSetGraphicMode(tenGraphicMode enGraphicMode)
 }
 
 /* Export functions definition   --------------------------------------------------------*/
-void GLCD_voDisplayString(tenTextSize enSize, uint8_t u8X, uint8_t u8Y, char* cString)
+void HAL_TIM_Base_MspInit(TIM_HandleTypeDef* tim_baseHandle)
 {
-    switch (enSize)
+    if (tim_baseHandle->Instance == TIM2)
     {
-        case eSMALL:
-            GLCD_voSendString3x5(u8X, u8Y, cString);
-            break;
+        /* TIM2 clock enable */
+        __HAL_RCC_TIM2_CLK_ENABLE();
+    }
+}
 
-        case eMEDIUM:
-            GLCD_voSendString5x7(u8X, u8Y, cString);
-            break;
-
-        default:
-            GLCD_voSendString7x9(u8X, u8Y, cString);
-            break;
+void HAL_TIM_Base_MspDeInit(TIM_HandleTypeDef* tim_baseHandle)
+{
+    if (tim_baseHandle->Instance == TIM2)
+    {
+        /* Peripheral clock disable */
+        __HAL_RCC_TIM2_CLK_DISABLE();
     }
 }
 
 tenStatus GLCD_enInit(void)
 {
-    /* Delay init */
-    HAL_TIM_Base_Start(&htim2);
-    GLCD_TIM2_Init();
+    GLCD_SystemClock_Config();
 
-    /* Turn on Graphic mode */
-    // GLCD_voSetGraphicMode(eENABLE);
+    /* Delay init */
+    GLCD_TIM2_Init();
+    HAL_TIM_Base_Start(&htim2);
 
     /* Init IO interface */
     if (GLCD_enInitIO() != eSUCCESS)
@@ -360,37 +347,81 @@ tenStatus GLCD_enInit(void)
     /* Set RESET = 0 then RESET = 1 */
     HAL_GPIO_WritePin(RST_PORT, RST_PIN, GPIO_PIN_RESET);
     osDelay(1);
+
     HAL_GPIO_WritePin(RST_PORT, RST_PIN, GPIO_PIN_SET);
     osDelay(1);
 
     /* 8bit mode */
-    GLCD_voSendCmd(0x30);
+    GLCD_voSendCmd(MODE_8_BIT);
     GLCD_voDelay_us(110);
 
-    GLCD_voSendCmd(0x30);
+    GLCD_voSendCmd(MODE_8_BIT);
     GLCD_voDelay_us(40);
 
     /* D = 0, C = 0, B = 0 */
-    GLCD_voSendCmd(0x08);
+    GLCD_voSendCmd(DISPLAY_CONTROL_OFF);
     GLCD_voDelay_us(110);
 
     /* Clear screen */
-    GLCD_voSendCmd(0x01);
+    GLCD_voSendCmd(CLEAR_SCREEN);
     osDelay(12);
 
     /* Cursor increment right no shift */
-    GLCD_voSendCmd(0x06);
+    GLCD_voSendCmd(ENTRY_MODE_SET);
     osDelay(1);
 
     /* D=1, C=0, B=0 */
-    GLCD_voSendCmd(0x0C);
+    GLCD_voSendCmd(DISPLAY_CONTROL_ON);
     osDelay(1);
 
     /* Return to home */
-    GLCD_voSendCmd(0x02);
+    GLCD_voSendCmd(END_INIT);
     osDelay(1);
 
+    /* Turn on Graphic mode */
+    GLCD_voSetGraphicMode(eENABLE);
+
     return eSUCCESS;
+}
+
+void GLCD_voDisplayString(uint8_t u8X, uint8_t u8Y, char* cString, tstGlcdDislayFont enFont)
+{
+    uint8_t u8Char;
+    while (*cString)
+    {
+        if (enFont.enPosition == eHorizon)
+        {
+            for (uint8_t u8IndexY = 0; u8IndexY < enFont.u8Height; u8IndexY++)
+            {
+                u8Char = *(enFont.pu8Font + u8IndexY + enFont.u8Height * (*cString - '/'));
+                for (uint8_t u8IndexX = 0; u8IndexX < enFont.u8Width; u8IndexX++)
+                {
+                    if (u8Char & (0x01 << u8IndexX))
+                    {
+                        GLCD_voSetPixel(u8X + u8IndexX, u8Y + u8IndexY);
+                    }
+                }
+            }
+            cString++;
+            u8X = u8X + enFont.u8Width + 1;
+        }
+        else
+        {
+            for (uint8_t u8IndexX = 0; u8IndexX < enFont.u8Width; u8IndexX++)
+            {
+                u8Char = *(enFont.pu8Font + u8IndexX + enFont.u8Width * (*cString - 32));
+                for (uint8_t u8IndexY = 0; u8IndexY < enFont.u8Height; u8IndexY++)
+                {
+                    if (u8Char & (1 << ((enFont.u8Height - 1) - u8IndexY)))
+                    {
+                        GLCD_voSetPixel(u8X + u8IndexX, u8Y + ((enFont.u8Height - 1) - u8IndexY));
+                    }
+                }
+            }
+            cString++;
+            u8X = u8X + enFont.u8Width + 1;
+        }
+    }
 }
 
 void GLCD_voDrawBitMap(const uint8_t* cu8Graphic)
@@ -398,41 +429,31 @@ void GLCD_voDrawBitMap(const uint8_t* cu8Graphic)
     uint8_t u8X, u8Y;
     for (u8Y = 0; u8Y < NUM_OF_ROWS; u8Y++)
     {
-        if (u8Y < HALF_OF_ROWS)
+        for (u8X = 0; u8X < NUM_ZONE_OF_ROW; u8X++)
         {
             /* Draws top half of the screen.
              In extended instruction mode, vertical and horizontal coordinates must be specified before sending data in. */
-            for (u8X = 0; u8X < NUM_BIT_OF_BYTE; u8X++)
+            if (u8Y < HALF_OF_ROWS)
             {
                 /* Vertical coordinate of the screen is specified first. (0-31) */
-                GLCD_voSendCmd(0x80 | u8Y);
+                GLCD_voSendCmd(ADDRESS_BASE | u8Y);
 
                 /* Then horizontal coordinate of the screen is specified. (0-8) */
-                GLCD_voSendCmd(0x80 | u8X);
-
-                /* Data to the upper byte is sent to the coordinate. */
-                GLCD_voSendData(cu8Graphic[2 * u8X + 16 * u8Y]);
-
-                /* Data to the lower byte is sent to the coordinate. */
-                GLCD_voSendData(cu8Graphic[2 * u8X + 1 + 16 * u8Y]);
+                GLCD_voSendCmd(ADDRESS_BASE | u8X);
             }
-        }
-        else
-        {
-            /* Draws bottom half of the screen. */
-            for (u8X = 0; u8X < NUM_BIT_OF_BYTE; u8X++)
+            else
             {
-                /* Actions performed as same as the upper half screen,
-                Vertical coordinate must be scaled back to 0-31 as it is dealing with another half of the screen. */
-                GLCD_voSendCmd(0x80 | (u8Y - HALF_OF_ROWS));
-                GLCD_voSendCmd(0x88 | u8X);
-                GLCD_voSendData(cu8Graphic[2 * u8X + 16 * u8Y]);
-                GLCD_voSendData(cu8Graphic[2 * u8X + 1 + 16 * u8Y]);
+                GLCD_voSendCmd(ADDRESS_BASE | (u8Y - HALF_OF_ROWS));
+                GLCD_voSendCmd(LINE_BASE_DDRAM | u8X);
             }
+            /* Data to the upper byte is sent to the coordinate. */
+            GLCD_voSendData(cu8Graphic[2 * u8X + 16 * u8Y]);
+
+            /* Data to the lower byte is sent to the coordinate. */
+            GLCD_voSendData(cu8Graphic[2 * u8X + 1 + 16 * u8Y]);
         }
     }
 }
-
 void GLCD_voUpdate(void)
 {
     GLCD_voDrawBitMap(su8Image);
@@ -448,14 +469,15 @@ void GLCD_voClearScreen(void)
         {
             if (u8Y < HALF_OF_ROWS)
             {
-                GLCD_voSendCmd(0x80 | u8Y);
-                GLCD_voSendCmd(0x80);
+                GLCD_voSendCmd(ADDRESS_BASE | u8Y);
+                GLCD_voSendCmd(ADDRESS_BASE);
             }
             else
             {
-                GLCD_voSendCmd(0x80 | (u8Y - HALF_OF_ROWS));
-                GLCD_voSendCmd(0x88);
+                GLCD_voSendCmd(ADDRESS_BASE | (u8Y - HALF_OF_ROWS));
+                GLCD_voSendCmd(LINE_BASE_DDRAM);
             }
+
             /* Send data to Rows */
             for (u8X = 0; u8X < NUM_BIT_OF_BYTE; u8X++)
             {
@@ -472,11 +494,20 @@ void GLCD_voClearScreen(void)
     }
 }
 
+void GLCD_voClearImage(void)
+{
+    for (uint16_t i = 0; i < (NUM_OF_COLUMNS * NUM_OF_ROWS) / NUM_BIT_OF_BYTE; i++)
+    {
+        su8Image[i] = CLEAR_VALUE;
+    }
+    GLCD_voUpdate();
+}
+
 /* Parameter: Row, Column, Array, Width, High */
 void GLCD_voDisplayImage(uint8_t u8X, uint8_t u8Y, uint8_t* u8Image, uint8_t u8Width, uint8_t u8Height)
 {
     /* Find byte per line */
-    uint8_t u8Byte = u8Width / 8;
+    uint8_t u8Byte = u8Width / NUM_BIT_OF_BYTE;
     for (uint32_t i = 0; i < (u8Width * u8Height) / NUM_BIT_OF_BYTE; i++)
     {
         for (uint8_t j = 0; j < NUM_BIT_OF_BYTE; j++)
@@ -484,7 +515,7 @@ void GLCD_voDisplayImage(uint8_t u8X, uint8_t u8Y, uint8_t* u8Image, uint8_t u8W
             /* Read bit from array byte */
             if (*u8Image & (1 << (7 - j)))
             {
-                GLCD_voSetPixel((u8X + (i % u8Byte) * 8 + j), (u8Y + i / u8Byte));
+                GLCD_voSetPixel((u8X + (i % u8Byte) * NUM_BIT_OF_BYTE + j), (u8Y + i / u8Byte));
             }
         }
         u8Image++;
@@ -502,7 +533,7 @@ void GLCD_voSetPixel(uint8_t u8X, uint8_t u8Y)
     if (u8Y < NUM_OF_ROWS && u8X < NUM_OF_COLUMNS)
     {
         /* Identify the pixel */
-        uint8_t* p = su8Image + ((u8Y * (NUM_OF_COLUMNS / NUM_BIT_OF_BYTE)) + (u8X / NUM_BIT_OF_BYTE));
+        uint8_t* p = su8Image + ((u8Y * (NUM_OF_COLUMNS / NUM_ZONE_OF_ROW)) + (u8X / NUM_BIT_OF_BYTE));
 
         /* Set the value for pixel */
         *p |= 0x80u >> (u8X % NUM_BIT_OF_BYTE);
