@@ -13,7 +13,6 @@
 #include "cmsis_os2.h"
 #include "common.h"
 #include "glcd.h"
-#include "font_glcd.h"
 #include "trace.h"
 
 /* Private define constants -------------------------------------------------------------*/
@@ -30,22 +29,22 @@
 #define RST_PIN  GPIO_PIN_7
 
 #define NUM_OF_ROWS    64
-#define HALF_OF_ROWS   32
+#define HALF_OF_ROWS   (NUM_OF_ROWS / 2)
 #define NUM_OF_COLUMNS 128
 
-#define LAST_COL_OF_SMALL 3
-#define LAST_ROW_OF_SMALL 5
+#define WIDTH_OF_FONT_SMALL  3
+#define HEIGHT_OF_FONT_SMALL 5
 
-#define LAST_COL_OF_MEDIUM 5
-#define LAST_ROW_OF_MEDIUM 7
-#define DEC_FIRST_MEDIUM   32
+#define WIDTH_OF_FONT_MEDIUM  5
+#define HEIGHT_OF_FONT_MEDIUM 7
+#define INDEX_OF_FONT_MEDIUM  32
 
-#define LAST_COL_OF_LARGE 7
-#define LAST_ROW_OF_LARGE 9
+#define WIDTH_OF_FONT_LARGE  7
+#define HEIGHT_OF_FONT_LARGE 9
 
-#define DISTANCE_PIXCEL_OF_SMALL  4
-#define DISTANCE_PIXCEL_OF_MEDIUM 6
-#define DISTANCE_PIXCEL_OF_LARGE  10
+#define DISTANCE_PIXEL_OF_SMALL  4
+#define DISTANCE_PIXEL_OF_MEDIUM 6
+#define DISTANCE_PIXEL_OF_LARGE  10
 
 #define NUM_BIT_OF_BYTE 8
 #define NUM_ZONE_OF_ROW 8
@@ -67,70 +66,23 @@
 /* Private macros -----------------------------------------------------------------------*/
 
 /* Private type definitions  ------------------------------------------------------------*/
-TIM_HandleTypeDef htim2;
 
 /* Private file-local global variables   ------------------------------------------------*/
 static uint8_t        su8Image[(NUM_OF_COLUMNS * NUM_OF_ROWS) / NUM_BIT_OF_BYTE];
 static tenGraphicMode enGraphicCheck = eDISABLE;
+TIM_HandleTypeDef     htim2;
 
 /* Private function prototypes declarations   -------------------------------------------*/
+static tenStatus GLCD_enInitTIM2(void);
 static tenStatus GLCD_enInitIO(void);
-static tenStatus GLCD_SystemClock_Config(void);
-
 static void      GLCD_voSendByteSpi(uint8_t u8byte);
 static void      GLCD_voSendCmd(uint8_t u8Cmd);
 static void      GLCD_voSendData(uint8_t u8Data);
-static void      GLCD_voDelay_us(uint16_t u16Delay_us);
+static void      GLCD_voDelayUs(uint16_t u16Delay_us);
 static void      GLCD_voSetGraphicMode(tenGraphicMode enGraphicMode);
 
 /* Private functions definition   -------------------------------------------------------*/
-static tenStatus GLCD_SystemClock_Config(void)
-{
-    RCC_OscInitTypeDef RCC_OscInitStruct = {0};
-    RCC_ClkInitTypeDef RCC_ClkInitStruct = {0};
-
-    /** Configure the main internal regulator output voltage
-     */
-    if (HAL_PWREx_ControlVoltageScaling(PWR_REGULATOR_VOLTAGE_SCALE1) != HAL_OK)
-    {
-        return eFAIL;
-    }
-
-    /** Initializes the RCC Oscillators according to the specified parameters
-     * in the RCC_OscInitTypeDef structure.
-     */
-    RCC_OscInitStruct.OscillatorType      = RCC_OSCILLATORTYPE_MSI;
-    RCC_OscInitStruct.MSIState            = RCC_MSI_ON;
-    RCC_OscInitStruct.MSICalibrationValue = 0;
-    RCC_OscInitStruct.MSIClockRange       = RCC_MSIRANGE_6;
-    RCC_OscInitStruct.PLL.PLLState        = RCC_PLL_ON;
-    RCC_OscInitStruct.PLL.PLLSource       = RCC_PLLSOURCE_MSI;
-    RCC_OscInitStruct.PLL.PLLM            = 1;
-    RCC_OscInitStruct.PLL.PLLN            = 40;
-    RCC_OscInitStruct.PLL.PLLP            = RCC_PLLP_DIV2;
-    RCC_OscInitStruct.PLL.PLLQ            = RCC_PLLQ_DIV2;
-    RCC_OscInitStruct.PLL.PLLR            = RCC_PLLR_DIV2;
-    if (HAL_RCC_OscConfig(&RCC_OscInitStruct) != HAL_OK)
-    {
-        return eFAIL;
-    }
-
-    /** Initializes the CPU, AHB and APB buses clocks
-     */
-    RCC_ClkInitStruct.ClockType      = RCC_CLOCKTYPE_HCLK | RCC_CLOCKTYPE_SYSCLK | RCC_CLOCKTYPE_PCLK1 | RCC_CLOCKTYPE_PCLK2;
-    RCC_ClkInitStruct.SYSCLKSource   = RCC_SYSCLKSOURCE_PLLCLK;
-    RCC_ClkInitStruct.AHBCLKDivider  = RCC_SYSCLK_DIV1;
-    RCC_ClkInitStruct.APB1CLKDivider = RCC_HCLK_DIV1;
-    RCC_ClkInitStruct.APB2CLKDivider = RCC_HCLK_DIV1;
-
-    if (HAL_RCC_ClockConfig(&RCC_ClkInitStruct, FLASH_LATENCY_4) != HAL_OK)
-    {
-        return eFAIL;
-    }
-    return eSUCCESS;
-}
-
-static tenStatus GLCD_TIM2_Init(void)
+static tenStatus GLCD_enInitTIM2(void)
 {
     TIM_ClockConfigTypeDef  sClockSourceConfig = {0};
     TIM_MasterConfigTypeDef sMasterConfig      = {0};
@@ -163,7 +115,6 @@ static tenStatus GLCD_enInitIO(void)
     GPIO_InitTypeDef GPIO_InitStruct = {0};
     /* GPIO Ports Clock Enable */
     __HAL_RCC_GPIOB_CLK_ENABLE();
-    __HAL_RCC_GPIOA_CLK_ENABLE();
     __HAL_RCC_GPIOI_CLK_ENABLE();
     __HAL_RCC_GPIOD_CLK_ENABLE();
     __HAL_RCC_GPIOH_CLK_ENABLE();
@@ -248,7 +199,7 @@ static void GLCD_voSendCmd(uint8_t u8Cmd)
     GLCD_voSendByteSpi((u8Cmd << 4) & SYNC_4_BIT);
 
     /* Delay 50us */
-    GLCD_voDelay_us(50);
+    GLCD_voDelayUs(50);
 
     /* Pull the CS low */
     HAL_GPIO_WritePin(CS_PORT, CS_PIN, GPIO_PIN_RESET);
@@ -268,13 +219,13 @@ static void GLCD_voSendData(uint8_t u8Data)
     /* Send the lower nibble */
     GLCD_voSendByteSpi((u8Data << 4) & SYNC_4_BIT);
 
-    GLCD_voDelay_us(50);
+    GLCD_voDelayUs(50);
 
     HAL_GPIO_WritePin(CS_PORT, CS_PIN, GPIO_PIN_RESET);
 }
 
 /* Delay with microseconds */
-static void GLCD_voDelay_us(uint16_t u16Delay_us)
+static void GLCD_voDelayUs(uint16_t u16Delay_us)
 {
     /* Reset the counter */
     __HAL_TIM_SET_COUNTER(&htim2, 0);
@@ -312,30 +263,10 @@ static void GLCD_voSetGraphicMode(tenGraphicMode enGraphicMode)
 }
 
 /* Export functions definition   --------------------------------------------------------*/
-void HAL_TIM_Base_MspInit(TIM_HandleTypeDef* tim_baseHandle)
-{
-    if (tim_baseHandle->Instance == TIM2)
-    {
-        /* TIM2 clock enable */
-        __HAL_RCC_TIM2_CLK_ENABLE();
-    }
-}
-
-void HAL_TIM_Base_MspDeInit(TIM_HandleTypeDef* tim_baseHandle)
-{
-    if (tim_baseHandle->Instance == TIM2)
-    {
-        /* Peripheral clock disable */
-        __HAL_RCC_TIM2_CLK_DISABLE();
-    }
-}
-
 tenStatus GLCD_enInit(void)
 {
-    GLCD_SystemClock_Config();
-
     /* Delay init */
-    GLCD_TIM2_Init();
+    GLCD_enInitTIM2();
     HAL_TIM_Base_Start(&htim2);
 
     /* Init IO interface */
@@ -353,14 +284,14 @@ tenStatus GLCD_enInit(void)
 
     /* 8bit mode */
     GLCD_voSendCmd(MODE_8_BIT);
-    GLCD_voDelay_us(110);
+    GLCD_voDelayUs(110);
 
     GLCD_voSendCmd(MODE_8_BIT);
-    GLCD_voDelay_us(40);
+    GLCD_voDelayUs(40);
 
     /* D = 0, C = 0, B = 0 */
     GLCD_voSendCmd(DISPLAY_CONTROL_OFF);
-    GLCD_voDelay_us(110);
+    GLCD_voDelayUs(110);
 
     /* Clear screen */
     GLCD_voSendCmd(CLEAR_SCREEN);
@@ -384,52 +315,158 @@ tenStatus GLCD_enInit(void)
     return eSUCCESS;
 }
 
-void GLCD_voDisplayString(uint8_t u8X, uint8_t u8Y, char* cString, tstGlcdDislayFont enFont)
+void GLCD_voSetPixel(uint8_t u8X, uint8_t u8Y)
 {
-    uint8_t u8Char;
-    while (*cString)
+    uint8_t u8StartRow    = 0;
+    uint8_t u8StartColumn = 0;
+    uint8_t u8EndRow      = 0;
+    uint8_t u8EndColumn   = 0;
+
+    if (u8Y < NUM_OF_ROWS && u8X < NUM_OF_COLUMNS)
     {
-        if (enFont.enPosition == eHorizon)
+        /* Identify the pixel */
+        uint8_t* p = su8Image + ((u8Y * (NUM_OF_COLUMNS / NUM_ZONE_OF_ROW)) + (u8X / NUM_BIT_OF_BYTE));
+
+        /* Set the value for pixel */
+        *p |= 0x80u >> (u8X % NUM_BIT_OF_BYTE);
+
+        /* Change the dirty rectangle to account for a pixel being dirty (we assume it was changed) */
+        if (u8StartRow > u8Y)
         {
-            for (uint8_t u8IndexY = 0; u8IndexY < enFont.u8Height; u8IndexY++)
-            {
-                u8Char = *(enFont.pu8Font + u8IndexY + enFont.u8Height * (*cString - '/'));
-                for (uint8_t u8IndexX = 0; u8IndexX < enFont.u8Width; u8IndexX++)
-                {
-                    if (u8Char & (0x01 << u8IndexX))
-                    {
-                        GLCD_voSetPixel(u8X + u8IndexX, u8Y + u8IndexY);
-                    }
-                }
-            }
-            cString++;
-            u8X = u8X + enFont.u8Width + 1;
+            u8StartRow = u8Y;
         }
-        else
+        if (u8EndRow <= u8Y)
         {
-            for (uint8_t u8IndexX = 0; u8IndexX < enFont.u8Width; u8IndexX++)
-            {
-                u8Char = *(enFont.pu8Font + u8IndexX + enFont.u8Width * (*cString - 32));
-                for (uint8_t u8IndexY = 0; u8IndexY < enFont.u8Height; u8IndexY++)
-                {
-                    if (u8Char & (1 << ((enFont.u8Height - 1) - u8IndexY)))
-                    {
-                        GLCD_voSetPixel(u8X + u8IndexX, u8Y + ((enFont.u8Height - 1) - u8IndexY));
-                    }
-                }
-            }
-            cString++;
-            u8X = u8X + enFont.u8Width + 1;
+            u8EndRow = u8Y + 1;
+        }
+        if (u8StartColumn > u8X)
+        {
+            u8StartColumn = u8X;
+        }
+        if (u8EndColumn <= u8X)
+        {
+            u8EndColumn = u8X + 1;
         }
     }
 }
 
-void GLCD_voDrawBitMap(const uint8_t* cu8Graphic)
+void GLCD_voClearPixel(uint8_t u8X, uint8_t u8Y)
 {
-    uint8_t u8X, u8Y;
-    for (u8Y = 0; u8Y < NUM_OF_ROWS; u8Y++)
+    uint8_t u8StartRow    = 0;
+    uint8_t u8StartColumn = 0;
+    uint8_t u8EndRow      = 0;
+    uint8_t u8EndColumn   = 0;
+
+    if (u8Y < NUM_OF_ROWS && u8X < NUM_OF_COLUMNS)
     {
-        for (u8X = 0; u8X < NUM_ZONE_OF_ROW; u8X++)
+        /* Identify the pixel */
+        uint8_t* p = su8Image + ((u8Y * (NUM_OF_COLUMNS / NUM_ZONE_OF_ROW)) + (u8X / NUM_BIT_OF_BYTE));
+
+        /* Clear the value for pixel */
+        *p &= ~(0x80u >> (u8X % NUM_BIT_OF_BYTE));
+
+        /* Change the dirty rectangle to account for a pixel being dirty (we assume it was changed) */
+        if (u8StartRow > u8Y)
+        {
+            u8StartRow = u8Y;
+        }
+        if (u8EndRow <= u8Y)
+        {
+            u8EndRow = u8Y + 1;
+        }
+        if (u8StartColumn > u8X)
+        {
+            u8StartColumn = u8X;
+        }
+        if (u8EndColumn <= u8X)
+        {
+            u8EndColumn = u8X + 1;
+        }
+    }
+}
+
+void GLCD_voDisplayString(uint8_t u8X, uint8_t u8Y, char* cString, const tstGlcdDislayFont* enFont)
+{
+    uint8_t u8Char;
+    while (*cString)
+    {
+        /* Check Horizontal */
+        if (enFont->enPosition == eHorizontal)
+        {
+            for (uint8_t u8IndexY = 0; u8IndexY < enFont->u8Height; u8IndexY++)
+            {
+                /* Get position to display */
+                u8Char = *(enFont->pu8Font + u8IndexY + enFont->u8Height * (*cString - '/'));
+                trace_line();
+                trace("u8Char: %02X\r\n", u8Char);
+                for (uint8_t u8IndexX = 0; u8IndexX < enFont->u8Width; u8IndexX++)
+                {
+                    /* Left Shift */
+                    if (u8Char & (0x01 << u8IndexX))
+                    {
+                        GLCD_voSetPixel(u8X + u8IndexX, u8Y + u8IndexY);
+                    }
+                    else
+                    {
+                        GLCD_voClearPixel(u8X + u8IndexX, u8Y + u8IndexY);
+                    }
+                }
+            }
+            cString++;
+            u8X = u8X + enFont->u8Width + 1;
+        }
+        else
+        {
+            /* Check Vertical */
+            for (uint8_t u8IndexX = 0; u8IndexX < enFont->u8Width; u8IndexX++)
+            {
+                /* Get position to display */
+                u8Char = *(enFont->pu8Font + u8IndexX + enFont->u8Width * (*cString - 32));
+                for (uint8_t u8IndexY = 0; u8IndexY < enFont->u8Height; u8IndexY++)
+                {
+                    if (u8Char & (1 << ((enFont->u8Height - 1) - u8IndexY)))
+                    {
+                        GLCD_voSetPixel(u8X + u8IndexX, u8Y + ((enFont->u8Height - 1) - u8IndexY));
+                    }
+                    else
+                    {
+                        GLCD_voClearPixel(u8X + u8IndexX, u8Y + ((enFont->u8Height - 1) - u8IndexY));
+                    }
+                }
+            }
+            cString++;
+            u8X = u8X + enFont->u8Width + 1;
+        }
+    }
+}
+
+void GLCD_voDisplayImage(uint8_t u8X, uint8_t u8Y, const uint8_t* u8Image, uint8_t u8Width, uint8_t u8Height)
+{
+    /* Find byte per line */
+    uint8_t u8Byte = u8Width / NUM_BIT_OF_BYTE;
+    for (uint32_t i = 0; i < (u8Width * u8Height) / NUM_BIT_OF_BYTE; i++)
+    {
+        for (uint8_t j = 0; j < NUM_BIT_OF_BYTE; j++)
+        {
+            /* Read bit from array byte */
+            if (*u8Image & (0x80 >> j))
+            {
+                GLCD_voSetPixel((u8X + (i % u8Byte) * NUM_BIT_OF_BYTE + j), (u8Y + i / u8Byte));
+            }
+            else
+            {
+                GLCD_voClearPixel((u8X + (i % u8Byte) * NUM_BIT_OF_BYTE + j), (u8Y + i / u8Byte));
+            }
+        }
+        u8Image++;
+    }
+}
+
+void GLCD_voUpdate(const uint8_t* cu8Graphic)
+{
+    for (uint8_t u8Y = 0; u8Y < NUM_OF_ROWS; u8Y++)
+    {
+        for (uint8_t u8X = 0; u8X < NUM_ZONE_OF_ROW; u8X++)
         {
             /* Draws top half of the screen.
              In extended instruction mode, vertical and horizontal coordinates must be specified before sending data in. */
@@ -443,9 +480,13 @@ void GLCD_voDrawBitMap(const uint8_t* cu8Graphic)
             }
             else
             {
+                /* Vertical coordinate of the screen is specified first. (32-63) */
                 GLCD_voSendCmd(ADDRESS_BASE | (u8Y - HALF_OF_ROWS));
+
+                /* Then horizontal coordinate of the screen is specified. (0-8) */
                 GLCD_voSendCmd(LINE_BASE_DDRAM | u8X);
             }
+
             /* Data to the upper byte is sent to the coordinate. */
             GLCD_voSendData(cu8Graphic[2 * u8X + 16 * u8Y]);
 
@@ -453,10 +494,6 @@ void GLCD_voDrawBitMap(const uint8_t* cu8Graphic)
             GLCD_voSendData(cu8Graphic[2 * u8X + 1 + 16 * u8Y]);
         }
     }
-}
-void GLCD_voUpdate(void)
-{
-    GLCD_voDrawBitMap(su8Image);
 }
 
 void GLCD_voClearScreen(void)
@@ -492,69 +529,11 @@ void GLCD_voClearScreen(void)
         GLCD_voSendCmd(0x01);
         osDelay(2);
     }
-}
 
-void GLCD_voClearImage(void)
-{
+    /* Clear su8Image */
     for (uint16_t i = 0; i < (NUM_OF_COLUMNS * NUM_OF_ROWS) / NUM_BIT_OF_BYTE; i++)
     {
         su8Image[i] = CLEAR_VALUE;
-    }
-    GLCD_voUpdate();
-}
-
-/* Parameter: Row, Column, Array, Width, High */
-void GLCD_voDisplayImage(uint8_t u8X, uint8_t u8Y, uint8_t* u8Image, uint8_t u8Width, uint8_t u8Height)
-{
-    /* Find byte per line */
-    uint8_t u8Byte = u8Width / NUM_BIT_OF_BYTE;
-    for (uint32_t i = 0; i < (u8Width * u8Height) / NUM_BIT_OF_BYTE; i++)
-    {
-        for (uint8_t j = 0; j < NUM_BIT_OF_BYTE; j++)
-        {
-            /* Read bit from array byte */
-            if (*u8Image & (1 << (7 - j)))
-            {
-                GLCD_voSetPixel((u8X + (i % u8Byte) * NUM_BIT_OF_BYTE + j), (u8Y + i / u8Byte));
-            }
-        }
-        u8Image++;
-    }
-    GLCD_voUpdate();
-}
-
-void GLCD_voSetPixel(uint8_t u8X, uint8_t u8Y)
-{
-    uint8_t u8StartRow    = 0;
-    uint8_t u8StartColumn = 0;
-    uint8_t u8EndRow      = 0;
-    uint8_t u8EndColumn   = 0;
-
-    if (u8Y < NUM_OF_ROWS && u8X < NUM_OF_COLUMNS)
-    {
-        /* Identify the pixel */
-        uint8_t* p = su8Image + ((u8Y * (NUM_OF_COLUMNS / NUM_ZONE_OF_ROW)) + (u8X / NUM_BIT_OF_BYTE));
-
-        /* Set the value for pixel */
-        *p |= 0x80u >> (u8X % NUM_BIT_OF_BYTE);
-
-        /* Change the dirty rectangle to account for a pixel being dirty (we assume it was changed) */
-        if (u8StartRow > u8Y)
-        {
-            u8StartRow = u8Y;
-        }
-        if (u8EndRow <= u8Y)
-        {
-            u8EndRow = u8Y + 1;
-        }
-        if (u8StartColumn > u8X)
-        {
-            u8StartColumn = u8X;
-        }
-        if (u8EndColumn <= u8X)
-        {
-            u8EndColumn = u8X + 1;
-        }
     }
 }
 
@@ -808,5 +787,23 @@ void GLCD_voDrawFilledTriangle(uint16_t u16X1, uint16_t u16Y1, uint16_t u16X2, u
         }
         u16X += u16Xinc2;
         i16y += i16yinc2;
+    }
+}
+
+void HAL_TIM_Base_MspInit(TIM_HandleTypeDef* tim_baseHandle)
+{
+    if (tim_baseHandle->Instance == TIM2)
+    {
+        /* TIM2 clock enable */
+        __HAL_RCC_TIM2_CLK_ENABLE();
+    }
+}
+
+void HAL_TIM_Base_MspDeInit(TIM_HandleTypeDef* tim_baseHandle)
+{
+    if (tim_baseHandle->Instance == TIM2)
+    {
+        /* Peripheral clock disable */
+        __HAL_RCC_TIM2_CLK_DISABLE();
     }
 }

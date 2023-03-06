@@ -17,6 +17,9 @@
 #include "led.h"
 #include "button.h"
 #include "rtc.h"
+#include "glcd.h"
+#include "trace.h"
+
 /* Private define constants -------------------------------------------------------------*/
 #define DRV_TASK_DELAY_TIME_MS 5
 
@@ -41,6 +44,8 @@ static void DRIV_voTask(void *pvoArgument)
     LED_voInit();
     RTC_enInit();
     BTN_enInit();
+    GLCD_enInit();
+    trace_line();
 
     for (;;)
     {

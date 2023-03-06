@@ -34,9 +34,9 @@ const osThreadAttr_t stGlcdTask = {
     .priority   = (osPriority_t)osPriorityLow,
 };
 
-tstGlcdDislayFont Font35 = {eSMALL, eHorizon, 3, 5, (uint8_t *)u8Font3x5};
-tstGlcdDislayFont Font79 = {eLARGE, eHorizon, 7, 9, (uint8_t *)u8Font7x9};
-tstGlcdDislayFont Font57 = {eMEDIUM, eVetical, 5, 7, (uint8_t *)u8Font5x7};
+tstGlcdDislayFont Font35 = {eSMALL, eHorizontal, 3, 5, u8Font3x5};
+tstGlcdDislayFont Font79 = {eLARGE, eHorizontal, 7, 9, u8Font7x9};
+tstGlcdDislayFont Font57 = {eMEDIUM, eVertical, 5, 7, u8Font5x7};
 
 /* Private function prototypes declarations   -------------------------------------------*/
 static void GLCD_voTask(void *pvoArgument);
@@ -50,19 +50,20 @@ static void GLCD_voTask(void *pvoArgument)
     GLCD_voUpdate();
     GLCD_voDisplayImage(20, 20, acu8Logo32x32, 32, 32);
     osDelay(2000);
-    GLCD_voClearImage();
-    GLCD_voDisplayImage(0, 0, acu8BitMap128x64, 128, 64);
-    osDelay(2000);
-    GLCD_voClearImage();
-    GLCD_voDisplayImage(20, 20, acu8Logo64x64, 64, 64);
-    osDelay(2000);
-    GLCD_voClearImage();
-    GLCD_voDisplayImage(0, 0, acu8Logo64x32, 64, 32);
-    osDelay(2000);
-    GLCD_voClearImage();
-    GLCD_voDisplayString(3, 4, "Thong", Font57);
+    // GLCD_voClearScreen();
+    // GLCD_voDisplayImage(0, 0, acu8BitMap128x64, 128, 64);
+    // osDelay(2000);
+    // GLCD_voClearScreen();
+    // GLCD_voDisplayImage(20, 20, acu8Logo64x64, 64, 64);
+    // osDelay(2000);
+    // GLCD_voClearScreen();
+    // GLCD_voDisplayImage(0, 0, acu8Logo64x32, 64, 32);
+    // osDelay(2000);
+    // GLCD_voClearScreen();
+    trace_line();
+
+    GLCD_voDisplayString(3, 4, "Thong", &Font57);
     GLCD_voUpdate();
-    trace("1\r\n");
     for (;;)
     {
         osDelay(1000);

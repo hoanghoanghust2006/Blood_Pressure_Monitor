@@ -33,8 +33,8 @@ extern "C"
 
     typedef enum
     {
-        eVetical,
-        eHorizon
+        eVertical,
+        eHorizontal
     } tenPosition;
 
     typedef struct
@@ -49,21 +49,23 @@ extern "C"
     /* Export Function Declarations -----------------------------------------------------------*/
     tenStatus GLCD_enInit(void);
 
+    /* Set Pixel */
+    void GLCD_voSetPixel(uint8_t u8X, uint8_t u8Y);
+
+    /* Clear Pixel */
+    void GLCD_voClearPixel(uint8_t u8X, uint8_t u8Y);
+
+    /* Display string customize font */
+    void GLCD_voDisplayString(uint8_t u8X, uint8_t u8Y, char* cString, const tstGlcdDislayFont* enFont);
+
     /* Display customize */
-    void GLCD_voDisplayImage(uint8_t u8X, uint8_t u8Y, uint8_t* u8Image, uint8_t u8Width, uint8_t u8Height);
-    void GLCD_voDisplayString(uint8_t u8X, uint8_t u8Y, char* cString, tstGlcdDislayFont enFont);
-    void GLCD_voClearImage(void);
+    void GLCD_voDisplayImage(uint8_t u8X, uint8_t u8Y, const uint8_t* u8Image, uint8_t u8Width, uint8_t u8Height);
+
+    /* Display Update */
+    void GLCD_voUpdate(void);
 
     /* Clear screen in any mode */
     void GLCD_voClearScreen(void);
-    void GLCD_voUpdate(void);
-
-    /* Draw BitMap on the display */
-    void GLCD_voDrawBitMap(const uint8_t* cu8Graphic);
-    void GLCD_voDrawImage(uint8_t u8H, uint8_t u8W, const uint8_t* cu8Graphic);
-
-    /* Update the display with the selected graphics */
-    void GLCD_voSetPixel(uint8_t u8X, uint8_t u8Y);
 
     /* Draw line from (X0, Y0) to (X1, Y1) */
     void GLCD_voDrawLine(uint8_t u8X0, uint8_t u8Y0, uint8_t u8X1, uint8_t u8Y1);
