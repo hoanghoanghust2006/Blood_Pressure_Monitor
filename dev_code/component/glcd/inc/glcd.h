@@ -15,6 +15,8 @@ extern "C"
 #endif
 /* Include --------------------------------------------------------------------------------*/
 #include "common.h"
+#include "font_glcd.h"
+
     /* Define constants -----------------------------------------------------------------------*/
 
     /* Type definitions (Typedef, enum, struct) -----------------------------------------------*/
@@ -23,28 +25,6 @@ extern "C"
         eENABLE,
         eDISABLE
     } tenGraphicMode;
-
-    typedef enum
-    {
-        eSMALL,
-        eMEDIUM,
-        eLARGE
-    } tenSizeFont;
-
-    typedef enum
-    {
-        eVertical,
-        eHorizontal
-    } tenPosition;
-
-    typedef struct
-    {
-        tenSizeFont enSize;
-        tenPosition enPosition;
-        uint8_t     u8Width;
-        uint8_t     u8Height;
-        uint8_t*    pu8Font;
-    } tstGlcdDislayFont;
 
     /* Export Function Declarations -----------------------------------------------------------*/
     tenStatus GLCD_enInit(void);

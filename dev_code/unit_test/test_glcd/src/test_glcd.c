@@ -17,8 +17,7 @@
 #include "test_glcd.h"
 #include "trace.h"
 #include "glcd.h"
-#include "font_glcd.h"
-#include "stm32l4xx_hal.h"
+#include "image_test.h"
 /* Private define constants -------------------------------------------------------------*/
 #define GLCD_TASK_DELAY_TIME_MS 5
 
@@ -34,10 +33,6 @@ const osThreadAttr_t stGlcdTask = {
     .priority   = (osPriority_t)osPriorityLow,
 };
 
-tstGlcdDislayFont Font35 = {eSMALL, eHorizontal, 3, 5, u8Font3x5};
-tstGlcdDislayFont Font79 = {eLARGE, eHorizontal, 7, 9, u8Font7x9};
-tstGlcdDislayFont Font57 = {eMEDIUM, eVertical, 5, 7, u8Font5x7};
-
 /* Private function prototypes declarations   -------------------------------------------*/
 static void GLCD_voTask(void *pvoArgument);
 
@@ -46,29 +41,17 @@ static void GLCD_voTask(void *pvoArgument)
 {
     GLCD_enInit();
     GLCD_voClearScreen();
-    GLCD_voSetPixel(0, 0);
-    GLCD_voUpdate();
-    GLCD_voDisplayImage(20, 20, acu8Logo32x32, 32, 32);
-    osDelay(2000);
-    // GLCD_voClearScreen();
-    // GLCD_voDisplayImage(0, 0, acu8BitMap128x64, 128, 64);
-    // osDelay(2000);
-    // GLCD_voClearScreen();
-    // GLCD_voDisplayImage(20, 20, acu8Logo64x64, 64, 64);
-    // osDelay(2000);
-    // GLCD_voClearScreen();
-    // GLCD_voDisplayImage(0, 0, acu8Logo64x32, 64, 32);
-    // osDelay(2000);
-    // GLCD_voClearScreen();
-    trace_line();
-
-    GLCD_voDisplayString(3, 4, "Thong", &Font57);
+    GLCD_voDisplayImage(0, 0, acu8Logo32x32, 32, 32);
+    GLCD_voDisplayString(45, 0, "HCL TECH", &stFont57);
+    GLCD_voDisplayString(45, 30, "0123456789", &stFont35);
+    GLCD_voDisplayString(45, 50, "0123456789", &stFont79);
     GLCD_voUpdate();
     for (;;)
     {
         osDelay(1000);
     }
 }
+
 /* Export functions definition   --------------------------------------------------------*/
 void GLCD_voTaskTestInit(void)
 {

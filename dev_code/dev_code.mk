@@ -5,6 +5,7 @@ dev_code/task/app_task/src/app_task.c \
 dev_code/component/led/src/led.c \
 dev_code/component/trace/src/trace.c \
 dev_code/component/glcd/src/glcd.c \
+dev_code/component/glcd/src/font_glcd.c \
 dev_code/component/common/src/common.c \
 dev_code/unit_test/test_button/src/test_button.c \
 dev_code/unit_test/test_glcd/src/test_glcd.c \

@@ -462,7 +462,7 @@ void GLCD_voDisplayImage(uint8_t u8X, uint8_t u8Y, const uint8_t* u8Image, uint8
     }
 }
 
-void GLCD_voUpdate(const uint8_t* cu8Graphic)
+void GLCD_voUpdate(void)
 {
     for (uint8_t u8Y = 0; u8Y < NUM_OF_ROWS; u8Y++)
     {
@@ -488,10 +488,10 @@ void GLCD_voUpdate(const uint8_t* cu8Graphic)
             }
 
             /* Data to the upper byte is sent to the coordinate. */
-            GLCD_voSendData(cu8Graphic[2 * u8X + 16 * u8Y]);
+            GLCD_voSendData(su8Image[2 * u8X + 16 * u8Y]);
 
             /* Data to the lower byte is sent to the coordinate. */
-            GLCD_voSendData(cu8Graphic[2 * u8X + 1 + 16 * u8Y]);
+            GLCD_voSendData(su8Image[2 * u8X + 1 + 16 * u8Y]);
         }
     }
 }

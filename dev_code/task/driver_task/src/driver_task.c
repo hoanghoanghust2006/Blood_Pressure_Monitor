@@ -45,7 +45,6 @@ static void DRIV_voTask(void *pvoArgument)
     RTC_enInit();
     BTN_enInit();
     GLCD_enInit();
-    trace_line();
 
     for (;;)
     {
