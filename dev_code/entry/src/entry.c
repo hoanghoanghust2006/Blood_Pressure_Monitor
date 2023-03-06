@@ -56,9 +56,9 @@ void ENTRY_voInit(void)
     BTN_voTaskTestInit();
 #elif defined(TEST_RTC)
     printf("Unit test for RTC component\r\n");
-    GLCD_voTaskTestInit();
+    RTC_voTaskTestInit();
 #elif defined(TEST_GLCD)
-    printf("Unit test for glcd component\r\n");
+    printf("Unit test for GLCD component\r\n");
     GLCD_voTaskTestInit();
 #else
     APP_enInitTask();
