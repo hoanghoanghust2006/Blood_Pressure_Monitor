@@ -32,19 +32,9 @@
 #define HALF_OF_ROWS   (NUM_OF_ROWS / 2)
 #define NUM_OF_COLUMNS 128
 
-#define WIDTH_OF_FONT_SMALL  3
-#define HEIGHT_OF_FONT_SMALL 5
-
-#define WIDTH_OF_FONT_MEDIUM  5
-#define HEIGHT_OF_FONT_MEDIUM 7
 #define INDEX_OF_FONT_MEDIUM  32
 
-#define WIDTH_OF_FONT_LARGE  7
-#define HEIGHT_OF_FONT_LARGE 9
-
-#define DISTANCE_PIXEL_OF_SMALL  4
-#define DISTANCE_PIXEL_OF_MEDIUM 6
-#define DISTANCE_PIXEL_OF_LARGE  10
+#define DISTANCE_PIXEL 1
 
 #define NUM_BIT_OF_BYTE 8
 #define NUM_ZONE_OF_ROW 8
@@ -413,7 +403,7 @@ void GLCD_voDisplayString(uint8_t u8X, uint8_t u8Y, char* cString, const tstGlcd
                 }
             }
             cString++;
-            u8X = u8X + enFont->u8Width + 1;
+            u8X = u8X + enFont->u8Width + DISTANCE_PIXEL;
         }
         else
         {
@@ -421,7 +411,7 @@ void GLCD_voDisplayString(uint8_t u8X, uint8_t u8Y, char* cString, const tstGlcd
             for (uint8_t u8IndexX = 0; u8IndexX < enFont->u8Width; u8IndexX++)
             {
                 /* Get position to display */
-                u8Char = *(enFont->pu8Font + u8IndexX + enFont->u8Width * (*cString - 32));
+                u8Char = *(enFont->pu8Font + u8IndexX + enFont->u8Width * (*cString - INDEX_OF_FONT_MEDIUM));
                 for (uint8_t u8IndexY = 0; u8IndexY < enFont->u8Height; u8IndexY++)
                 {
                     if (u8Char & (1 << ((enFont->u8Height - 1) - u8IndexY)))
@@ -435,7 +425,7 @@ void GLCD_voDisplayString(uint8_t u8X, uint8_t u8Y, char* cString, const tstGlcd
                 }
             }
             cString++;
-            u8X = u8X + enFont->u8Width + 1;
+            u8X = u8X + enFont->u8Width + DISTANCE_PIXEL;
         }
     }
 }
