@@ -25,6 +25,18 @@
 #define MAX_VALUE              150
 #define MIN_VALUE              0
 
+#define FIRST_DAY   1
+#define LAST_DAY    31
+#define FIRST_MONTH 1
+#define LAST_MONTH  12
+
+#define FIRST_HOUR   0
+#define LAST_HOUR    23
+#define FIRST_MINUTE 0
+#define LAST_MINUTE  59
+#define FIRST_SECOND 0
+#define LAST_SECOND  59
+
 /* Private macros -----------------------------------------------------------------------*/
 
 /* Private type definitions  ------------------------------------------------------------*/
@@ -80,13 +92,16 @@ static void APP_voTask(void *pvoArgument)
     {
         uint32_t u32AppTaskStartTick = osKernelGetTickCount();
 
+        // APP_voMenuSetDate();
+        APP_voMenuSetTime();
+
         /* Search in state handler lookup table for current state */
         for (uint8_t i = 0; i < sizeof(stAppStateHandler) / sizeof(tstAppStateHandler); i++)
         {
             if (enAppState == stAppStateHandler[i].enState)
             {
                 /* If found, run state handler function */
-                stAppStateHandler[i].voStateHandler();
+                // stAppStateHandler[i].voStateHandler();
                 break;
             }
         }
@@ -276,10 +291,216 @@ static void APP_voMenuHistory(void)
 
 static void APP_voMenuSetDate(void)
 {
-    // TODO:
+    static uint8_t           u8FlagGetDate = 1;
+    static uint8_t           u8CountSelect = 0;
+    static tstTime           stSetDate;
+    static tenDateSetupState enState;
+    tenButtonState           enUpBtnState     = BTN_voGetState(eBUTTON_UP);
+    tenButtonState           enDownBtnState   = BTN_voGetState(eBUTTON_DOWN);
+    tenButtonState           enSelectBtnState = BTN_voGetState(eBUTTON_SELECT);
+
+    /* Get current date */
+    if (u8FlagGetDate == 1)
+    {
+        RTC_enGetDateTime(&stSetDate);
+        trace("%d %d %d\r\n", stSetDate.u8Day, stSetDate.u8Month, stSetDate.u16Year);
+        u8FlagGetDate = 0;
+    }
+
+    /* Check date setup state */
+    switch (u8CountSelect)
+    {
+        /* Set day */
+        case 0:
+            enState = eDAY;
+            if (enUpBtnState != eNONE)
+            {
+                stSetDate.u8Day++;
+                if (stSetDate.u8Day > LAST_DAY)
+                {
+                    stSetDate.u8Day = FIRST_DAY;
+                }
+            }
+            else if (enDownBtnState != eNONE)
+            {
+                stSetDate.u8Day--;
+                if (stSetDate.u8Day < FIRST_DAY)
+                {
+                    stSetDate.u8Day = LAST_DAY;
+                }
+            }
+            break;
+
+        /* Set month */
+        case 1:
+            enState = eMONTH;
+            if (enUpBtnState != eNONE)
+            {
+                stSetDate.u8Month++;
+                if (stSetDate.u8Month > LAST_MONTH)
+                {
+                    stSetDate.u8Month = FIRST_MONTH;
+                }
+            }
+            else if (enDownBtnState != eNONE)
+            {
+                stSetDate.u8Month--;
+                if (stSetDate.u8Month < FIRST_MONTH)
+                {
+                    stSetDate.u8Month = LAST_MONTH;
+                }
+            }
+            break;
+
+        /* Set year */
+        case 2:
+            enState = eYEAR;
+            if (enUpBtnState != eNONE)
+            {
+                stSetDate.u16Year++;
+            }
+            else if (enDownBtnState != eNONE)
+            {
+                stSetDate.u16Year--;
+            }
+            break;
+    }
+
+    /* Display setup date */
+    if ((enUpBtnState != eNONE) || (enDownBtnState != eNONE))
+    {
+        DPL_enDisplaySetupDate(&stSetDate, enState);
+    }
+
+    /* Even when button select is pressed */
+    if (enSelectBtnState == ePRESSED)
+    {
+        printf("\033\143");
+        printf("\033[3J");
+        u8CountSelect++;
+
+        /* Check condition to save date */
+        if (u8CountSelect == 3)
+        {
+            printf("\033\143");
+            printf("\033[3J");
+            RTC_enSetDateTime(&stSetDate);
+            trace("%d %d %d\r\n", stSetDate.u8Day, stSetDate.u8Month, stSetDate.u16Year);
+            trace("Save date: Done \r\n");
+            u8CountSelect = 0;
+            u8FlagGetDate = 1;
+        }
+    }
 }
 
 static void APP_voMenuSetTime(void)
 {
-    // TODO:
+    static uint8_t           u8FlagGetTime = 1;
+    static uint8_t           u8CountSelect = 0;
+    static tstTime           stSetTime;
+    static tenDateSetupState enState;
+    tenButtonState           enUpBtnState     = BTN_voGetState(eBUTTON_UP);
+    tenButtonState           enDownBtnState   = BTN_voGetState(eBUTTON_DOWN);
+    tenButtonState           enSelectBtnState = BTN_voGetState(eBUTTON_SELECT);
+
+    /* Get current time */
+    if (u8FlagGetTime == 1)
+    {
+        RTC_enGetDateTime(&stSetTime);
+        trace("%d %d %d\r\n", stSetTime.u8Hour, stSetTime.u8Minute, stSetTime.u8Second);
+        u8FlagGetTime = 0;
+    }
+
+    /* Check time setup state */
+    switch (u8CountSelect)
+    {
+        /* Set hour */
+        case 0:
+            enState = eHOUR;
+            if (enUpBtnState != eNONE)
+            {
+                stSetTime.u8Hour++;
+                if (stSetTime.u8Hour > LAST_HOUR)
+                {
+                    stSetTime.u8Hour = FIRST_HOUR;
+                }
+            }
+            else if (enDownBtnState != eNONE)
+            {
+                stSetTime.u8Hour--;
+                if (stSetTime.u8Hour > LAST_HOUR)
+                {
+                    stSetTime.u8Hour = LAST_HOUR;
+                }
+            }
+            break;
+
+        /* Set minute */
+        case 1:
+            enState = eMONTH;
+            if (enUpBtnState != eNONE)
+            {
+                stSetTime.u8Minute++;
+                if (stSetTime.u8Minute > LAST_MINUTE)
+                {
+                    stSetTime.u8Minute = FIRST_MINUTE;
+                }
+            }
+            else if (enDownBtnState != eNONE)
+            {
+                stSetTime.u8Minute--;
+                if (stSetTime.u8Minute > LAST_MINUTE)
+                {
+                    stSetTime.u8Minute = LAST_MINUTE;
+                }
+            }
+            break;
+
+        /* Set second */
+        case 2:
+            enState = eSECOND;
+            if (enUpBtnState != eNONE)
+            {
+                stSetTime.u8Second++;
+                if (stSetTime.u8Second > LAST_SECOND)
+                {
+                    stSetTime.u8Second = FIRST_SECOND;
+                }
+            }
+            else if (enDownBtnState != eNONE)
+            {
+                stSetTime.u8Second--;
+                if (stSetTime.u8Second > LAST_SECOND)
+                {
+                    stSetTime.u8Second = LAST_SECOND;
+                }
+            }
+            break;
+    }
+
+    /* Display setup time */
+    if ((enUpBtnState != eNONE) || (enDownBtnState != eNONE))
+    {
+        DPL_enDisplaySetupTime(&stSetTime, enState);
+    }
+
+    /* Even when button select is pressed */
+    if (enSelectBtnState == ePRESSED)
+    {
+        printf("\033\143");
+        printf("\033[3J");
+        u8CountSelect++;
+
+        /* Check condition to save time */
+        if (u8CountSelect == 3)
+        {
+            printf("\033\143");
+            printf("\033[3J");
+            RTC_enSetDateTime(&stSetTime);
+            trace("%d %d %d\r\n", stSetTime.u8Hour, stSetTime.u8Minute, stSetTime.u8Second);
+            trace("Save time: Done \r\n");
+            u8CountSelect = 0;
+            u8FlagGetTime = 1;
+        }
+    }
 }
