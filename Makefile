@@ -151,7 +151,7 @@ $(DEV_CODE_INCLUDES)
 # compile gcc flags
 ASFLAGS = $(MCU) $(AS_DEFS) $(AS_INCLUDES) $(OPT) -Wall -Wfatal-errors -fdata-sections -ffunction-sections -Wno-unused-function
 
-CFLAGS += $(MCU) $(C_DEFS) $(C_INCLUDES) $(OPT) -Wall -Werror -Wfatal-errors -fdata-sections -ffunction-sections -Wno-unused-function ${test}
+CFLAGS += $(MCU) $(C_DEFS) $(C_INCLUDES) $(OPT) -Wall -Wfatal-errors -fdata-sections -ffunction-sections -Wno-unused-function ${test}
 
 ifeq ($(DEBUG), 1)
 CFLAGS += -g -gdwarf-2
