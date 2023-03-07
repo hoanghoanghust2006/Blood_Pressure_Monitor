@@ -19,7 +19,7 @@
 #include "glcd.h"
 #include "image_test.h"
 /* Private define constants -------------------------------------------------------------*/
-#define GLCD_TASK_DELAY_TIME_MS 5
+#define GLCD_TASK_DELAY_TIME_MS 500
 
 /* Private macros -----------------------------------------------------------------------*/
 
@@ -48,7 +48,7 @@ static void GLCD_voTask(void *pvoArgument)
     GLCD_voUpdate();
     for (;;)
     {
-        osDelay(1000);
+        osDelay(GLCD_TASK_DELAY_TIME_MS);
     }
 }
 
