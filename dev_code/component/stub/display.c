@@ -1,6 +1,6 @@
 #include "display.h"
 #include "trace.h"
-
+#include "button.h"
 tenStatus DPL_enDisplayProcessMeasurement(uint8_t          u8AirPressure,
                                           tenPressureState enPressureState,
                                           bool             bRefreshAll)
@@ -55,11 +55,18 @@ tenStatus DPL_enDisplayRecordHistory(const tstStorage* stStorage, uint8_t u8Inde
 
 tenStatus DPL_enDisplaySetupDate(const tstTime* stTime, tenDateSetupState enDateSetupState)
 {
-    return eSUCCESS;
+    printf("Setting up date\r\n");
+    while (1)
+    {
+        if (BTN_voGetState(eBUTTON_SELECT) == ePRESSED) return eSUCCESS;
+    }
 }
 
 tenStatus DPL_enDisplaySetupTime(const tstTime* stTime, tenTimeSetupState enTimeSetupState)
 {
     printf("Setting up time\r\n");
-    return eSUCCESS;
+    while (1)
+    {
+        if (BTN_voGetState(eBUTTON_SELECT) == ePRESSED) return eSUCCESS;
+    }
 }

@@ -23,6 +23,13 @@ extern "C"
     /* Define constants -----------------------------------------------------------------------*/
 
     /* Type definitions (Typedef, enum, struct) -----------------------------------------------*/
+    typedef enum
+    {
+        eDONE,
+        eWORKING,
+
+    } tenWorkingStatus;
+
     typedef struct tstMenu tstMenu;
     struct tstMenu
     {
@@ -31,7 +38,7 @@ extern "C"
         uint8_t    u8CurrentIndex;
         uint8_t    u8Size;
         tstMenu*   apstMenuList[MAX_MENU_LIST];
-        void (*pvoDoWork)(void);
+        tenStatus (*pvoDoWork)(void);
     };
 
     /* Export Function Declarations -----------------------------------------------------------*/
