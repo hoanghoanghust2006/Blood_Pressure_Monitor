@@ -33,11 +33,23 @@ tenStatus DPL_enDisplayResults(const tstBloodPressureResult* stResult)
 tenStatus DPL_enDisplayMenu(const tstMenu* stMenu)
 {
     // TODO: Hoang Hoang
+    printf("%s\r\n", stMenu->pstParent->cName);
+    for (uint8_t i = 0; i < stMenu->pstParent->u8Size; i++)
+    {
+        if (i == stMenu->pstParent->u8CurrentIndex)
+        {
+            printf("OOO    %s\r\n", stMenu->cName);
+        }
+        else
+            printf("%s\r\n", stMenu->pstParent->apstMenuList[i]->cName);
+    }
+    printf("\r\n");
     return eSUCCESS;
 }
 
 tenStatus DPL_enDisplayRecordHistory(const tstStorage* stStorage, uint8_t u8Index)
 {
+    printf("Displaying record\r\n");
     return eSUCCESS;
 }
 
@@ -48,5 +60,6 @@ tenStatus DPL_enDisplaySetupDate(const tstTime* stTime, tenDateSetupState enDate
 
 tenStatus DPL_enDisplaySetupTime(const tstTime* stTime, tenTimeSetupState enTimeSetupState)
 {
+    printf("Setting up time\r\n");
     return eSUCCESS;
 }

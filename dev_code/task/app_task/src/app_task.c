@@ -27,46 +27,10 @@
 #define MIN_VALUE              0
 
 /* Private macros -----------------------------------------------------------------------*/
-tstMenu  stMenuStart;
-tstMenu  stMenu1, stMenu2, stMenu3;
-tstMenu  stMenu1_1, stMenu1_2, stMenu1_3, stMenu2_1, stMenu2_2, stMenu2_3;
-tstMenu  stMenu1_1_1, stMenu1_1_2, stMenu1_1_3;
-tstMenu *stCurrentMenu;
+static tstMenu  stMenuStart;
+static tstMenu  stMenu1, stMenu2, stMenu3;
+static tstMenu *stCurrentMenu = &stMenu1;
 
-typedef struct
-{
-    tstMenu *pstMenuVal;
-    char     cName[MAX_CHARACTER_LENGTH];
-    void (*pvoDoWork)(void);
-} tstPreMenu;
-
-typedef struct
-{
-    tenButtonType enButton;
-    void (*pvoDoWork)(tstMenu **);
-} tstScanMenu;
-static tstPreMenu astPreMenu[] =
-    {
-        {&stMenuStart, "MenuStart", 0},
-        {&stMenu1, "Menu1", 0},
-        {&stMenu2, "Menu2", 0},
-        {&stMenu3, "Menu3", 0},
-        {&stMenu1_1, "Menu1_1", 0},
-        {&stMenu1_2, "Menu1_2", 0},
-        {&stMenu1_3, "Menu1_3", 0},
-        {&stMenu2_1, "Menu2_1", 0},
-        {&stMenu2_2, "Menu2_2", 0},
-        {&stMenu2_3, "Menu2_3", 0},
-        {&stMenu1_1_1, "Menu1_1_1", 0},
-        {&stMenu1_1_2, "Menu1_1_2", 0},
-        {&stMenu1_1_3, "Menu1_1_3", 0}};
-
-static tstMenu *apstAllMenuLink[][MAX_MENU_LIST + 1] =
-    {
-        {&stMenuStart, &stMenu1, &stMenu2, &stMenu3, NULL},
-        {&stMenu1, &stMenu1_1, &stMenu1_2, &stMenu1_3},
-        {&stMenu1_1, &stMenu1_1_1, &stMenu1_1_2, &stMenu1_1_3},
-        {&stMenu2, &stMenu2_1, &stMenu2_2, &stMenu2_3}};
 /* Private type definitions  ------------------------------------------------------------*/
 typedef enum
 {
@@ -91,10 +55,6 @@ static void APP_voMenuStateHandler(void);
 static void APP_voMenuSetDate(void);
 static void APP_voMenuSetTime(void);
 
-static void MENU_voCreateAll(tstPreMenu *pastPreMenu);
-static void MENU_voAddLinks(tstMenu **pastMenu);
-static void MENU_voAddAllLinks(tstMenu *apstAllMenuLink[][MAX_MENU_LIST + 1]);
-
 static void MENU_voNext(tstMenu **stCurrentMenu);
 static void MENU_voBack(tstMenu **stCurrentMenu);
 static void MENU_voUp(tstMenu **stCurrentMenu);
@@ -115,43 +75,39 @@ tstAppStateHandler stAppStateHandler[] = {
     {eMENU, APP_voMenuStateHandler},
 };
 
-// static tenAppState enAppState = eIDLE;
-static tenAppState enAppState = eMENU;
+static tenAppState enAppState = eIDLE;
+// static tenAppState enAppState = eMENU;
 
 static tstValueMeasurement stValueMeasurement = {.u8Pressure  = 0,
                                                  .u8Systolic  = 0,
                                                  .u8Diastolic = 0,
                                                  .u8HeartBeat = 88};
-tstScanMenu                astScanMenu[]      = {
-    {eBUTTON_MENU, MENU_voNext},
-    {eBUTTON_BACK, MENU_voBack},
-    {eBUTTON_UP, MENU_voUp},
-    {eBUTTON_DOWN, MENU_voDown},
-};
 
 /* Private functions definition   -------------------------------------------------------*/
 static void APP_voTask(void *pvoArgument)
 {
+    MENU_enCreate(&stMenuStart, "START MENU", 0);
+    MENU_enCreate(&stMenu1, "Blood pressure", 0);
+    MENU_enCreate(&stMenu2, "Set time", DPL_enDisplaySetupTime);
+    MENU_enCreate(&stMenu3, "History record", DPL_enDisplayRecordHistory);
+    MENU_enAddLink(&stMenuStart, &stMenu1);
+    MENU_enAddLink(&stMenuStart, &stMenu2);
+    MENU_enAddLink(&stMenuStart, &stMenu3);
     for (;;)
     {
         uint32_t u32AppTaskStartTick = osKernelGetTickCount();
 
         /* Search in state handler lookup table for current state */
-        // for (uint8_t i = 0; i < sizeof(stAppStateHandler) / sizeof(tstAppStateHandler); i++)
-        // {
-        //     if (enAppState == stAppStateHandler[i].enState)
-        //     {
-        //         /* If found, run state handler function */
-        //         stAppStateHandler[i].voStateHandler();
-        //         break;
-        //     }
-        // }
+        for (uint8_t i = 0; i < sizeof(stAppStateHandler) / sizeof(tstAppStateHandler); i++)
+        {
+            if (enAppState == stAppStateHandler[i].enState)
+            {
+                /* If found, run state handler function */
+                stAppStateHandler[i].voStateHandler();
+                break;
+            }
+        }
         // APP_voMenuStateHandler();
-        // printf("hello\r\n");
-        MENU_voCreateAll(astPreMenu);
-        MENU_voAddAllLinks(apstAllMenuLink);
-        stCurrentMenu = &stMenu1;
-        DPL_enDisplayMenu(stCurrentMenu);
 
         osDelayUntil(u32AppTaskStartTick + APP_TASK_DELAY_TIME_MS);
     }
@@ -179,6 +135,7 @@ static void APP_voIdleStateHandler(void)
     /* Event when button menu is pressed */
     if (BTN_voGetState(eBUTTON_MENU) == ePRESSED)
     {
+        DPL_enDisplayMenu(stCurrentMenu);
         enAppState = eMENU;
     }
 }
@@ -309,6 +266,7 @@ static void APP_voFinishStateHandler(void)
         /* Event when button menu is pressed */
         if (BTN_voGetState(eBUTTON_MENU) == ePRESSED)
         {
+            DPL_enDisplayMenu(stCurrentMenu);
             u16DisplayCount = 0;
             enAppState      = eMENU;
         }
@@ -323,26 +281,42 @@ static void APP_voFinishStateHandler(void)
 
 static void APP_voMenuStateHandler(void)
 {
-    // trace("menu\r\n");
-    // if (BTN_voGetState(eBUTTON_BACK) == ePRESSED)
-    // {
-    //     enAppState = eIDLE;
-    // }
     // TODO: Hoang Hoang
-    MENU_voCreateAll(astPreMenu);
-    MENU_voAddAllLinks(apstAllMenuLink);
-    stCurrentMenu = &stMenu1;
-    DPL_enDisplayMenu(stCurrentMenu);
-    while (1)
+
+    if (BTN_voGetState(eBUTTON_SELECT) == ePRESSED)
     {
-        for (uint8_t i = 0; i < 4; i++)
+        if (stCurrentMenu == &stMenu1)
         {
-            if (BTN_voGetState(astScanMenu[i].enButton) == ePRESSED)
-            {
-                astScanMenu[i].pvoDoWork(&stCurrentMenu);
-                DPL_enDisplayMenu(stCurrentMenu);
-            }
+            enAppState = eIN_PROCESS;
         }
+        else
+        {
+            stCurrentMenu->pvoDoWork();
+        }
+    }
+
+    if (BTN_voGetState(eBUTTON_MENU) == ePRESSED)
+    {
+        MENU_voNext(&stCurrentMenu);
+        DPL_enDisplayMenu(stCurrentMenu);
+    }
+
+    if (BTN_voGetState(eBUTTON_BACK) == ePRESSED)
+    {
+        MENU_voBack(&stCurrentMenu);
+        DPL_enDisplayMenu(stCurrentMenu);
+    }
+
+    if (BTN_voGetState(eBUTTON_UP) == ePRESSED)
+    {
+        MENU_voUp(&stCurrentMenu);
+        DPL_enDisplayMenu(stCurrentMenu);
+    }
+
+    if (BTN_voGetState(eBUTTON_DOWN) == ePRESSED)
+    {
+        MENU_voDown(&stCurrentMenu);
+        DPL_enDisplayMenu(stCurrentMenu);
     }
 }
 
@@ -360,37 +334,7 @@ static void APP_voMenuSetTime(void)
 {
     // TODO:
 }
-static void MENU_voCreateAll(tstPreMenu *pastPreMenu)
-{
-    uint8_t i = 0;
-    while ((pastPreMenu + i)->pstMenuVal != NULL)
-    {
-        MENU_enCreate((pastPreMenu + i)->pstMenuVal, (pastPreMenu + i)->cName, (pastPreMenu + i)->pvoDoWork);
-        i++;
-    }
-}
 
-/* Linking a parent option to child options*/
-static void MENU_voAddLinks(tstMenu **pastMenu)
-{
-    uint8_t i = 1;
-    while (*(pastMenu + i) != NULL)
-    {
-        MENU_enAddLink(*pastMenu, *(pastMenu + i));
-        i++;
-    }
-}
-
-/* Linking all parent options to their child options*/
-static void MENU_voAddAllLinks(tstMenu *apstAllMenuLink[][MAX_MENU_LIST + 1])
-{
-    uint8_t i = 0;
-    while ((apstAllMenuLink[i][MAX_MENU_LIST + 1]) != NULL)
-    {
-        MENU_voAddLinks(apstAllMenuLink[i]);
-        i++;
-    }
-}
 static void MENU_voNext(tstMenu **stCurrentMenu)
 {
     if ((*stCurrentMenu)->apstMenuList[0] != NULL)
