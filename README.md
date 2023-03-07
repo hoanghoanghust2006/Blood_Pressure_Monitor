@@ -3,7 +3,7 @@
 ## Clone project
 
 - **User name**: nguyen_trung
-- **Password**: ys2kphguaz2rnbi5x6lh3fpuv7qcv6tuelfz4kyfoy4d6br3ycvq
+- **Password**: c5cu6sqht7qix2osxmmjvnatj6awk2iabrkar2n32w52v2nsu6aa
 
 ## Support feature
 
@@ -70,4 +70,5 @@ make -j12
 ## Build unit test
 make clean
 make -j12 test=-DTEST_BUTTON
+make -j12 test=-DTEST_GLCD
 ```
