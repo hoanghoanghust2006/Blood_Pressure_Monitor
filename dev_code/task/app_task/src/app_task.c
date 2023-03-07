@@ -29,6 +29,8 @@
 #define LAST_DAY    31
 #define FIRST_MONTH 1
 #define LAST_MONTH  12
+#define FIRST_YEAR  0
+#define LAST_YEAR   99
 
 #define FIRST_HOUR   0
 #define LAST_HOUR    23
@@ -36,6 +38,9 @@
 #define LAST_MINUTE  59
 #define FIRST_SECOND 0
 #define LAST_SECOND  59
+
+#define BTN_UP_FLAG   1
+#define BTN_DOWN_FLAG 2
 
 /* Private macros -----------------------------------------------------------------------*/
 
@@ -86,6 +91,9 @@ static tstValueMeasurement stValueMeasurement = {.u8Pressure  = 0,
                                                  .u8HeartBeat = 88};
 
 /* Private functions definition   -------------------------------------------------------*/
+static tenStatus enAdjustValueU16(uint16_t *pu16Value, uint8_t u8Max, uint8_t u8Min, uint8_t u8BtnFlag);
+static tenStatus enAdjustValueU8(uint8_t *pu8Value, uint8_t u8Max, uint8_t u8Min, uint8_t u8BtnFlag);
+
 static void APP_voTask(void *pvoArgument)
 {
     for (;;)
@@ -288,79 +296,68 @@ static void APP_voMenuHistory(void)
 
 static void APP_voMenuSetDate(void)
 {
-    static uint8_t           u8FlagGetDate = 1;
-    static uint8_t           u8CountSelect = 0;
+    static bool              bFlagGetDate = true;
     static tstTime           stSetDate;
-    static tenDateSetupState enState;
+    static tenDateSetupState enState = eDAY;
+    uint8_t                  u8BtnFlag;
     tenButtonState           enUpBtnState     = BTN_voGetState(eBUTTON_UP);
     tenButtonState           enDownBtnState   = BTN_voGetState(eBUTTON_DOWN);
     tenButtonState           enSelectBtnState = BTN_voGetState(eBUTTON_SELECT);
 
     /* Get current date */
-    if (u8FlagGetDate == 1)
+    if (bFlagGetDate == true)
     {
         RTC_enGetDateTime(&stSetDate);
         trace("%d %d %d\r\n", stSetDate.u8Day, stSetDate.u8Month, stSetDate.u16Year);
-        u8FlagGetDate = 0;
+        bFlagGetDate = false;
     }
 
-    /* Check date setup state */
-    switch (u8CountSelect)
+    /* Event when button up is pressed or held */
+    if (enUpBtnState != eNONE)
     {
-        /* Set day */
-        case 0:
-            enState = eDAY;
-            if (enUpBtnState != eNONE)
-            {
-                stSetDate.u8Day++;
-                if (stSetDate.u8Day > LAST_DAY)
-                {
-                    stSetDate.u8Day = FIRST_DAY;
-                }
-            }
-            else if (enDownBtnState != eNONE)
-            {
-                stSetDate.u8Day--;
-                if (stSetDate.u8Day < FIRST_DAY)
-                {
-                    stSetDate.u8Day = LAST_DAY;
-                }
-            }
-            break;
+        u8BtnFlag = BTN_UP_FLAG;
 
-        /* Set month */
-        case 1:
-            enState = eMONTH;
-            if (enUpBtnState != eNONE)
-            {
-                stSetDate.u8Month++;
-                if (stSetDate.u8Month > LAST_MONTH)
-                {
-                    stSetDate.u8Month = FIRST_MONTH;
-                }
-            }
-            else if (enDownBtnState != eNONE)
-            {
-                stSetDate.u8Month--;
-                if (stSetDate.u8Month < FIRST_MONTH)
-                {
-                    stSetDate.u8Month = LAST_MONTH;
-                }
-            }
-            break;
+        /* Increase day value */
+        if (enState == eDAY)
+        {
+            enAdjustValueU8(&(stSetDate.u8Day), LAST_DAY, FIRST_DAY, u8BtnFlag);
+        }
 
-        /* Set year */
-        case 2:
-            enState = eYEAR;
-            if (enUpBtnState != eNONE)
-            {
-                stSetDate.u16Year++;
-            }
-            else if (enDownBtnState != eNONE)
-            {
-                stSetDate.u16Year--;
-            }
-            break;
+        /* Increase month value */
+        if (enState == eMONTH)
+        {
+            enAdjustValueU8(&(stSetDate.u8Month), LAST_MONTH, FIRST_MONTH, u8BtnFlag);
+        }
+
+        /* Increase year value */
+        if (enState == eYEAR)
+        {
+            stSetDate.u16Year++;
+        }
+    }
+
+    /* Event when button down is pressed or held */
+    if (enDownBtnState != eNONE)
+    {
+        u8BtnFlag = BTN_DOWN_FLAG;
+
+        /* Decrease day value */
+        if (enState == eDAY)
+        {
+            enAdjustValueU8(&(stSetDate.u8Day), LAST_DAY, FIRST_DAY, u8BtnFlag);
+        }
+
+        /* Decrease month value */
+        if (enState == eMONTH)
+        {
+            enAdjustValueU8(&(stSetDate.u8Month), LAST_MONTH, FIRST_MONTH, u8BtnFlag);
+        }
+
+        /* Decrease year value */
+        if (enState == eYEAR)
+        {
+            enAdjustValueU16(&(stSetDate.u16Year), LAST_YEAR, FIRST_YEAR, u8BtnFlag);
+        }
     }
 
     /* Display setup date */
@@ -374,105 +371,91 @@ static void APP_voMenuSetDate(void)
     {
         printf("\033\143");
         printf("\033[3J");
-        u8CountSelect++;
 
         /* Check condition to save date */
-        if (u8CountSelect == 3)
+        if (enState < 2)
+        {
+            /* Move to next setup state */
+            enState++;
+            trace("%d %d %d\r\n", stSetDate.u8Day, stSetDate.u8Month, stSetDate.u16Year);
+        }
+        else
         {
             printf("\033\143");
             printf("\033[3J");
             RTC_enSetDateTime(&stSetDate);
             trace("%d %d %d\r\n", stSetDate.u8Day, stSetDate.u8Month, stSetDate.u16Year);
-            trace("Save date: Done \r\n");
-            u8CountSelect = 0;
-            u8FlagGetDate = 1;
+            trace("Save time: Done \r\n");
+            enState      = eDAY;
+            bFlagGetDate = true;
         }
     }
 }
 
 static void APP_voMenuSetTime(void)
 {
-    static uint8_t           u8FlagGetTime = 1;
-    static uint8_t           u8CountSelect = 0;
+    static bool              bFlagGetTime = true;
     static tstTime           stSetTime;
-    static tenDateSetupState enState;
+    static tenTimeSetupState enState = eHOUR;
+    uint8_t                  u8BtnFlag;
     tenButtonState           enUpBtnState     = BTN_voGetState(eBUTTON_UP);
     tenButtonState           enDownBtnState   = BTN_voGetState(eBUTTON_DOWN);
     tenButtonState           enSelectBtnState = BTN_voGetState(eBUTTON_SELECT);
 
     /* Get current time */
-    if (u8FlagGetTime == 1)
+    if (bFlagGetTime == true)
     {
         RTC_enGetDateTime(&stSetTime);
         trace("%d %d %d\r\n", stSetTime.u8Hour, stSetTime.u8Minute, stSetTime.u8Second);
-        u8FlagGetTime = 0;
+        bFlagGetTime = false;
     }
 
-    /* Check time setup state */
-    switch (u8CountSelect)
+    /* Event when button up is pressed or held */
+    if (enUpBtnState != eNONE)
     {
-        /* Set hour */
-        case 0:
-            enState = eHOUR;
-            if (enUpBtnState != eNONE)
-            {
-                stSetTime.u8Hour++;
-                if (stSetTime.u8Hour > LAST_HOUR)
-                {
-                    stSetTime.u8Hour = FIRST_HOUR;
-                }
-            }
-            else if (enDownBtnState != eNONE)
-            {
-                stSetTime.u8Hour--;
-                if (stSetTime.u8Hour > LAST_HOUR)
-                {
-                    stSetTime.u8Hour = LAST_HOUR;
-                }
-            }
-            break;
+        u8BtnFlag = BTN_UP_FLAG;
 
-        /* Set minute */
-        case 1:
-            enState = eMONTH;
-            if (enUpBtnState != eNONE)
-            {
-                stSetTime.u8Minute++;
-                if (stSetTime.u8Minute > LAST_MINUTE)
-                {
-                    stSetTime.u8Minute = FIRST_MINUTE;
-                }
-            }
-            else if (enDownBtnState != eNONE)
-            {
-                stSetTime.u8Minute--;
-                if (stSetTime.u8Minute > LAST_MINUTE)
-                {
-                    stSetTime.u8Minute = LAST_MINUTE;
-                }
-            }
-            break;
+        /* Increase hour value */
+        if (enState == eHOUR)
+        {
+            enAdjustValueU8(&(stSetTime.u8Hour), LAST_HOUR, FIRST_HOUR, u8BtnFlag);
+        }
 
-        /* Set second */
-        case 2:
-            enState = eSECOND;
-            if (enUpBtnState != eNONE)
-            {
-                stSetTime.u8Second++;
-                if (stSetTime.u8Second > LAST_SECOND)
-                {
-                    stSetTime.u8Second = FIRST_SECOND;
-                }
-            }
-            else if (enDownBtnState != eNONE)
-            {
-                stSetTime.u8Second--;
-                if (stSetTime.u8Second > LAST_SECOND)
-                {
-                    stSetTime.u8Second = LAST_SECOND;
-                }
-            }
-            break;
+        /* Increase minute value */
+        if (enState == eMINUTE)
+        {
+            enAdjustValueU8(&(stSetTime.u8Minute), LAST_MINUTE, FIRST_MINUTE, u8BtnFlag);
+        }
+
+        /* Increase second value */
+        if (enState == eSECOND)
+        {
+            enAdjustValueU8(&(stSetTime.u8Second), LAST_SECOND, FIRST_SECOND, u8BtnFlag);
+        }
+    }
+
+    /* Event when button down is pressed or held */
+    if (enDownBtnState != eNONE)
+    {
+        u8BtnFlag = BTN_DOWN_FLAG;
+
+        /* Decrease hour value */
+        if (enState == eHOUR)
+        {
+            enAdjustValueU8(&(stSetTime.u8Hour), LAST_HOUR, FIRST_HOUR, u8BtnFlag);
+        }
+
+        /* Decrease minute value */
+        if (enState == eMINUTE)
+        {
+            enAdjustValueU8(&(stSetTime.u8Minute), LAST_MINUTE, FIRST_MINUTE, u8BtnFlag);
+        }
+
+        /* Decrease second value */
+        if (enState == eSECOND)
+        {
+            enAdjustValueU8(&(stSetTime.u8Second), LAST_SECOND, FIRST_SECOND, u8BtnFlag);
+        }
     }
 
     /* Display setup time */
@@ -486,18 +469,78 @@ static void APP_voMenuSetTime(void)
     {
         printf("\033\143");
         printf("\033[3J");
-        u8CountSelect++;
 
         /* Check condition to save time */
-        if (u8CountSelect == 3)
+        if (enState < 2)
+        {
+            /* Move to next setup state */
+            enState++;
+            trace("%d %d %d\r\n", stSetTime.u8Hour, stSetTime.u8Minute, stSetTime.u8Second);
+        }
+        else
         {
             printf("\033\143");
             printf("\033[3J");
             RTC_enSetDateTime(&stSetTime);
             trace("%d %d %d\r\n", stSetTime.u8Hour, stSetTime.u8Minute, stSetTime.u8Second);
             trace("Save time: Done \r\n");
-            u8CountSelect = 0;
-            u8FlagGetTime = 1;
+            enState      = eHOUR;
+            bFlagGetTime = true;
+        }
+    }
+}
+
+static tenStatus enAdjustValueU16(uint16_t *pu16Value, uint8_t u8Max, uint8_t u8Min, uint8_t u8BtnFlag)
+{
+    if (u8BtnFlag == BTN_UP_FLAG)
+    {
+        if (*pu16Value == u8Max)
+        {
+            *pu16Value = u8Min;
+        }
+        else
+        {
+            (*pu16Value)++;
+        }
+    }
+
+    if (u8BtnFlag == BTN_DOWN_FLAG)
+    {
+        if (*pu16Value == u8Min)
+        {
+            *pu16Value = u8Max;
+        }
+        else
+        {
+            (*pu16Value)--;
+        }
+    }
+}
+
+static tenStatus enAdjustValueU8(uint8_t *pu8Value, uint8_t u8Max, uint8_t u8Min, uint8_t u8BtnFlag)
+{
+    if (u8BtnFlag == BTN_UP_FLAG)
+    {
+        trace("%d\r\n", *pu8Value);
+        if (*pu8Value == u8Max)
+        {
+            *pu8Value = u8Min;
+        }
+        else
+        {
+            (*pu8Value)++;
+        }
+    }
+
+    if (u8BtnFlag == BTN_DOWN_FLAG)
+    {
+        if (*pu8Value == u8Min)
+        {
+            *pu8Value = u8Max;
+        }
+        else
+        {
+            (*pu8Value)--;
         }
     }
 }
