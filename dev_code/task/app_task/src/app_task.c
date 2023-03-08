@@ -68,6 +68,9 @@ static void APP_voMenuStateHandler(void);
 static void APP_voMenuSetDate(void);
 static void APP_voMenuSetTime(void);
 
+static tenStatus enAdjustValueU16(uint16_t *pu16Value, uint8_t u8Max, uint8_t u8Min, uint8_t u8BtnFlag);
+static tenStatus enAdjustValueU8(uint8_t *pu8Value, uint8_t u8Max, uint8_t u8Min, uint8_t u8BtnFlag);
+
 /* Private file-local global variables   ------------------------------------------------*/
 static osThreadId_t         APP_pvoTaskHandle;
 static const osThreadAttr_t stAppTask = {
@@ -91,9 +94,6 @@ static tstValueMeasurement stValueMeasurement = {.u8Pressure  = 0,
                                                  .u8HeartBeat = 88};
 
 /* Private functions definition   -------------------------------------------------------*/
-static tenStatus enAdjustValueU16(uint16_t *pu16Value, uint8_t u8Max, uint8_t u8Min, uint8_t u8BtnFlag);
-static tenStatus enAdjustValueU8(uint8_t *pu8Value, uint8_t u8Max, uint8_t u8Min, uint8_t u8BtnFlag);
-
 static void APP_voTask(void *pvoArgument)
 {
     for (;;)
