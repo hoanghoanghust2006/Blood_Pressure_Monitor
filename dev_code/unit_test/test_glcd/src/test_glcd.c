@@ -1,8 +1,8 @@
 /*
- * Title : driver_task.c
- * Copyright : HCL
- * Author : Nam Ngo
- * Creation Date : 31/08/2022
+ * Title : test_glcd.c
+ * Copyright : HCLTech
+ * Author : Hoang Thong
+ * Creation Date : 07/02/2023
  * Description : < Briefly describe the purpose of the file. >
  * Limitations : < Any limitations. >
  * Dependencies : < H/W, S/W( Operating System, Compiler) >
@@ -14,52 +14,47 @@
 
 /* Local Include ------------------------------------------------------------------------*/
 #include "cmsis_os.h"
-#include "led.h"
-#include "button.h"
-#include "rtc.h"
-#include "glcd.h"
+#include "test_glcd.h"
 #include "trace.h"
-
+#include "glcd.h"
+#include "image_test.h"
 /* Private define constants -------------------------------------------------------------*/
-#define DRV_TASK_DELAY_TIME_MS 5
+#define GLCD_TASK_DELAY_TIME_MS 500
 
 /* Private macros -----------------------------------------------------------------------*/
 
 /* Private type definitions  ------------------------------------------------------------*/
 
 /* Private file-local global variables   ------------------------------------------------*/
-osThreadId_t         DRIV_pvoTaskHandle;
-const osThreadAttr_t stDriverTask = {
-    .name       = "DriverTask",
+osThreadId_t         GLCD_pvoTaskHandle;
+const osThreadAttr_t stGlcdTask = {
+    .name       = "GlcdlateTask",
     .stack_size = 1024 * 4,
-    .priority   = (osPriority_t)osPriorityHigh,
+    .priority   = (osPriority_t)osPriorityLow,
 };
 
 /* Private function prototypes declarations   -------------------------------------------*/
-static void DRIV_voTask(void *pvoArgument);
+static void GLCD_voTask(void *pvoArgument);
 
 /* Private functions definition   -------------------------------------------------------*/
-static void DRIV_voTask(void *pvoArgument)
+static void GLCD_voTask(void *pvoArgument)
 {
-    LED_voInit();
-    RTC_enInit();
-    BTN_enInit();
     GLCD_enInit();
-
+    GLCD_voClearScreen();
+    GLCD_voDisplayImage(0, 25, acu8Setting16x16, 16, 16);
+    GLCD_voDrawFilledRectangle(5, 0, 116, 16);
+    GLCD_voDisplayString(40, 5, "HCL TECH", &stFont57, eREVERSE);
+    GLCD_voDisplayString(45, 30, "0123456789", &stFont35, eNORMAL);
+    GLCD_voDisplayString(45, 50, "0123456789", &stFont79, eNORMAL);
+    GLCD_voUpdate();
     for (;;)
     {
-        uint32_t u32DriverTaskStartTick = osKernelGetTickCount();
-
-        LED_voMainFunction();
-        RTC_voMainFunction(DRV_TASK_DELAY_TIME_MS);
-        BTN_voMainFunction(DRV_TASK_DELAY_TIME_MS);
-
-        osDelayUntil(u32DriverTaskStartTick + DRV_TASK_DELAY_TIME_MS);
+        osDelay(GLCD_TASK_DELAY_TIME_MS);
     }
 }
 
 /* Export functions definition   --------------------------------------------------------*/
-void DRIV_voInitTask(void)
+void GLCD_voTaskTestInit(void)
 {
-    DRIV_pvoTaskHandle = osThreadNew(DRIV_voTask, NULL, &stDriverTask);
+    GLCD_pvoTaskHandle = osThreadNew(GLCD_voTask, NULL, &stGlcdTask);
 }

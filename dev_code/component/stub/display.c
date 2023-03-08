@@ -10,6 +10,7 @@ tenStatus DPL_enDisplayProcessMeasurement(uint8_t          u8AirPressure,
     trace("Air Pressure: %d\r\n", u8AirPressure);
     trace("enPressureState: %d\r\n", enPressureState);
     trace("bRefreshAll: %d\r\n", bRefreshAll);
+    return eSUCCESS;
 }
 
 tenStatus DPL_enDisplayResults(const tstBloodPressureResult* stResult)
@@ -26,15 +27,18 @@ tenStatus DPL_enDisplayResults(const tstBloodPressureResult* stResult)
     {
         trace("Error\r\n");
     }
+    return eSUCCESS;
 }
 
 tenStatus DPL_enDisplayMenu(const tstMenu* stMenu)
 {
     // TODO: Hoang Hoang
+    return eSUCCESS;
 }
 
 tenStatus DPL_enDisplayRecordHistory(const tstStorage* stStorage, uint8_t u8Index)
 {
+    return eSUCCESS;
 }
 
 tenStatus DPL_enDisplaySetupDate(const tstTime* stTime, tenDateSetupState enDateSetupState)
@@ -54,6 +58,7 @@ tenStatus DPL_enDisplaySetupDate(const tstTime* stTime, tenDateSetupState enDate
             trace("Year: %d\r\n", stTime->u16Year);
             break;
     }
+    return eSUCCESS;
 }
 
 tenStatus DPL_enDisplaySetupTime(const tstTime* stTime, tenTimeSetupState enTimeSetupState)
@@ -73,4 +78,5 @@ tenStatus DPL_enDisplaySetupTime(const tstTime* stTime, tenTimeSetupState enTime
             trace("Second: %d\r\n", stTime->u8Second);
             break;
     }
+    return eSUCCESS;
 }

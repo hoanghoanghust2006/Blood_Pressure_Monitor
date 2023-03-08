@@ -20,7 +20,7 @@
 #include "app_task.h"
 #include "test_button.h"
 #include "test_rtc.h"
-#include "test_menu.h"
+#include "test_glcd.h"
 
 /* Private define constants -------------------------------------------------------------*/
 
@@ -57,9 +57,9 @@ void ENTRY_voInit(void)
 #elif defined(TEST_RTC)
     printf("Unit test for RTC component\r\n");
     RTC_voTaskTestInit();
-#elif defined(TEST_MENU)
-    printf("Unit test for menu component\r\n");
-    MENU_voTaskTestInit();
+#elif defined(TEST_GLCD)
+    printf("Unit test for GLCD component\r\n");
+    GLCD_voTaskTestInit();
 #else
     APP_enInitTask();
 #endif
