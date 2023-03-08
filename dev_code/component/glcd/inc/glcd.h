@@ -26,6 +26,12 @@ extern "C"
         eDISABLE
     } tenGraphicMode;
 
+    typedef enum
+    {
+        eNORMAL  = 0x00,
+        eREVERSE = 0x01
+    } tenDisplayType;
+
     /* Export Function Declarations -----------------------------------------------------------*/
     tenStatus GLCD_enInit(void);
 
@@ -36,7 +42,7 @@ extern "C"
     void GLCD_voClearPixel(uint8_t u8X, uint8_t u8Y);
 
     /* Display string customize font */
-    void GLCD_voDisplayString(uint8_t u8X, uint8_t u8Y, char* cString, const tstGlcdDislayFont* enFont, uint8_t u8Toggle);
+    void GLCD_voDisplayString(uint8_t u8X, uint8_t u8Y, char* cString, const tstGlcdDislayFont* enFont, tenDisplayType enDisplayType);
 
     /* Display customize */
     void GLCD_voDisplayImage(uint8_t u8X, uint8_t u8Y, const uint8_t* u8Image, uint8_t u8Width, uint8_t u8Height);

@@ -43,9 +43,9 @@ static void GLCD_voTask(void *pvoArgument)
     GLCD_voClearScreen();
     GLCD_voDisplayImage(0, 25, acu8Setting16x16, 16, 16);
     GLCD_voDrawFilledRectangle(5, 0, 116, 16);
-    GLCD_voDisplayString(40, 5, "HCL TECH", &stFont57, 1);
-    GLCD_voDisplayString(45, 30, "0123456789", &stFont35, 0);
-    GLCD_voDisplayString(45, 50, "0123456789", &stFont79, 0);
+    GLCD_voDisplayString(40, 5, "HCL TECH", &stFont57, eREVERSE);
+    GLCD_voDisplayString(45, 30, "0123456789", &stFont35, eNORMAL);
+    GLCD_voDisplayString(45, 50, "0123456789", &stFont79, eNORMAL);
     GLCD_voUpdate();
     for (;;)
     {

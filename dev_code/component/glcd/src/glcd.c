@@ -329,7 +329,7 @@ void GLCD_voClearPixel(uint8_t u8X, uint8_t u8Y)
     }
 }
 
-void GLCD_voDisplayString(uint8_t u8X, uint8_t u8Y, char* cString, const tstGlcdDislayFont* enFont, uint8_t u8Toggle)
+void GLCD_voDisplayString(uint8_t u8X, uint8_t u8Y, char* cString, const tstGlcdDislayFont* enFont, tenDisplayType enDisplayType)
 {
     uint8_t u8Char;
     while (*cString)
@@ -346,7 +346,7 @@ void GLCD_voDisplayString(uint8_t u8X, uint8_t u8Y, char* cString, const tstGlcd
                 {
                     /* Left Shift */
                     uint8_t u8Bit = (u8Char >> u8IndexX) & 0x01;
-                    u8Bit ^= u8Toggle;
+                    u8Bit ^= (uint8_t)enDisplayType;
                     if (u8Bit)
                     {
                         GLCD_voSetPixel(u8X + u8IndexX, u8Y + u8IndexY);
@@ -371,7 +371,7 @@ void GLCD_voDisplayString(uint8_t u8X, uint8_t u8Y, char* cString, const tstGlcd
                 {
                     uint8_t u8IndexBit = enFont->u8Height - 1 - u8IndexY;
                     uint8_t u8Bit      = (u8Char >> u8IndexBit) & 0x01;
-                    u8Bit ^= u8Toggle;
+                    u8Bit ^= (uint8_t)enDisplayType;
                     if (u8Bit)
                     {
                         GLCD_voSetPixel(u8X + u8IndexX, u8Y + ((enFont->u8Height - 1) - u8IndexY));
