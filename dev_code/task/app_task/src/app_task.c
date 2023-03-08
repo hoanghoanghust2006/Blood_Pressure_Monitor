@@ -372,9 +372,6 @@ static void APP_voMenuSetDate(void)
     /* Even when button select is pressed */
     if (enSelectBtnState == ePRESSED)
     {
-        printf("\033\143");
-        printf("\033[3J");
-
         /* Check condition to save date */
         if (enState < eYEAR)
         {
