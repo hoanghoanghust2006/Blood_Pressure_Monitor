@@ -30,7 +30,7 @@
 #define FIRST_MONTH 1
 #define LAST_MONTH  12
 #define FIRST_YEAR  0
-#define LAST_YEAR   99
+#define LAST_YEAR   4000
 
 #define FIRST_HOUR   0
 #define LAST_HOUR    23
