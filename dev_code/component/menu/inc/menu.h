@@ -25,10 +25,9 @@ extern "C"
     /* Type definitions (Typedef, enum, struct) -----------------------------------------------*/
     typedef enum
     {
-        eDONE,
-        eWORKING,
-
-    } tenWorkingStatus;
+        ePROCESSING,
+        eCOMPLETED,
+    } tenProcessStatus;
 
     typedef struct tstMenu tstMenu;
     struct tstMenu
@@ -38,7 +37,7 @@ extern "C"
         uint8_t    u8CurrentIndex;
         uint8_t    u8Size;
         tstMenu*   apstMenuList[MAX_MENU_LIST];
-        tenStatus (*pvoDoWork)(void);
+        tenProcessStatus (*pvoDoWork)();
     };
 
     /* Export Function Declarations -----------------------------------------------------------*/

@@ -1,6 +1,8 @@
 #include "display.h"
 #include "trace.h"
 #include "button.h"
+#include "menu.h"
+
 tenStatus DPL_enDisplayProcessMeasurement(uint8_t          u8AirPressure,
                                           tenPressureState enPressureState,
                                           bool             bRefreshAll)
@@ -47,26 +49,29 @@ tenStatus DPL_enDisplayMenu(const tstMenu* stMenu)
     return eSUCCESS;
 }
 
-tenStatus DPL_enDisplayRecordHistory(const tstStorage* stStorage, uint8_t u8Index)
+tenProcessStatus DPL_enDisplayRecordHistory(const tstStorage* stStorage, uint8_t u8Index)
 {
     printf("Displaying record\r\n");
-    return eSUCCESS;
+    while (1)
+    {
+        if (BTN_voGetState(eBUTTON_SELECT) == ePRESSED) return eCOMPLETED;
+    }
 }
 
-tenStatus DPL_enDisplaySetupDate(const tstTime* stTime, tenDateSetupState enDateSetupState)
+tenProcessStatus DPL_enDisplaySetupDate(const tstTime* stTime, tenDateSetupState enDateSetupState)
 {
     printf("Setting up date\r\n");
     while (1)
     {
-        if (BTN_voGetState(eBUTTON_SELECT) == ePRESSED) return eSUCCESS;
+        if (BTN_voGetState(eBUTTON_SELECT) == ePRESSED) return eCOMPLETED;
     }
 }
 
-tenStatus DPL_enDisplaySetupTime(const tstTime* stTime, tenTimeSetupState enTimeSetupState)
+tenProcessStatus DPL_enDisplaySetupTime(const tstTime* stTime, tenTimeSetupState enTimeSetupState)
 {
     printf("Setting up time\r\n");
     while (1)
     {
-        if (BTN_voGetState(eBUTTON_SELECT) == ePRESSED) return eSUCCESS;
+        if (BTN_voGetState(eBUTTON_SELECT) == ePRESSED) return eCOMPLETED;
     }
 }

@@ -53,7 +53,7 @@ tenStatus DPL_enDisplayProcessMeasurement(uint8_t          u8AirPressure,
                                           bool             bRefreshAll);
 tenStatus DPL_enDisplayResults(const tstBloodPressureResult* stResult);
 tenStatus DPL_enDisplayMenu(const tstMenu* stMenu);
-tenStatus DPL_enDisplayRecordHistory(const tstStorage* stStorage, uint8_t u8Index);
-tenStatus DPL_enDisplaySetupDate(const tstTime* stTime, tenDateSetupState enDateSetupState);
-tenStatus DPL_enDisplaySetupTime(const tstTime* stTime, tenTimeSetupState enTimeSetupState);
+tenProcessStatus DPL_enDisplayRecordHistory(const tstStorage* stStorage, uint8_t u8Index);
+tenProcessStatus DPL_enDisplaySetupDate(const tstTime* stTime, tenDateSetupState enDateSetupState);
+tenProcessStatus DPL_enDisplaySetupTime(const tstTime* stTime, tenTimeSetupState enTimeSetupState);
 #endif

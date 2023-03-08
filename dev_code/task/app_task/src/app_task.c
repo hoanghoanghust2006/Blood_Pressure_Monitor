@@ -27,31 +27,7 @@
 #define MIN_VALUE              0
 
 /* Private macros -----------------------------------------------------------------------*/
-tstMenu  stMenuStart;
-tstMenu  stMenu1, stMenu2, stMenu3;
-tstMenu  stMenu2_1, stMenu2_2;
-tstMenu *stCurrentMenu = &stMenu1;
 
-typedef struct
-{
-    tstMenu *pstMenuVal;
-    char     cName[MAX_CHARACTER_LENGTH];
-    void (*pvoDoWork)(void);
-} tstPreMenu;
-
-static tstPreMenu astPreMenu[] =
-    {
-        {&stMenuStart, "MenuStart", 0},
-        {&stMenu1, "Blood Pressure Measurement", 0},
-        {&stMenu2, "Set Date Time", 0},
-        {&stMenu3, "Record History", DPL_enDisplayRecordHistory},
-        {&stMenu2_1, "SetDate", DPL_enDisplaySetupDate},
-        {&stMenu2_2, "SetTime", DPL_enDisplaySetupTime}};
-
-static tstMenu *apstAllMenuLink[][MAX_MENU_LIST + 1] =
-    {
-        {&stMenuStart, &stMenu1, &stMenu2, &stMenu3, NULL},
-        {&stMenu2, &stMenu2_1, &stMenu2_2, NULL}};
 /* Private type definitions  ------------------------------------------------------------*/
 typedef enum
 {
@@ -63,10 +39,17 @@ typedef enum
 
 typedef struct
 {
+    tstMenu *pstMenuVal;
+    char     cName[MAX_CHARACTER_LENGTH];
+    tenProcessStatus (*pvoDoWork)();
+} tstPreMenu;
+
+typedef struct
+{
     tenAppState enState;
     void (*voStateHandler)(void);
 } tstAppStateHandler;
-tenStatus s = eSUCCESS;
+
 /* Private function prototypes declarations   -------------------------------------------*/
 static void APP_voTask(void *pvoArgument);
 static void APP_voIdleStateHandler(void);
@@ -79,7 +62,6 @@ static void APP_voMenuSetTime(void);
 static void MENU_voCreateAll(tstPreMenu *pastPreMenu);
 static void MENU_voAddLinks(tstMenu **pastMenu);
 static void MENU_voAddAllLinks(tstMenu *apstAllMenuLink[][MAX_MENU_LIST + 1]);
-
 static void MENU_voNext(tstMenu **stCurrentMenu);
 static void MENU_voBack(tstMenu **stCurrentMenu);
 static void MENU_voUp(tstMenu **stCurrentMenu);
@@ -100,13 +82,31 @@ tstAppStateHandler stAppStateHandler[] = {
     {eMENU, APP_voMenuStateHandler},
 };
 
+static tstMenu  stMenuStart;
+static tstMenu  stMenu1, stMenu2, stMenu3;
+static tstMenu  stMenu2_1, stMenu2_2;
+static tstMenu *stCurrentMenu = &stMenu1;
+
 static tenAppState enAppState = eIDLE;
-// static tenAppState enAppState = eMENU;
 
 static tstValueMeasurement stValueMeasurement = {.u8Pressure  = 0,
                                                  .u8Systolic  = 0,
                                                  .u8Diastolic = 0,
                                                  .u8HeartBeat = 88};
+
+static tstPreMenu astPreMenu[] =
+    {
+        {&stMenuStart, "MenuStart", 0},
+        {&stMenu1, "Blood Pressure  ", 0},
+        {&stMenu2, "Set Date Time", 0},
+        {&stMenu3, "Record History", DPL_enDisplayRecordHistory},
+        {&stMenu2_1, "SetDate", DPL_enDisplaySetupDate},
+        {&stMenu2_2, "SetTime", DPL_enDisplaySetupTime}};
+
+static tstMenu *apstAllMenuLink[][MAX_MENU_LIST + 1] =
+    {
+        {&stMenuStart, &stMenu1, &stMenu2, &stMenu3, NULL},
+        {&stMenu2, &stMenu2_1, &stMenu2_2, NULL}};
 
 /* Private functions definition   -------------------------------------------------------*/
 static void APP_voTask(void *pvoArgument)
@@ -303,35 +303,34 @@ static void APP_voFinishStateHandler(void)
 static void APP_voMenuStateHandler(void)
 {
     // TODO: Hoang Hoang
-
+    tenProcessStatus enProcessStatus = ePROCESSING;
     if (BTN_voGetState(eBUTTON_SELECT) == ePRESSED)
     {
         if (stCurrentMenu->pvoDoWork != 0)
         {
-            s = eFAIL;
-            s = stCurrentMenu->pvoDoWork();
+            enProcessStatus = ePROCESSING;
+            enProcessStatus = stCurrentMenu->pvoDoWork();
             DPL_enDisplayMenu(stCurrentMenu);
         }
-    }
-    if (s == eSUCCESS)
-    {
-        if (BTN_voGetState(eBUTTON_MENU) == ePRESSED)
+        else
         {
             MENU_voNext(&stCurrentMenu);
             DPL_enDisplayMenu(stCurrentMenu);
         }
-
+    }
+    if (enProcessStatus == eSUCCESS)
+    {
         if (BTN_voGetState(eBUTTON_BACK) == ePRESSED)
         {
             MENU_voBack(&stCurrentMenu);
             DPL_enDisplayMenu(stCurrentMenu);
         }
 
-                if (BTN_voGetState(eBUTTON_UP) == ePRESSED)
-                {
+        if (BTN_voGetState(eBUTTON_UP) == ePRESSED)
+        {
             MENU_voUp(&stCurrentMenu);
             DPL_enDisplayMenu(stCurrentMenu);
-                }
+        }
 
         if (BTN_voGetState(eBUTTON_DOWN) == ePRESSED)
         {
