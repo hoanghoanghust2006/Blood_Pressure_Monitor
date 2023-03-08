@@ -307,11 +307,6 @@ tenStatus GLCD_enInit(void)
 
 void GLCD_voSetPixel(uint8_t u8X, uint8_t u8Y)
 {
-    uint8_t u8StartRow    = 0;
-    uint8_t u8StartColumn = 0;
-    uint8_t u8EndRow      = 0;
-    uint8_t u8EndColumn   = 0;
-
     if (u8Y < NUM_OF_ROWS && u8X < NUM_OF_COLUMNS)
     {
         /* Identify the pixel */
@@ -319,34 +314,11 @@ void GLCD_voSetPixel(uint8_t u8X, uint8_t u8Y)
 
         /* Set the value for pixel */
         *p |= 0x80u >> (u8X % NUM_BIT_OF_BYTE);
-
-        /* Change the dirty rectangle to account for a pixel being dirty (we assume it was changed) */
-        if (u8StartRow > u8Y)
-        {
-            u8StartRow = u8Y;
-        }
-        if (u8EndRow <= u8Y)
-        {
-            u8EndRow = u8Y + 1;
-        }
-        if (u8StartColumn > u8X)
-        {
-            u8StartColumn = u8X;
-        }
-        if (u8EndColumn <= u8X)
-        {
-            u8EndColumn = u8X + 1;
-        }
     }
 }
 
 void GLCD_voClearPixel(uint8_t u8X, uint8_t u8Y)
 {
-    uint8_t u8StartRow    = 0;
-    uint8_t u8StartColumn = 0;
-    uint8_t u8EndRow      = 0;
-    uint8_t u8EndColumn   = 0;
-
     if (u8Y < NUM_OF_ROWS && u8X < NUM_OF_COLUMNS)
     {
         /* Identify the pixel */
@@ -354,28 +326,10 @@ void GLCD_voClearPixel(uint8_t u8X, uint8_t u8Y)
 
         /* Clear the value for pixel */
         *p &= ~(0x80u >> (u8X % NUM_BIT_OF_BYTE));
-
-        /* Change the dirty rectangle to account for a pixel being dirty (we assume it was changed) */
-        if (u8StartRow > u8Y)
-        {
-            u8StartRow = u8Y;
-        }
-        if (u8EndRow <= u8Y)
-        {
-            u8EndRow = u8Y + 1;
-        }
-        if (u8StartColumn > u8X)
-        {
-            u8StartColumn = u8X;
-        }
-        if (u8EndColumn <= u8X)
-        {
-            u8EndColumn = u8X + 1;
-        }
     }
 }
 
-void GLCD_voDisplayString(uint8_t u8X, uint8_t u8Y, char* cString, const tstGlcdDislayFont* enFont)
+void GLCD_voDisplayString(uint8_t u8X, uint8_t u8Y, char* cString, const tstGlcdDislayFont* enFont, uint8_t u8Toggle)
 {
     uint8_t u8Char;
     while (*cString)
@@ -387,12 +341,13 @@ void GLCD_voDisplayString(uint8_t u8X, uint8_t u8Y, char* cString, const tstGlcd
             {
                 /* Get position to display */
                 u8Char = *(enFont->pu8Font + u8IndexY + enFont->u8Height * (*cString - '/'));
-                trace_line();
-                trace("u8Char: %02X\r\n", u8Char);
+
                 for (uint8_t u8IndexX = 0; u8IndexX < enFont->u8Width; u8IndexX++)
                 {
                     /* Left Shift */
-                    if (u8Char & (0x01 << u8IndexX))
+                    uint8_t u8Bit = (u8Char >> u8IndexX) & 0x01;
+                    u8Bit ^= u8Toggle;
+                    if (u8Bit)
                     {
                         GLCD_voSetPixel(u8X + u8IndexX, u8Y + u8IndexY);
                     }
@@ -414,7 +369,10 @@ void GLCD_voDisplayString(uint8_t u8X, uint8_t u8Y, char* cString, const tstGlcd
                 u8Char = *(enFont->pu8Font + u8IndexX + enFont->u8Width * (*cString - INDEX_OF_FONT_MEDIUM));
                 for (uint8_t u8IndexY = 0; u8IndexY < enFont->u8Height; u8IndexY++)
                 {
-                    if (u8Char & (1 << ((enFont->u8Height - 1) - u8IndexY)))
+                    uint8_t u8IndexBit = enFont->u8Height - 1 - u8IndexY;
+                    uint8_t u8Bit      = (u8Char >> u8IndexBit) & 0x01;
+                    u8Bit ^= u8Toggle;
+                    if (u8Bit)
                     {
                         GLCD_voSetPixel(u8X + u8IndexX, u8Y + ((enFont->u8Height - 1) - u8IndexY));
                     }
