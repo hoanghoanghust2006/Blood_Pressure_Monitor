@@ -103,14 +103,13 @@ static void APP_voTask(void *pvoArgument)
     {
         uint32_t u32AppTaskStartTick = osKernelGetTickCount();
 
-        APP_voMenuSetDate();
         /* Search in state handler lookup table for current state */
         for (uint8_t i = 0; i < sizeof(stAppStateHandler) / sizeof(tstAppStateHandler); i++)
         {
             if (enAppState == stAppStateHandler[i].enState)
             {
                 /* If found, run state handler function */
-                // stAppStateHandler[i].voStateHandler();
+                stAppStateHandler[i].voStateHandler();
                 break;
             }
         }
