@@ -303,9 +303,10 @@ static void APP_voFinishStateHandler(void)
 static void APP_voMenuStateHandler(void)
 {
     // TODO: Hoang Hoang
-    tenProcessStatus enProcessStatus = ePROCESSING;
+    tenProcessStatus enProcessStatus = eCOMPLETED;
     if (BTN_voGetState(eBUTTON_SELECT) == ePRESSED)
     {
+        /* Check if current menu has task to do, it will preempt */
         if (stCurrentMenu->pvoDoWork != 0)
         {
             enProcessStatus = ePROCESSING;
@@ -318,7 +319,7 @@ static void APP_voMenuStateHandler(void)
             DPL_enDisplayMenu(stCurrentMenu);
         }
     }
-    if (enProcessStatus == eSUCCESS)
+    if (enProcessStatus == eCOMPLETED)
     {
         if (BTN_voGetState(eBUTTON_BACK) == ePRESSED)
         {
@@ -354,6 +355,7 @@ static void APP_voMenuSetTime(void)
 {
     // TODO:
 }
+
 static void MENU_voCreateAll(tstPreMenu *pastPreMenu)
 {
     uint8_t i = 0;
