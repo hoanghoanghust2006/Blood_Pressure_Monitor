@@ -28,7 +28,7 @@
 #define PRESS_TIME_DETECT 50
 #define HOLD_TIME_DETECT  2000
 
-#define COUNTER_DELAY 100
+#define COUNTER_DELAY 20
 
 /* Private macros -----------------------------------------------------------------------*/
 
