@@ -37,12 +37,16 @@ extern "C"
         uint8_t    u8CurrentIndex;
         uint8_t    u8Size;
         tstMenu*   apstMenuList[MAX_MENU_LIST];
-        tenProcessStatus (*pvoDoWork)();
+        tenProcessStatus (*pvoDoWork)(void);
     };
 
     /* Export Function Declarations -----------------------------------------------------------*/
-    tenStatus MENU_enCreate(tstMenu* pstMenuVal, char* cName, void (*pvoDoWork)(void));
+    tenStatus MENU_enCreate(tstMenu* pstMenuVal, char* cName, tenProcessStatus (*pvoDoWork)(void));
     tenStatus MENU_enAddLink(tstMenu* pstParent, tstMenu* pstChild);
+    void      MENU_voNext(tstMenu** stCurrentMenu);
+    void      MENU_voBack(tstMenu** stCurrentMenu);
+    void      MENU_voUp(tstMenu** stCurrentMenu);
+    void      MENU_voDown(tstMenu** stCurrentMenu);
 
 #ifdef __cplusplus
 }

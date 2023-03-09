@@ -24,7 +24,7 @@
 /* Private function prototypes declarations   -------------------------------------------*/
 
 /* Private functions definition   -------------------------------------------------------*/
-tenStatus MENU_enCreate(tstMenu* pstMenuVal, char* cName, void (*pvoDoWork)())
+tenStatus MENU_enCreate(tstMenu* pstMenuVal, char* cName, tenProcessStatus (*pvoDoWork)(void))
 {
     if (strlen(cName) <= MAX_CHARACTER_LENGTH)
     {
@@ -55,6 +55,45 @@ tenStatus MENU_enAddLink(tstMenu* pstParent, tstMenu* pstChild)
         return eFAIL;
     }
     return eSUCCESS;
+}
+
+void MENU_voNext(tstMenu** stCurrentMenu)
+{
+    if ((*stCurrentMenu)->apstMenuList[0] != NULL)
+    {
+        *stCurrentMenu = (*stCurrentMenu)->apstMenuList[0];
+    }
+}
+
+void MENU_voBack(tstMenu** stCurrentMenu)
+{
+    if ((*stCurrentMenu)->pstParent->pstParent != NULL)
+    {
+        (*stCurrentMenu)->pstParent->u8CurrentIndex = 0;
+        *stCurrentMenu                              = (*stCurrentMenu)->pstParent;
+    }
+}
+
+void MENU_voUp(tstMenu** stCurrentMenu)
+{
+    *stCurrentMenu = (*stCurrentMenu)->pstParent;
+    if ((*stCurrentMenu)->u8CurrentIndex == 0)
+    {
+        (*stCurrentMenu)->u8CurrentIndex = ((*stCurrentMenu)->u8Size);
+    }
+    (*stCurrentMenu)->u8CurrentIndex--;
+    *stCurrentMenu = (*stCurrentMenu)->apstMenuList[(*stCurrentMenu)->u8CurrentIndex];
+}
+
+void MENU_voDown(tstMenu** stCurrentMenu)
+{
+    *stCurrentMenu = (*stCurrentMenu)->pstParent;
+    (*stCurrentMenu)->u8CurrentIndex++;
+    if ((*stCurrentMenu)->u8CurrentIndex >= (*stCurrentMenu)->u8Size)
+    {
+        (*stCurrentMenu)->u8CurrentIndex = 0;
+    }
+    *stCurrentMenu = (*stCurrentMenu)->apstMenuList[(*stCurrentMenu)->u8CurrentIndex];
 }
 
 /* Export functions definition   --------------------------------------------------------*/

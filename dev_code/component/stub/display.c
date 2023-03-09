@@ -34,7 +34,6 @@ tenStatus DPL_enDisplayResults(const tstBloodPressureResult* stResult)
 
 tenStatus DPL_enDisplayMenu(const tstMenu* stMenu)
 {
-    // TODO: Hoang Hoang
     printf("%s\r\n", stMenu->pstParent->cName);
     for (uint8_t i = 0; i < stMenu->pstParent->u8Size; i++)
     {
@@ -49,29 +48,17 @@ tenStatus DPL_enDisplayMenu(const tstMenu* stMenu)
     return eSUCCESS;
 }
 
-tenProcessStatus DPL_enDisplayRecordHistory(const tstStorage* stStorage, uint8_t u8Index)
+tenStatus DPL_enDisplayRecordHistory(const tstStorage* stStorage, uint8_t u8Index)
 {
-    printf("Displaying record\r\n");
-    while (1)
-    {
-        if (BTN_voGetState(eBUTTON_SELECT) == ePRESSED) return eCOMPLETED;
-    }
+    return eSUCCESS;
 }
 
-tenProcessStatus DPL_enDisplaySetupDate(const tstTime* stTime, tenDateSetupState enDateSetupState)
+tenStatus DPL_enDisplaySetupDate(const tstTime* stTime, tenDateSetupState enDateSetupState)
 {
-    printf("Setting up date\r\n");
-    while (1)
-    {
-        if (BTN_voGetState(eBUTTON_SELECT) == ePRESSED) return eCOMPLETED;
-    }
+    return eSUCCESS;
 }
 
-tenProcessStatus DPL_enDisplaySetupTime(const tstTime* stTime, tenTimeSetupState enTimeSetupState)
+tenStatus DPL_enDisplaySetupTime(const tstTime* stTime, tenTimeSetupState enTimeSetupState)
 {
-    printf("Setting up time\r\n");
-    while (1)
-    {
-        if (BTN_voGetState(eBUTTON_SELECT) == ePRESSED) return eCOMPLETED;
-    }
+    return eSUCCESS;
 }
