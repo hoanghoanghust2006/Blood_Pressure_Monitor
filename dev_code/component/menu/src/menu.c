@@ -57,24 +57,26 @@ tenStatus MENU_enAddLink(tstMenu* pstParent, tstMenu* pstChild)
     return eSUCCESS;
 }
 
-void MENU_voNext(tstMenu** stCurrentMenu)
+tenStatus MENU_voNext(tstMenu** stCurrentMenu)
 {
     if ((*stCurrentMenu)->apstMenuList[0] != NULL)
     {
         *stCurrentMenu = (*stCurrentMenu)->apstMenuList[0];
     }
+    return eSUCCESS;
 }
 
-void MENU_voBack(tstMenu** stCurrentMenu)
+tenStatus MENU_voBack(tstMenu** stCurrentMenu)
 {
     if ((*stCurrentMenu)->pstParent->pstParent != NULL)
     {
         (*stCurrentMenu)->pstParent->u8CurrentIndex = 0;
         *stCurrentMenu                              = (*stCurrentMenu)->pstParent;
     }
+    return eSUCCESS;
 }
 
-void MENU_voUp(tstMenu** stCurrentMenu)
+tenStatus MENU_voUp(tstMenu** stCurrentMenu)
 {
     *stCurrentMenu = (*stCurrentMenu)->pstParent;
     if ((*stCurrentMenu)->u8CurrentIndex == 0)
@@ -83,9 +85,10 @@ void MENU_voUp(tstMenu** stCurrentMenu)
     }
     (*stCurrentMenu)->u8CurrentIndex--;
     *stCurrentMenu = (*stCurrentMenu)->apstMenuList[(*stCurrentMenu)->u8CurrentIndex];
+    return eSUCCESS;
 }
 
-void MENU_voDown(tstMenu** stCurrentMenu)
+tenStatus MENU_voDown(tstMenu** stCurrentMenu)
 {
     *stCurrentMenu = (*stCurrentMenu)->pstParent;
     (*stCurrentMenu)->u8CurrentIndex++;
@@ -94,6 +97,7 @@ void MENU_voDown(tstMenu** stCurrentMenu)
         (*stCurrentMenu)->u8CurrentIndex = 0;
     }
     *stCurrentMenu = (*stCurrentMenu)->apstMenuList[(*stCurrentMenu)->u8CurrentIndex];
+    return eSUCCESS;
 }
 
 /* Export functions definition   --------------------------------------------------------*/
