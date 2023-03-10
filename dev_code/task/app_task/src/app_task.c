@@ -105,7 +105,7 @@ tstAppStateHandler stAppStateHandler[] = {
 static tstMenu  stMainMenu;
 static tstMenu  stHistoryRecordMenu, stSetDateTimeMenu;
 static tstMenu  stSetDateMenu, stSetTimeMenu;
-static tstMenu *stCurrentMenu = &stHistoryRecordMenu;
+static tstMenu *stCurrentMenu = &stMainMenu;
 
 static tenAppState enAppState = eIDLE;
 
@@ -321,43 +321,40 @@ static void APP_voMenuStateHandler(void)
 {
     static tenProcessStatus enProcessStatus = eCOMPLETED;
     /* Check if a menu option has a task to do*/
-    if (stCurrentMenu->pvoDoWork != NULL && enProcessStatus == eCOMPLETED)
-    {
-        /* Event when button is pressed, switch task state to processing*/
-        if (BTN_voGetState(eBUTTON_SELECT) == ePRESSED)
-        {
-            enProcessStatus = ePROCESSING;
-        }
-    }
-    /* Check if task state is processing, do task*/
-    if (enProcessStatus == ePROCESSING)
+    if (stCurrentMenu->pvoDoWork != NULL)
     {
         enProcessStatus = stCurrentMenu->pvoDoWork();
+        /* Check if task is done, back to previous menu*/
+        if (enProcessStatus == eCOMPLETED)
+        {
+            MENU_enBack(&stCurrentMenu);
+            DPL_enDisplayMenu(stCurrentMenu);
+        }
     }
-    /* Check if task state is completed, means no task to do*/
-    else if (enProcessStatus == eCOMPLETED)
+    /* Check if no task to do*/
+    if (enProcessStatus == eCOMPLETED)
     {
         if (BTN_voGetState(eBUTTON_SELECT) == ePRESSED)
         {
-            MENU_voNext(&stCurrentMenu);
+            MENU_enNext(&stCurrentMenu);
             DPL_enDisplayMenu(stCurrentMenu);
         }
 
         if (BTN_voGetState(eBUTTON_BACK) == ePRESSED)
         {
-            MENU_voBack(&stCurrentMenu);
+            MENU_enBack(&stCurrentMenu);
             DPL_enDisplayMenu(stCurrentMenu);
         }
 
         if (BTN_voGetState(eBUTTON_UP) == ePRESSED)
         {
-            MENU_voUp(&stCurrentMenu);
+            MENU_enUp(&stCurrentMenu);
             DPL_enDisplayMenu(stCurrentMenu);
         }
 
         if (BTN_voGetState(eBUTTON_DOWN) == ePRESSED)
         {
-            MENU_voDown(&stCurrentMenu);
+            MENU_enDown(&stCurrentMenu);
             DPL_enDisplayMenu(stCurrentMenu);
         }
     }
@@ -367,17 +364,17 @@ static tenProcessStatus APP_voMenuHistory(void)
 {
     if (BTN_voGetState(eBUTTON_SELECT) == ePRESSED)
     {
-        printf("Displaying History\r\n");
+        printf("Displaying History \r\n");
     }
+
     if (BTN_voGetState(eBUTTON_BACK) == ePRESSED)
     {
-        DPL_enDisplayMenu(stCurrentMenu);
         return eCOMPLETED;
     }
     return ePROCESSING;
 }
 
-static tenProcessStatus APP_voMenuSetDate(void)
+static tenProcessStatus APP_voMenuSetTime(void)
 {
     static bool              bFlagGetTime = true;
     static tstTime           stSetTime;
@@ -468,19 +465,8 @@ static tenProcessStatus APP_voMenuSetDate(void)
     }
     return ePROCESSING;
 }
-    // if (BTN_voGetState(eBUTTON_SELECT) == ePRESSED)
-    // {
-    //     printf("Setting up Date\r\n");
-    // }
-    // if (BTN_voGetState(eBUTTON_BACK) == ePRESSED)
-    // {
-    //     DPL_enDisplayMenu(stCurrentMenu);
-    //     return eCOMPLETED;
-    // }
-    // return ePROCESSING;
 
-
-static tenProcessStatus APP_voMenuSetTime(void)
+static tenProcessStatus APP_voMenuSetDate(void)
 {
     static bool              bFlagGetDate = true;
     static tstTime           stSetDate;

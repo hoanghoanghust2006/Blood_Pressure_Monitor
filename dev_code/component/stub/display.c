@@ -34,17 +34,21 @@ tenStatus DPL_enDisplayResults(const tstBloodPressureResult* stResult)
 
 tenStatus DPL_enDisplayMenu(const tstMenu* stMenu)
 {
-    printf("%s\r\n", stMenu->pstParent->cName);
-    for (uint8_t i = 0; i < stMenu->pstParent->u8Size; i++)
+    if (stMenu->apstMenuList[0] != NULL)
     {
-        if (i == stMenu->pstParent->u8CurrentIndex)
+        printf("%s\r\n", stMenu->cName);
+
+        for (uint8_t i = 0; i < stMenu->u8Size; i++)
         {
-            printf("OOO    %s\r\n", stMenu->cName);
+            if (i == stMenu->u8CurrentIndex)
+            {
+                printf("OOO    %s\r\n", stMenu->apstMenuList[i]->cName);
+            }
+            else
+                printf("%s\r\n", stMenu->apstMenuList[i]->cName);
         }
-        else
-            printf("%s\r\n", stMenu->pstParent->apstMenuList[i]->cName);
+        printf("\r\n");
     }
-    printf("\r\n");
     return eSUCCESS;
 }
 

@@ -57,47 +57,42 @@ tenStatus MENU_enAddLink(tstMenu* pstParent, tstMenu* pstChild)
     return eSUCCESS;
 }
 
-tenStatus MENU_voNext(tstMenu** stCurrentMenu)
+tenStatus MENU_enNext(tstMenu** stCurrentMenu)
 {
-    if ((*stCurrentMenu)->apstMenuList[0] != NULL)
-    {
-        *stCurrentMenu = (*stCurrentMenu)->apstMenuList[0];
-    }
+    *stCurrentMenu = (*stCurrentMenu)->apstMenuList[(*stCurrentMenu)->u8CurrentIndex];
+
     return eSUCCESS;
 }
 
-tenStatus MENU_voBack(tstMenu** stCurrentMenu)
+tenStatus MENU_enBack(tstMenu** stCurrentMenu)
 {
-    if ((*stCurrentMenu)->pstParent->pstParent != NULL)
+    if ((*stCurrentMenu)->pstParent != NULL)
     {
-        (*stCurrentMenu)->pstParent->u8CurrentIndex = 0;
-        *stCurrentMenu                              = (*stCurrentMenu)->pstParent;
+        *stCurrentMenu = (*stCurrentMenu)->pstParent;
     }
+
     return eSUCCESS;
 }
 
-tenStatus MENU_voUp(tstMenu** stCurrentMenu)
+tenStatus MENU_enUp(tstMenu** stCurrentMenu)
 {
-    *stCurrentMenu = (*stCurrentMenu)->pstParent;
     if ((*stCurrentMenu)->u8CurrentIndex == 0)
     {
         (*stCurrentMenu)->u8CurrentIndex = ((*stCurrentMenu)->u8Size);
     }
     (*stCurrentMenu)->u8CurrentIndex--;
-    *stCurrentMenu = (*stCurrentMenu)->apstMenuList[(*stCurrentMenu)->u8CurrentIndex];
+
     return eSUCCESS;
 }
 
-tenStatus MENU_voDown(tstMenu** stCurrentMenu)
+tenStatus MENU_enDown(tstMenu** stCurrentMenu)
 {
-    *stCurrentMenu = (*stCurrentMenu)->pstParent;
     (*stCurrentMenu)->u8CurrentIndex++;
     if ((*stCurrentMenu)->u8CurrentIndex >= (*stCurrentMenu)->u8Size)
     {
         (*stCurrentMenu)->u8CurrentIndex = 0;
     }
-    *stCurrentMenu = (*stCurrentMenu)->apstMenuList[(*stCurrentMenu)->u8CurrentIndex];
+
     return eSUCCESS;
 }
-
 /* Export functions definition   --------------------------------------------------------*/

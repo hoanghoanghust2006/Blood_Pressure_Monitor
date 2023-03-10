@@ -43,10 +43,10 @@ extern "C"
     /* Export Function Declarations -----------------------------------------------------------*/
     tenStatus MENU_enCreate(tstMenu* pstMenuVal, char* cName, tenProcessStatus (*pvoDoWork)(void));
     tenStatus MENU_enAddLink(tstMenu* pstParent, tstMenu* pstChild);
-    tenStatus MENU_voNext(tstMenu** stCurrentMenu);
-    tenStatus MENU_voBack(tstMenu** stCurrentMenu);
-    tenStatus MENU_voUp(tstMenu** stCurrentMenu);
-    tenStatus MENU_voDown(tstMenu** stCurrentMenu);
+    tenStatus MENU_enNext(tstMenu** stCurrentMenu);
+    tenStatus MENU_enBack(tstMenu** stCurrentMenu);
+    tenStatus MENU_enUp(tstMenu** stCurrentMenu);
+    tenStatus MENU_enDown(tstMenu** stCurrentMenu);
 
 #ifdef __cplusplus
 }
