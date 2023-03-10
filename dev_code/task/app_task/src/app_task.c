@@ -80,9 +80,9 @@ static void APP_voMenuCreateAll(tstPreMenu *pastPreMenu);
 static void APP_voMenuAddLinks(tstMenu **pastMenu);
 static void APP_voMenuAddAllLinks(tstMenu *apstAllMenuLink[][MAX_MENU_LIST + 1]);
 
-static tenProcessStatus APP_voMenuSetDate(void);
-static tenProcessStatus APP_voMenuSetTime(void);
-static tenProcessStatus APP_voMenuHistory(void);
+static tenProcessStatus APP_enMenuSetDate(void);
+static tenProcessStatus APP_enMenuSetTime(void);
+static tenProcessStatus APP_enMenuHistory(void);
 
 static tenStatus enAdjustValueU16(uint16_t *pu16Value, uint16_t u8Max, uint16_t u8Min, tenOperator enOperator);
 static tenStatus enAdjustValueU8(uint8_t *pu8Value, uint8_t u8Max, uint8_t u8Min, tenOperator enOperator);
@@ -117,10 +117,10 @@ static tstValueMeasurement stValueMeasurement = {.u8Pressure  = 0,
 static tstPreMenu astPreMenu[] =
     {
         {&stMainMenu, "Main Menu", NULL},
-        {&stHistoryRecordMenu, "History of records", APP_voMenuHistory},
+        {&stHistoryRecordMenu, "History of records", APP_enMenuHistory},
         {&stSetDateTimeMenu, "Set Date Time", NULL},
-        {&stSetDateMenu, "Set up Date", APP_voMenuSetDate},
-        {&stSetTimeMenu, "Set up Time", APP_voMenuSetTime}};
+        {&stSetDateMenu, "Set up Date", APP_enMenuSetDate},
+        {&stSetTimeMenu, "Set up Time", APP_enMenuSetTime}};
 
 static tstMenu *apstAllMenuLink[][MAX_MENU_LIST + 1] =
     {
@@ -360,7 +360,7 @@ static void APP_voMenuStateHandler(void)
     }
 }
 
-static tenProcessStatus APP_voMenuHistory(void)
+static tenProcessStatus APP_enMenuHistory(void)
 {
     if (BTN_voGetState(eBUTTON_SELECT) == ePRESSED)
     {
@@ -374,7 +374,7 @@ static tenProcessStatus APP_voMenuHistory(void)
     return ePROCESSING;
 }
 
-static tenProcessStatus APP_voMenuSetTime(void)
+static tenProcessStatus APP_enMenuSetTime(void)
 {
     static bool              bFlagGetTime = true;
     static tstTime           stSetTime;
@@ -466,7 +466,7 @@ static tenProcessStatus APP_voMenuSetTime(void)
     return ePROCESSING;
 }
 
-static tenProcessStatus APP_voMenuSetDate(void)
+static tenProcessStatus APP_enMenuSetDate(void)
 {
     static bool              bFlagGetDate = true;
     static tstTime           stSetDate;
