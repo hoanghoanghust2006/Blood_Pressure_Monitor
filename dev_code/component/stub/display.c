@@ -42,7 +42,7 @@ tenStatus DPL_enDisplayMenu(const tstMenu* stMenu)
         {
             if (i == stMenu->u8CurrentIndex)
             {
-                printf("OOO    %s\r\n", stMenu->apstMenuList[i]->cName);
+                printf("%s <--\r\n", stMenu->apstMenuList[i]->cName);
             }
             else
                 printf("%s\r\n", stMenu->apstMenuList[i]->cName);

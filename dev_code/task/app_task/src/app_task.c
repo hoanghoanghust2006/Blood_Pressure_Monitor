@@ -147,6 +147,7 @@ static void APP_voTask(void *pvoArgument)
                 break;
             }
         }
+
         osDelayUntil(u32AppTaskStartTick + APP_TASK_DELAY_TIME_MS);
     }
 }

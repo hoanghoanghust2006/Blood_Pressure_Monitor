@@ -78,19 +78,25 @@ tenStatus MENU_enUp(tstMenu** stCurrentMenu)
 {
     if ((*stCurrentMenu)->u8CurrentIndex == 0)
     {
-        (*stCurrentMenu)->u8CurrentIndex = ((*stCurrentMenu)->u8Size);
+        (*stCurrentMenu)->u8CurrentIndex = ((*stCurrentMenu)->u8Size) - 1;
     }
-    (*stCurrentMenu)->u8CurrentIndex--;
+    else
+    {
+        (*stCurrentMenu)->u8CurrentIndex--;
+    }
 
     return eSUCCESS;
 }
 
 tenStatus MENU_enDown(tstMenu** stCurrentMenu)
 {
-    (*stCurrentMenu)->u8CurrentIndex++;
-    if ((*stCurrentMenu)->u8CurrentIndex >= (*stCurrentMenu)->u8Size)
+    if ((*stCurrentMenu)->u8CurrentIndex == ((*stCurrentMenu)->u8Size) - 1)
     {
         (*stCurrentMenu)->u8CurrentIndex = 0;
+    }
+    else
+    {
+        (*stCurrentMenu)->u8CurrentIndex++;
     }
 
     return eSUCCESS;
