@@ -29,7 +29,7 @@ typedef struct
 {
     tstMenu   *pstMenuVal;
     char       cName[MAX_CHARACTER_LENGTH];
-    void (*pvoDoWork)(void);
+    tenProcessStatus (*pvoDoWork)(void);
 } tstPreMenu;
 
 /* Private file-local global variables   ------------------------------------------------*/
