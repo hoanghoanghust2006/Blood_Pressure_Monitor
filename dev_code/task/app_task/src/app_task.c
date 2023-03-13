@@ -122,19 +122,19 @@ static tstPreMenu astPreMenu[] =
         {&stHistoryRecordMenu, "History of records", APP_enMenuHistory},
         {&stSetDateTimeMenu, "Set Date Time", NULL},
         {&stSetDateMenu, "Set up Date", APP_enMenuSetDate},
-        {&stSetTimeMenu, "Set up Time", APP_enMenuSetTime}};
+        {&stSetTimeMenu, "Set up Time", APP_enMenuSetTime},
+        {NULL, "", NULL}};
 
 static tstMenu *apstAllMenuLink[][MAX_MENU_LIST + 1] =
     {
         {&stMainMenu, &stHistoryRecordMenu, &stSetDateTimeMenu, NULL},
-        {&stSetDateTimeMenu, &stSetDateMenu, &stSetTimeMenu, NULL}};
+        {&stSetDateTimeMenu, &stSetDateMenu, &stSetTimeMenu, NULL},
+        {NULL, NULL}};
 
 /* Private functions definition   -------------------------------------------------------*/
 static void APP_voTask(void *pvoArgument)
 {
-    trace_line();
     APP_voMenuCreateAll(astPreMenu);
-        trace_line();
     APP_voMenuAddAllLinks(apstAllMenuLink);
 
     for (;;)
@@ -373,6 +373,7 @@ static tenProcessStatus APP_enMenuHistory(void)
     static uint8_t    u8MaxRecordIndex;
     tenButtonState    enUpBtnState   = BTN_voGetState(eBUTTON_UP);
     tenButtonState    enDownBtnState = BTN_voGetState(eBUTTON_DOWN);
+    tenButtonState    enBackBtnState = BTN_voGetState(eBUTTON_BACK);
 
     /* Get record history */
     if (bFlagGetHistory == true)
@@ -403,6 +404,12 @@ static tenProcessStatus APP_enMenuHistory(void)
     if ((enUpBtnState != eNONE) || (enDownBtnState != eNONE))
     {
         DPL_enDisplayRecordHistory(&astStorage[u8Index], u8Index + 1);
+    }
+
+    /* Even when button back is pressed*/
+    if (enBackBtnState == ePRESSED)
+    {
+        return eCOMPLETED;
     }
     return ePROCESSING;
 }
