@@ -17,30 +17,39 @@
 #include <ctype.h>
 /* Local Include ------------------------------------------------------------------------*/
 #include "cmsis_os.h"
-#include "stm32l4xx_hal.h"
 #include "test_storage.h"
 #include "storage.h"
 #include "trace.h"
 
+#if defined(STM32H735xx)
+#include "stm32h7xx_hal.h"
+#elif defined(STM32H7B3xxQ)
+#include "stm32h7xx_hal.h"
+#elif defined(STM32L496xx)
+#include "stm32l4xx_hal.h"
+#endif
+
 /* Private define constants -------------------------------------------------------------*/
 
 /* Private macros -----------------------------------------------------------------------*/
-#define MAX_NUM_OF_RECORD 90
 
 /* Private type definitions  ------------------------------------------------------------*/
 
 /* Private file-local global variables   ------------------------------------------------*/
-#if defined(STM32L496xx)
-extern UART_HandleTypeDef  huart2;
-static UART_HandleTypeDef *huart_storage = &huart2;
-#elif defined(STM32L496xx)
+#if defined(STM32H735xx)
+extern UART_HandleTypeDef  huart3;
+static UART_HandleTypeDef *huart_storage = &huart3;
+#elif defined(STM32H7B3xxQ)
 extern UART_HandleTypeDef  huart1;
 static UART_HandleTypeDef *huart_storage = &huart1;
+#elif defined(STM32L496xx)
+extern UART_HandleTypeDef  huart2;
+static UART_HandleTypeDef *huart_storage = &huart2;
 #endif
 
 static uint8_t       u8DataRx;
 static uint8_t       u8CmdData;
-static tstStorage    arrStorage[MAX_NUM_OF_RECORD];
+static tstStorage    arrStorage[MAX_NUM_OF_RECORDS];
 static osThreadId_t  STO_voTestTaskHandle;
 const osThreadAttr_t stStorageTask = {
     .name       = "StorageTask",
@@ -67,7 +76,7 @@ static void STO_voTestTask(void *pvoArgument)
     trace("Press 'N' to get Number of record \r\n");
     trace("Press 'G' to Get all of record \r\n");
     trace("Press 'R' to Random one record \r\n");
-    trace("Press 'D' to Delete all of record\r\n\n");
+    trace("Press 'D' to Delete all of record\r\n\r\n");
 
     /* Infinite loop */
     for (;;)
@@ -87,20 +96,20 @@ static void STO_voTestTask(void *pvoArgument)
 
 static void STO_voTestGetNumRecords()
 {
-    trace("Request Total Records\r\n\n");
-    trace("Total Measurement : %d\r\n\n", STO_u8GetNumOfRecords());
+    trace("Request Total Records\r\n");
+    trace("Total Measurement : %d\r\n\r\n", STO_u8GetNumOfRecords());
 }
 static void STO_voTestGetRecords()
 {
-    trace("Request Read Data from Flash Memory\r\n\n");
+    trace("Request Read Data from Flash Memory\r\n");
     uint8_t u8NumActualRecord = STO_voGetRecords(arrStorage, 90);
     if (u8NumActualRecord == 0)
     {
-        trace("There is no record in memory\r\n\n");
+        trace("There is no record in memory\r\n\r\n");
     }
     for (uint8_t u8Index = 0; u8Index < u8NumActualRecord; u8Index++)
     {
-        trace("Time measurement %d -> Day:%u | Month:%u | Year:%u | Hour:%u | Minute:%u | Second:%u | Sys:%u | Dia:%u | HB:%u\r\n\n",
+        trace("Time measurement %d -> Day:%u | Month:%u | Year:%u | Hour:%u | Minute:%u | Second:%u | Sys:%u | Dia:%u | HB:%u\r\n\r\n",
               (u8Index + 1),
               arrStorage[u8Index].stRecordTime.u8Day,
               arrStorage[u8Index].stRecordTime.u8Month,
@@ -116,7 +125,7 @@ static void STO_voTestGetRecords()
 static void STO_voTestCreateRecords()
 {
     tstStorage stNewRecordTemp;
-    trace("Request Random New Records\r\n\n");
+    trace("Request Random New Records\r\n");
     stNewRecordTemp.stRecordTime.u8Day    = (uint8_t)rand();
     stNewRecordTemp.stRecordTime.u8Month  = (uint8_t)rand();
     stNewRecordTemp.stRecordTime.u16Year  = (uint8_t)rand();
@@ -126,7 +135,7 @@ static void STO_voTestCreateRecords()
     stNewRecordTemp.u8Sys                 = (uint8_t)rand();
     stNewRecordTemp.u8Dia                 = (uint8_t)rand();
     stNewRecordTemp.u8HeartRate           = (uint8_t)rand();
-    trace("Add valued is Day:%u | Month:%u | Year:%u | Hour:%u | Minute:%u | Second:%u | Sys:%u | Dia:%u | HB:%u\r\n\n",
+    trace("Add valued is Day:%u | Month:%u | Year:%u | Hour:%u | Minute:%u | Second:%u | Sys:%u | Dia:%u | HB:%u\r\n\r\n",
           stNewRecordTemp.stRecordTime.u8Day,
           stNewRecordTemp.stRecordTime.u8Month,
           stNewRecordTemp.stRecordTime.u16Year,
@@ -140,7 +149,7 @@ static void STO_voTestCreateRecords()
 }
 static void STO_voTestDeleteRecords()
 {
-    trace("Delete all of records\r\n\n");
+    trace("Delete all of records\r\n\r\n");
     STO_DeleteAllRecord();
 }
 /* Export functions definition   --------------------------------------------------------*/

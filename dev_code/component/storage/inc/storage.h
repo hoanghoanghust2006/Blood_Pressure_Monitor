@@ -23,23 +23,25 @@ extern "C"
 #include "common.h"
 
 /* Define constants -----------------------------------------------------------------------*/
+#define MAX_NUM_OF_RECORDS 90
+#define ERASE_DATA         0xFF
 
-/* Type definitions (Typedef, enum, struct) -----------------------------------------------*/
-typedef struct
-{
-    tstTime stRecordTime;
-    uint8_t u8Sys;
-    uint8_t u8Dia;
-    uint8_t u8HeartRate;
-} tstStorage;
+    /* Type definitions (Typedef, enum, struct) -----------------------------------------------*/
+    typedef struct
+    {
+        tstTime stRecordTime;
+        uint8_t u8Sys;
+        uint8_t u8Dia;
+        uint8_t u8HeartRate;
+    } tstStorage;
 
-/* Export Function Declarations -----------------------------------------------------------*/
-void    STO_voInit(void);
-void    STO_voMainFunction(void);
-void    STO_voSaveRecord(const tstStorage *stNewRecord);
-uint8_t STO_u8GetNumOfRecords(void);
-uint8_t STO_voGetRecords(tstStorage arrStorage[], uint8_t u8NumRequestRecord);
-void    STO_DeleteAllRecord(void);
+    /* Export Function Declarations -----------------------------------------------------------*/
+    void    STO_voInit(void);
+    void    STO_voMainFunction(void);
+    void    STO_voSaveRecord(const tstStorage *stNewRecord);
+    uint8_t STO_u8GetNumOfRecords(void);
+    uint8_t STO_voGetRecords(tstStorage arrStorage[], uint8_t u8NumRequestRecord);
+    void    STO_DeleteAllRecord(void);
 
 #ifdef __cplusplus
 }

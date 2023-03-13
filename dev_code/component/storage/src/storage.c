@@ -14,23 +14,35 @@
 #include <string.h>
 
 /* Local Include ------------------------------------------------------------------------*/
-#include "stm32l4xx_hal.h"
 #include "storage.h"
 #include "common.h"
 #include "trace.h"
 
+#if defined(STM32H735xx)
+#include "stm32h7xx_hal.h"
+#elif defined(STM32H7B3xxQ)
+#include "stm32h7xx_hal.h"
+#elif defined(STM32L496xx)
+#include "stm32l4xx_hal.h"
+#endif
+
 /* Private define constants -------------------------------------------------------------*/
-#if defined(STM32L496xx)
+#if defined(STM32H735xx)
+#define FLASH_WORD             32
+#define ADDRESS_STORAGE_MEMORY 0x080E0000
+#define FLASH_BANK_NUM         FLASH_BANK_1
+#define TYPEPROGRAM            FLASH_TYPEPROGRAM_FLASHWORD
+#elif defined(STM32H7B3xxQ)
+#define FLASH_WORD             16
+#define ADDRESS_STORAGE_MEMORY 0x081E0000
+#define FLASH_BANK_NUM         FLASH_BANK_2
+#define TYPEPROGRAM            FLASH_TYPEPROGRAM_FLASHWORD
+#elif defined(STM32L496xx)
 #define FLASH_WORD             8
 #define ADDRESS_STORAGE_MEMORY 0x0807F800
 #define FLASH_BANK_NUM         FLASH_BANK_1
-#elif defined(STM32L496xx)
-#define FLASH_WORD             8
-#define ADDRESS_STORAGE_MEMORY 0x080FF800
-#define FLASH_BANK_NUM         FLASH_BANK_2
+#define TYPEPROGRAM            FLASH_TYPEPROGRAM_DOUBLEWORD
 #endif
-#define MAX_NUM_OF_RECORDS 90
-#define ERASE_DATA         0xFF
 
 /* Private macros -----------------------------------------------------------------------*/
 
@@ -49,7 +61,7 @@ static tstStorage STO_tstGetOneRecordFromMemory(uint32_t u32address);
 static void       STO_voGetRecordsFromMemory(tstStorage stStorage[], uint8_t u8Length, uint32_t u32Address);
 
 /* Private functions definition   -------------------------------------------------------*/
-static uint32_t STO_u32GetPage(uint32_t u32Address)
+static uint32_t STO_u32GetSegment(uint32_t u32Address)
 {
     return (u32Address - FLASH_BASE) / FLASH_PAGE_SIZE;
 }
@@ -60,9 +72,9 @@ static void STO_voEraseMemory(uint32_t u32address)
     /* Unlock the Flash to enable the flash control register access */
     HAL_FLASH_Unlock();
 
-    uint32_t u32FirstPage = 0;
-    uint32_t u32PageError = 0;
-    u32FirstPage          = STO_u32GetPage(u32address);
+    uint32_t u32FirstPSegment = 0;
+    uint32_t u32SegmentError  = 0;
+    u32FirstPSegment          = STO_u32GetSegment(u32address);
 
     __HAL_FLASH_CLEAR_FLAG(FLASH_FLAG_OPTVERR);
 
@@ -70,11 +82,11 @@ static void STO_voEraseMemory(uint32_t u32address)
     FLASH_EraseInitTypeDef EraseInitStruct;
     EraseInitStruct.TypeErase = FLASH_TYPEERASE_PAGES;
     EraseInitStruct.Banks     = FLASH_BANK_NUM;
-    EraseInitStruct.Page      = u32FirstPage;
+    EraseInitStruct.Page      = u32FirstPSegment;
     EraseInitStruct.NbPages   = 1;
 
     /* Start Delete Pages */
-    HAL_FLASHEx_Erase(&EraseInitStruct, &u32PageError);
+    HAL_FLASHEx_Erase(&EraseInitStruct, &u32SegmentError);
 
     /* Lock the Flash to disable the flash control register access */
     HAL_FLASH_Lock();
@@ -114,14 +126,12 @@ static void STO_voSaveRecordsToMemory(tstStorage stStorage[], uint8_t u8Length, 
     {
         return;
     }
-    trace("STO_voEraseMemory before\r\n\n");
     STO_voEraseMemory(u32Address);
-    trace("STO_voEraseMemory after\r\n\n");
 
     /*Save each record into flash*/
     for (uint8_t u8Index = 0; u8Index < u8NumTotalRecord; u8Index++)
     {
-        trace("STO_voSaveOneRecord %d\r\n\n", u8Index);
+        trace("STO_voSaveOneRecord %d\r\n\r\n", u8Index);
         STO_voSaveOneRecord(u32Address, &stStorage[u8Index]);
         u32Address += FLASH_WORD;
     }
@@ -153,7 +163,6 @@ void STO_voSaveRecord(const tstStorage *stNewRecord)
     }
     else if (u8NumOfRecord == MAX_NUM_OF_RECORDS)
     {
-        trace("%s u8NumOfRecord: %d\r\n\n", __func__, u8NumOfRecord);
         for (uint8_t u8Index = 1; u8Index < MAX_NUM_OF_RECORDS; u8Index++)
         {
             stStorage[u8Index - 1] = stStorage[u8Index];
