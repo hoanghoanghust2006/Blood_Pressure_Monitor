@@ -38,7 +38,7 @@ extern "C"
     /* Export Function Declarations -----------------------------------------------------------*/
     tenStatus      BTN_enInit(void);
     void           BTN_voMainFunction(uint32_t u32LoopTime);
-    tenButtonState BTN_voGetState(tenButtonType enButton);
+    tenButtonState BTN_enGetState(tenButtonType enButton);
 
 #ifdef __cplusplus
 }

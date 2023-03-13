@@ -168,14 +168,14 @@ static void APP_voIdleStateHandler(void)
     printf("\033[3J");
 
     /* Event when button select is pressed */
-    if (BTN_voGetState(eBUTTON_SELECT) == ePRESSED)
+    if (BTN_enGetState(eBUTTON_SELECT) == ePRESSED)
     {
         PRE_voRequestStartProcess();
         enAppState = eIN_PROCESS;
     }
 
     /* Event when button menu is pressed */
-    if (BTN_voGetState(eBUTTON_MENU) == ePRESSED)
+    if (BTN_enGetState(eBUTTON_MENU) == ePRESSED)
     {
         DPL_enDisplayMenu(stCurrentMenu);
         enAppState = eMENU;
@@ -235,7 +235,7 @@ static void APP_voInProcessStateHandler(void)
         else if (enResponse == eBUSY)
         {
             /* Event when button select is pressed */
-            if (BTN_voGetState(eBUTTON_SELECT) == ePRESSED)
+            if (BTN_enGetState(eBUTTON_SELECT) == ePRESSED)
             {
                 PRE_voRequestCancelProcess();
                 u16InProcessCount = 0;
@@ -298,7 +298,7 @@ static void APP_voFinishStateHandler(void)
     if (u16DisplayCount <= DISPLAY_TIMEOUT)
     {
         /* Event when button select is pressed */
-        if (BTN_voGetState(eBUTTON_SELECT) == ePRESSED)
+        if (BTN_enGetState(eBUTTON_SELECT) == ePRESSED)
         {
             trace("Select is pressed\r\n");
             u16DisplayCount = 0;
@@ -306,7 +306,7 @@ static void APP_voFinishStateHandler(void)
         }
 
         /* Event when button menu is pressed */
-        if (BTN_voGetState(eBUTTON_MENU) == ePRESSED)
+        if (BTN_enGetState(eBUTTON_MENU) == ePRESSED)
         {
             DPL_enDisplayMenu(stCurrentMenu);
             u16DisplayCount = 0;
@@ -338,25 +338,25 @@ static void APP_voMenuStateHandler(void)
     /* Check if no task to do*/
     if (enProcessStatus == eCOMPLETED)
     {
-        if (BTN_voGetState(eBUTTON_SELECT) == ePRESSED)
+        if (BTN_enGetState(eBUTTON_SELECT) == ePRESSED)
         {
             MENU_enNext(&stCurrentMenu);
             DPL_enDisplayMenu(stCurrentMenu);
         }
 
-        if (BTN_voGetState(eBUTTON_BACK) == ePRESSED)
+        if (BTN_enGetState(eBUTTON_BACK) == ePRESSED)
         {
             MENU_enBack(&stCurrentMenu);
             DPL_enDisplayMenu(stCurrentMenu);
         }
 
-        if (BTN_voGetState(eBUTTON_UP) == ePRESSED)
+        if (BTN_enGetState(eBUTTON_UP) == ePRESSED)
         {
             MENU_enUp(&stCurrentMenu);
             DPL_enDisplayMenu(stCurrentMenu);
         }
 
-        if (BTN_voGetState(eBUTTON_DOWN) == ePRESSED)
+        if (BTN_enGetState(eBUTTON_DOWN) == ePRESSED)
         {
             MENU_enDown(&stCurrentMenu);
             DPL_enDisplayMenu(stCurrentMenu);
@@ -370,9 +370,9 @@ static tenProcessStatus APP_enMenuHistory(void)
     static tstStorage astStorage[MAX_NUM_OF_RECORD];
     static uint8_t    u8Index;
     static uint8_t    u8MaxRecordIndex;
-    tenButtonState    enUpBtnState   = BTN_voGetState(eBUTTON_UP);
-    tenButtonState    enDownBtnState = BTN_voGetState(eBUTTON_DOWN);
-    tenButtonState    enBackBtnState = BTN_voGetState(eBUTTON_BACK);
+    tenButtonState    enUpBtnState   = BTN_enGetState(eBUTTON_UP);
+    tenButtonState    enDownBtnState = BTN_enGetState(eBUTTON_DOWN);
+    tenButtonState    enBackBtnState = BTN_enGetState(eBUTTON_BACK);
 
     /* Get record history */
     if (bFlagGetHistory == true)
@@ -418,9 +418,9 @@ static tenProcessStatus APP_enMenuSetDate(void)
     static bool              bFlagGetDate = true;
     static tstTime           stSetDate;
     static tenDateSetupState enState          = eDAY;
-    tenButtonState           enUpBtnState     = BTN_voGetState(eBUTTON_UP);
-    tenButtonState           enDownBtnState   = BTN_voGetState(eBUTTON_DOWN);
-    tenButtonState           enSelectBtnState = BTN_voGetState(eBUTTON_SELECT);
+    tenButtonState           enUpBtnState     = BTN_enGetState(eBUTTON_UP);
+    tenButtonState           enDownBtnState   = BTN_enGetState(eBUTTON_DOWN);
+    tenButtonState           enSelectBtnState = BTN_enGetState(eBUTTON_SELECT);
 
     /* Get current date */
     if (bFlagGetDate == true)
@@ -510,9 +510,9 @@ static tenProcessStatus APP_enMenuSetTime(void)
     static bool              bFlagGetTime = true;
     static tstTime           stSetTime;
     static tenTimeSetupState enState          = eHOUR;
-    tenButtonState           enUpBtnState     = BTN_voGetState(eBUTTON_UP);
-    tenButtonState           enDownBtnState   = BTN_voGetState(eBUTTON_DOWN);
-    tenButtonState           enSelectBtnState = BTN_voGetState(eBUTTON_SELECT);
+    tenButtonState           enUpBtnState     = BTN_enGetState(eBUTTON_UP);
+    tenButtonState           enDownBtnState   = BTN_enGetState(eBUTTON_DOWN);
+    tenButtonState           enSelectBtnState = BTN_enGetState(eBUTTON_SELECT);
 
     /* Get current time */
     if (bFlagGetTime == true)
