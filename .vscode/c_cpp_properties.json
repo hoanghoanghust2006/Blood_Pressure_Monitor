@@ -10,8 +10,7 @@
                 "USE_HAL_DRIVER",
                 "STM32L496xx",
                 "HAL_UART_MODULE_ENABLED",
-                "__cplusplus",
-                "TEST_STO"
+                "__cplusplus"
             ],
             "cStandard": "c11",
             "intelliSenseMode": "gcc-arm",
