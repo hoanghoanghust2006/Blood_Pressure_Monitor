@@ -21,6 +21,7 @@
 #include "test_button.h"
 #include "test_rtc.h"
 #include "test_glcd.h"
+#include "test_storage.h"
 
 /* Private define constants -------------------------------------------------------------*/
 

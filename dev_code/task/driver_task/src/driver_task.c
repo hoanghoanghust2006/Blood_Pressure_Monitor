@@ -19,6 +19,7 @@
 #include "rtc.h"
 #include "glcd.h"
 #include "trace.h"
+#include "storage.h"
 
 /* Private define constants -------------------------------------------------------------*/
 #define DRV_TASK_DELAY_TIME_MS 5
@@ -45,6 +46,7 @@ static void DRIV_voTask(void *pvoArgument)
     RTC_enInit();
     BTN_enInit();
     GLCD_enInit();
+    STO_voInit();
 
     for (;;)
     {
@@ -53,6 +55,7 @@ static void DRIV_voTask(void *pvoArgument)
         LED_voMainFunction();
         RTC_voMainFunction(DRV_TASK_DELAY_TIME_MS);
         BTN_voMainFunction(DRV_TASK_DELAY_TIME_MS);
+        STO_voMainFunction();
 
         osDelayUntil(u32DriverTaskStartTick + DRV_TASK_DELAY_TIME_MS);
     }

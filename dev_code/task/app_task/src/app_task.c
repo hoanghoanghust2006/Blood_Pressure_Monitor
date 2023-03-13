@@ -157,7 +157,7 @@ static void APP_voInProcessStateHandler(void)
             stNewRecord.u8Sys       = stResult.u8Systolic;
             stNewRecord.u8Dia       = stResult.u8Diastolic;
             stNewRecord.u8HeartRate = stResult.u8HeartBeat;
-            STO_voSaveRecord(stNewRecord);
+            STO_voSaveRecord(&stNewRecord);
 
             DPL_enDisplayResults(&stResult);
             u16InProcessCount = 0;

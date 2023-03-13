@@ -1,8 +1,8 @@
 /*
  * Title : Storage.h
  * Copyright : HCL
- * Author : hoang.le
- * Creation Date : 31/08/2022
+ * Author : Vu Hieu
+ * Creation Date : 01/03/2023
  * Requirements : < Which other header files needs be included to include this header file. >
  * Description : < Briefly describe the purpose of the file. >
  * Limitations : < Any limitations. >
@@ -36,7 +36,7 @@ typedef struct
 /* Export Function Declarations -----------------------------------------------------------*/
 void    STO_voInit(void);
 void    STO_voMainFunction(void);
-void    STO_voSaveRecord(tstStorage stNewRecord);
+void    STO_voSaveRecord(const tstStorage *stNewRecord);
 uint8_t STO_u8GetNumOfRecords(void);
 uint8_t STO_voGetRecords(tstStorage arrStorage[], uint8_t u8NumRequestRecord);
 void    STO_DeleteAllRecord(void);

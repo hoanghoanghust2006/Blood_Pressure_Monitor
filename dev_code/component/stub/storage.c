@@ -1,7 +1,7 @@
 #include "storage.h"
 #include "trace.h"
 
-void STO_voSaveRecord(tstStorage stNewRecord)
+void STO_voSaveRecord(const tstStorage* stNewRecord)
 {
     trace("Done\r\n");
 }
