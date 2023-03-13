@@ -20,17 +20,20 @@
 
 /* Private define constants -------------------------------------------------------------*/
 #define APP_TASK_DELAY_TIME_MS 10
+
 #define PROCESS_TIMEOUT        700
 #define DISPLAY_TIMEOUT        1000
 #define MAX_VALUE              150
 #define MIN_VALUE              0
+
+#define OLDEST_RECORD 0
 
 #define FIRST_DAY   1
 #define LAST_DAY    31
 #define FIRST_MONTH 1
 #define LAST_MONTH  12
 #define FIRST_YEAR  0
-#define LAST_YEAR   4000
+#define LAST_YEAR   99
 
 #define FIRST_HOUR   0
 #define LAST_HOUR    23
@@ -70,6 +73,7 @@ static void APP_voFinishStateHandler(void);
 static void APP_voMenuStateHandler(void);
 static void APP_voMenuSetDate(void);
 static void APP_voMenuSetTime(void);
+static void APP_voMenuHistory(void);
 
 static tenStatus enAdjustValueU16(uint16_t *pu16Value, uint8_t u8Max, uint8_t u8Min, tenOperator enOperator);
 static tenStatus enAdjustValueU8(uint8_t *pu8Value, uint8_t u8Max, uint8_t u8Min, tenOperator enOperator);
@@ -185,14 +189,14 @@ static void APP_voInProcessStateHandler(void)
             DPL_enDisplayResults(&stResult);
             u16InProcessCount = 0;
             bRefreshAll       = true;
-            enAppState  = eFINISH;
+            enAppState        = eFINISH;
         }
         else if (enResponse == eFAILED)
         {
             trace("Error\r\n");
             u16InProcessCount = 0;
             bRefreshAll       = true;
-            enAppState = eFINISH;
+            enAppState        = eFINISH;
         }
         else if (enResponse == eBUSY)
         {
@@ -202,7 +206,7 @@ static void APP_voInProcessStateHandler(void)
                 PRE_voRequestCancelProcess();
                 u16InProcessCount = 0;
                 bRefreshAll       = true;
-                enAppState = eIDLE;
+                enAppState        = eIDLE;
             }
 
             /* Check motor status */
@@ -278,7 +282,7 @@ static void APP_voFinishStateHandler(void)
     {
         trace("back to idle mode\r\n");
         u16DisplayCount = 0;
-        enAppState = eIDLE;
+        enAppState      = eIDLE;
     }
 }
 
@@ -294,7 +298,41 @@ static void APP_voMenuStateHandler(void)
 
 static void APP_voMenuHistory(void)
 {
-    // TODO:
+    static bool       bFlagGetHistory = true;
+    static tstStorage astStorage[30];
+    static uint8_t    u8Index;
+    tenButtonState    enUpBtnState   = BTN_voGetState(eBUTTON_UP);
+    tenButtonState    enDownBtnState = BTN_voGetState(eBUTTON_DOWN);
+
+    /* Get record history */
+    if (bFlagGetHistory == true)
+    {
+        STO_voGetRecords(astStorage, STO_u8GetNumOfRecords());
+        u8Index = STO_u8GetNumOfRecords() - 1;
+
+        /* Display lastest record*/
+        DPL_enDisplayRecordHistory(&astStorage[u8Index], u8Index + 1);
+
+        bFlagGetHistory = false;
+    }
+
+    /* Increase record when button up is pressed or held */
+    if (enUpBtnState != eNONE)
+    {
+        enAdjustValueU8(&u8Index, STO_u8GetNumOfRecords() - 1, OLDEST_RECORD, eINCREASE);
+    }
+
+    /* Decrease record when button down is pressed or held */
+    if (enDownBtnState != eNONE)
+    {
+        enAdjustValueU8(&u8Index, STO_u8GetNumOfRecords() - 1, OLDEST_RECORD, eDECREASE);
+    }
+
+    /* Display current record */
+    if ((enUpBtnState != eNONE) || (enDownBtnState != eNONE))
+    {
+        DPL_enDisplayRecordHistory(&astStorage[u8Index], u8Index + 1);
+    }
 }
 
 static void APP_voMenuSetDate(void)
@@ -502,6 +540,7 @@ static tenStatus enAdjustValueU16(uint16_t *pu16Value, uint8_t u8Max, uint8_t u8
             (*pu16Value)--;
         }
     }
+    return eSUCCESS;
 }
 
 static tenStatus enAdjustValueU8(uint8_t *pu8Value, uint8_t u8Max, uint8_t u8Min, tenOperator enOperator)
@@ -529,4 +568,5 @@ static tenStatus enAdjustValueU8(uint8_t *pu8Value, uint8_t u8Max, uint8_t u8Min
             (*pu8Value)--;
         }
     }
+    return eSUCCESS;
 }

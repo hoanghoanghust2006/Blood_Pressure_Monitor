@@ -38,6 +38,16 @@ tenStatus DPL_enDisplayMenu(const tstMenu* stMenu)
 
 tenStatus DPL_enDisplayRecordHistory(const tstStorage* stStorage, uint8_t u8Index)
 {
+    printf("\033\143");
+    printf("\033[3J");
+
+    trace("Systolic: %d\r\n", stStorage->u8Sys);
+    trace("HeartBeat: %d\r\n", stStorage->u8HeartRate);
+    trace("Diastolic: %d\r\n", stStorage->u8Dia);
+    trace("Date: %d/%d/%d\r\n", stStorage->stRecordTime.u8Day, stStorage->stRecordTime.u8Month, stStorage->stRecordTime.u16Year);
+    trace("Time: %d:%d:%d\r\n", stStorage->stRecordTime.u8Hour, stStorage->stRecordTime.u8Minute, stStorage->stRecordTime.u8Second);
+    trace("Index: %d/%d\r\n", u8Index, STO_u8GetNumOfRecords());
+
     return eSUCCESS;
 }
 
