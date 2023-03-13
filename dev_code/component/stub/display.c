@@ -34,6 +34,9 @@ tenStatus DPL_enDisplayResults(const tstBloodPressureResult* stResult)
 
 tenStatus DPL_enDisplayMenu(const tstMenu* stMenu)
 {
+    printf("\033\143");
+    printf("\033[3J");
+
     if (stMenu->apstMenuList[0] != NULL)
     {
         printf("%s\r\n", stMenu->cName);

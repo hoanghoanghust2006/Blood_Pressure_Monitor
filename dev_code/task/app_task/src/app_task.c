@@ -128,8 +128,7 @@ static tstPreMenu astPreMenu[] =
 static tstMenu *apstAllMenuLink[][MAX_MENU_LIST + 1] =
     {
         {&stMainMenu, &stHistoryRecordMenu, &stSetDateTimeMenu, NULL},
-        {&stSetDateTimeMenu, &stSetDateMenu, &stSetTimeMenu, NULL},
-        {NULL, NULL}};
+        {&stSetDateTimeMenu, &stSetDateMenu, &stSetTimeMenu, NULL}};
 
 /* Private functions definition   -------------------------------------------------------*/
 static void APP_voTask(void *pvoArgument)
@@ -427,7 +426,7 @@ static tenProcessStatus APP_enMenuSetDate(void)
     if (bFlagGetDate == true)
     {
         RTC_enGetDateTime(&stSetDate);
-        trace("%d %d %d\r\n", stSetDate.u8Day, stSetDate.u8Month, stSetDate.u16Year);
+        DPL_enDisplaySetupDate(&stSetDate, enState);
         bFlagGetDate = false;
     }
 
@@ -519,7 +518,7 @@ static tenProcessStatus APP_enMenuSetTime(void)
     if (bFlagGetTime == true)
     {
         RTC_enGetDateTime(&stSetTime);
-        trace("%d %d %d\r\n", stSetTime.u8Hour, stSetTime.u8Minute, stSetTime.u8Second);
+        DPL_enDisplaySetupTime(&stSetTime, enState);
         bFlagGetTime = false;
     }
 
