@@ -26,7 +26,7 @@
 #define FLASH_BANK_NUM         FLASH_BANK_1
 #elif defined(STM32L496xx)
 #define FLASH_WORD             8
-#define ADDRESS_STORAGE_MEMORY 0x0807F800
+#define ADDRESS_STORAGE_MEMORY 0x080FF800
 #define FLASH_BANK_NUM         FLASH_BANK_2
 #endif
 #define MAX_NUM_OF_RECORDS 90
