@@ -27,6 +27,7 @@
 #define MIN_VALUE              0
 
 #define OLDEST_RECORD 0
+#define MAX_NUM_OF_RECORD 90
 
 #define FIRST_DAY   1
 #define LAST_DAY    31
@@ -299,8 +300,9 @@ static void APP_voMenuStateHandler(void)
 static void APP_voMenuHistory(void)
 {
     static bool       bFlagGetHistory = true;
-    static tstStorage astStorage[30];
+    static tstStorage astStorage[MAX_NUM_OF_RECORD];
     static uint8_t    u8Index;
+    static uint8_t    u8MaxRecordIndex;
     tenButtonState    enUpBtnState   = BTN_voGetState(eBUTTON_UP);
     tenButtonState    enDownBtnState = BTN_voGetState(eBUTTON_DOWN);
 
@@ -309,6 +311,7 @@ static void APP_voMenuHistory(void)
     {
         STO_voGetRecords(astStorage, STO_u8GetNumOfRecords());
         u8Index = STO_u8GetNumOfRecords() - 1;
+        u8MaxRecordIndex = u8Index;
 
         /* Display lastest record*/
         DPL_enDisplayRecordHistory(&astStorage[u8Index], u8Index + 1);
@@ -319,13 +322,13 @@ static void APP_voMenuHistory(void)
     /* Increase record when button up is pressed or held */
     if (enUpBtnState != eNONE)
     {
-        enAdjustValueU8(&u8Index, STO_u8GetNumOfRecords() - 1, OLDEST_RECORD, eINCREASE);
+        enAdjustValueU8(&u8Index, u8MaxRecordIndex, OLDEST_RECORD, eINCREASE);
     }
 
     /* Decrease record when button down is pressed or held */
     if (enDownBtnState != eNONE)
     {
-        enAdjustValueU8(&u8Index, STO_u8GetNumOfRecords() - 1, OLDEST_RECORD, eDECREASE);
+        enAdjustValueU8(&u8Index, u8MaxRecordIndex, OLDEST_RECORD, eDECREASE);
     }
 
     /* Display current record */

@@ -1,7 +1,7 @@
 #include "storage.h"
 #include "trace.h"
 
-#define MAX_NUM_OF_RECORDS 30
+#define MAX_NUM_OF_RECORDS 90
 #define RECORDS            (sizeof(stStorage) / sizeof(tstStorage))
 
 static tstStorage stStorage[] = {
