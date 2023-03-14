@@ -99,7 +99,7 @@ static void STO_voSaveOneRecord(uint32_t u32address, const tstStorage *stStorage
     /* Unlock the Flash to enable the flash control register access */
     HAL_FLASH_Unlock();
 
-    HAL_FLASH_Program(FLASH_TYPEPROGRAM_DOUBLEWORD, u32address, (uint32_t)stStorage);
+    HAL_FLASH_Program(TYPEPROGRAM, u32address, (uint32_t)stStorage);
 
     /* Lock the Flash to disable the flash control register access */
     HAL_FLASH_Lock();
