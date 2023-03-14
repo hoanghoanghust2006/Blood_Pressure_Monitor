@@ -43,6 +43,7 @@
 #define FLASH_BANK_NUM         FLASH_BANK_1
 #define TYPEPROGRAM            FLASH_TYPEPROGRAM_DOUBLEWORD
 #endif
+#define ERASE_DATA 0xFF
 
 /* Private macros -----------------------------------------------------------------------*/
 

@@ -24,7 +24,6 @@ extern "C"
 
 /* Define constants -----------------------------------------------------------------------*/
 #define MAX_NUM_OF_RECORDS 90
-#define ERASE_DATA         0xFF
 
     /* Type definitions (Typedef, enum, struct) -----------------------------------------------*/
     typedef struct
