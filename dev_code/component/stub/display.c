@@ -1,5 +1,7 @@
 #include "display.h"
 #include "trace.h"
+#include "button.h"
+#include "menu.h"
 
 tenStatus DPL_enDisplayProcessMeasurement(uint8_t          u8AirPressure,
                                           tenPressureState enPressureState,
@@ -32,12 +34,39 @@ tenStatus DPL_enDisplayResults(const tstBloodPressureResult* stResult)
 
 tenStatus DPL_enDisplayMenu(const tstMenu* stMenu)
 {
-    // TODO: Hoang Hoang
+    printf("\033\143");
+    printf("\033[3J");
+
+    if (stMenu->apstMenuList[0] != NULL)
+    {
+        printf("%s\r\n", stMenu->cName);
+
+        for (uint8_t i = 0; i < stMenu->u8Size; i++)
+        {
+            if (i == stMenu->u8CurrentIndex)
+            {
+                printf("%s <--\r\n", stMenu->apstMenuList[i]->cName);
+            }
+            else
+                printf("%s\r\n", stMenu->apstMenuList[i]->cName);
+        }
+        printf("\r\n");
+    }
     return eSUCCESS;
 }
 
 tenStatus DPL_enDisplayRecordHistory(const tstStorage* stStorage, uint8_t u8Index)
 {
+    printf("\033\143");
+    printf("\033[3J");
+
+    trace("Systolic: %d\r\n", stStorage->u8Sys);
+    trace("HeartBeat: %d\r\n", stStorage->u8HeartRate);
+    trace("Diastolic: %d\r\n", stStorage->u8Dia);
+    trace("Date: %d/%d/%d\r\n", stStorage->stRecordTime.u8Day, stStorage->stRecordTime.u8Month, stStorage->stRecordTime.u16Year);
+    trace("Time: %d:%d:%d\r\n", stStorage->stRecordTime.u8Hour, stStorage->stRecordTime.u8Minute, stStorage->stRecordTime.u8Second);
+    trace("Index: %d/%d\r\n", u8Index, STO_u8GetNumOfRecords());
+
     return eSUCCESS;
 }
 

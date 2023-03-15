@@ -17,20 +17,25 @@
 #include "blood_pressure.h"
 #include "storage.h"
 #include "rtc.h"
+#include "menu.h"
 
 /* Private define constants -------------------------------------------------------------*/
 #define APP_TASK_DELAY_TIME_MS 10
+
 #define PROCESS_TIMEOUT        700
 #define DISPLAY_TIMEOUT        1000
 #define MAX_VALUE              150
 #define MIN_VALUE              0
+
+#define OLDEST_RECORD 0
+#define MAX_NUM_OF_RECORD 90
 
 #define FIRST_DAY   1
 #define LAST_DAY    31
 #define FIRST_MONTH 1
 #define LAST_MONTH  12
 #define FIRST_YEAR  0
-#define LAST_YEAR   4000
+#define LAST_YEAR   99
 
 #define FIRST_HOUR   0
 #define LAST_HOUR    23
@@ -52,6 +57,13 @@ typedef enum
 
 typedef struct
 {
+    tstMenu *pstMenuVal;
+    char     cName[MAX_CHARACTER_LENGTH];
+    tenProcessStatus (*pvoDoWork)(void);
+} tstPreMenu;
+
+typedef struct
+{
     tenAppState enState;
     void (*voStateHandler)(void);
 } tstAppStateHandler;
@@ -68,10 +80,13 @@ static void APP_voIdleStateHandler(void);
 static void APP_voInProcessStateHandler(void);
 static void APP_voFinishStateHandler(void);
 static void APP_voMenuStateHandler(void);
-static void APP_voMenuSetDate(void);
-static void APP_voMenuSetTime(void);
-
-static tenStatus enAdjustValueU16(uint16_t *pu16Value, uint8_t u8Max, uint8_t u8Min, tenOperator enOperator);
+static tenProcessStatus APP_enMenuHistory(void);
+static tenProcessStatus APP_enMenuSetDate(void);
+static tenProcessStatus APP_enMenuSetTime(void);
+static void APP_voMenuCreateAll(tstPreMenu *pastPreMenu);
+static void APP_voMenuAddLinks(tstMenu **pastMenu);
+static void APP_voMenuAddAllLinks(tstMenu *apstAllMenuLink[][MAX_MENU_LIST + 1]);
+static tenStatus enAdjustValueU16(uint16_t *pu16Value, uint16_t u8Max, uint16_t u8Min, tenOperator enOperator);
 static tenStatus enAdjustValueU8(uint8_t *pu8Value, uint8_t u8Max, uint8_t u8Min, tenOperator enOperator);
 
 /* Private file-local global variables   ------------------------------------------------*/
@@ -89,6 +104,11 @@ tstAppStateHandler stAppStateHandler[] = {
     {eMENU, APP_voMenuStateHandler},
 };
 
+static tstMenu  stMainMenu;
+static tstMenu  stHistoryRecordMenu, stSetDateTimeMenu;
+static tstMenu  stSetDateMenu, stSetTimeMenu;
+static tstMenu *stCurrentMenu = &stMainMenu;
+
 static tenAppState enAppState = eIDLE;
 
 static tstValueMeasurement stValueMeasurement = {.u8Pressure  = 0,
@@ -96,9 +116,26 @@ static tstValueMeasurement stValueMeasurement = {.u8Pressure  = 0,
                                                  .u8Diastolic = 0,
                                                  .u8HeartBeat = 88};
 
+static tstPreMenu astPreMenu[] =
+    {
+        {&stMainMenu, "Main Menu", NULL},
+        {&stHistoryRecordMenu, "History of records", APP_enMenuHistory},
+        {&stSetDateTimeMenu, "Set Date Time", NULL},
+        {&stSetDateMenu, "Set up Date", APP_enMenuSetDate},
+        {&stSetTimeMenu, "Set up Time", APP_enMenuSetTime},
+        {NULL, "", NULL}};
+
+static tstMenu *apstAllMenuLink[][MAX_MENU_LIST + 1] =
+    {
+        {&stMainMenu, &stHistoryRecordMenu, &stSetDateTimeMenu, NULL},
+        {&stSetDateTimeMenu, &stSetDateMenu, &stSetTimeMenu, NULL}};
+
 /* Private functions definition   -------------------------------------------------------*/
 static void APP_voTask(void *pvoArgument)
 {
+    APP_voMenuCreateAll(astPreMenu);
+    APP_voMenuAddAllLinks(apstAllMenuLink);
+
     for (;;)
     {
         uint32_t u32AppTaskStartTick = osKernelGetTickCount();
@@ -131,15 +168,16 @@ static void APP_voIdleStateHandler(void)
     printf("\033[3J");
 
     /* Event when button select is pressed */
-    if (BTN_voGetState(eBUTTON_SELECT) == ePRESSED)
+    if (BTN_enGetState(eBUTTON_SELECT) == ePRESSED)
     {
         PRE_voRequestStartProcess();
         enAppState = eIN_PROCESS;
     }
 
     /* Event when button menu is pressed */
-    if (BTN_voGetState(eBUTTON_MENU) == ePRESSED)
+    if (BTN_enGetState(eBUTTON_MENU) == ePRESSED)
     {
+        DPL_enDisplayMenu(stCurrentMenu);
         enAppState = eMENU;
     }
 }
@@ -185,24 +223,24 @@ static void APP_voInProcessStateHandler(void)
             DPL_enDisplayResults(&stResult);
             u16InProcessCount = 0;
             bRefreshAll       = true;
-            enAppState  = eFINISH;
+            enAppState        = eFINISH;
         }
         else if (enResponse == eFAILED)
         {
             trace("Error\r\n");
             u16InProcessCount = 0;
             bRefreshAll       = true;
-            enAppState = eFINISH;
+            enAppState        = eFINISH;
         }
         else if (enResponse == eBUSY)
         {
             /* Event when button select is pressed */
-            if (BTN_voGetState(eBUTTON_SELECT) == ePRESSED)
+            if (BTN_enGetState(eBUTTON_SELECT) == ePRESSED)
             {
                 PRE_voRequestCancelProcess();
                 u16InProcessCount = 0;
                 bRefreshAll       = true;
-                enAppState = eIDLE;
+                enAppState        = eIDLE;
             }
 
             /* Check motor status */
@@ -260,7 +298,7 @@ static void APP_voFinishStateHandler(void)
     if (u16DisplayCount <= DISPLAY_TIMEOUT)
     {
         /* Event when button select is pressed */
-        if (BTN_voGetState(eBUTTON_SELECT) == ePRESSED)
+        if (BTN_enGetState(eBUTTON_SELECT) == ePRESSED)
         {
             trace("Select is pressed\r\n");
             u16DisplayCount = 0;
@@ -268,8 +306,9 @@ static void APP_voFinishStateHandler(void)
         }
 
         /* Event when button menu is pressed */
-        if (BTN_voGetState(eBUTTON_MENU) == ePRESSED)
+        if (BTN_enGetState(eBUTTON_MENU) == ePRESSED)
         {
+            DPL_enDisplayMenu(stCurrentMenu);
             u16DisplayCount = 0;
             enAppState      = eMENU;
         }
@@ -278,39 +317,116 @@ static void APP_voFinishStateHandler(void)
     {
         trace("back to idle mode\r\n");
         u16DisplayCount = 0;
-        enAppState = eIDLE;
+        enAppState      = eIDLE;
     }
 }
 
 static void APP_voMenuStateHandler(void)
 {
-    trace("menu\r\n");
-    if (BTN_voGetState(eBUTTON_BACK) == ePRESSED)
+    static tenProcessStatus enProcessStatus = eCOMPLETED;
+    /* Check if a menu option has a task to do*/
+    if (stCurrentMenu->pvoDoWork != NULL)
     {
-        enAppState = eIDLE;
+        enProcessStatus = stCurrentMenu->pvoDoWork();
+        /* Check if task is done, back to previous menu*/
+        if (enProcessStatus == eCOMPLETED)
+        {
+            MENU_enBack(&stCurrentMenu);
+            DPL_enDisplayMenu(stCurrentMenu);
+        }
     }
-    // TODO: Hoang Hoang
+    /* Check if no task to do*/
+    if (enProcessStatus == eCOMPLETED)
+    {
+        if (BTN_enGetState(eBUTTON_SELECT) == ePRESSED)
+        {
+            MENU_enNext(&stCurrentMenu);
+            DPL_enDisplayMenu(stCurrentMenu);
+        }
+
+        if (BTN_enGetState(eBUTTON_BACK) == ePRESSED)
+        {
+            MENU_enBack(&stCurrentMenu);
+            DPL_enDisplayMenu(stCurrentMenu);
+        }
+
+        if (BTN_enGetState(eBUTTON_UP) == ePRESSED)
+        {
+            MENU_enUp(&stCurrentMenu);
+            DPL_enDisplayMenu(stCurrentMenu);
+        }
+
+        if (BTN_enGetState(eBUTTON_DOWN) == ePRESSED)
+        {
+            MENU_enDown(&stCurrentMenu);
+            DPL_enDisplayMenu(stCurrentMenu);
+        }
+    }
 }
 
-static void APP_voMenuHistory(void)
+static tenProcessStatus APP_enMenuHistory(void)
 {
-    // TODO:
+    static bool       bFlagGetHistory = true;
+    static tstStorage astStorage[MAX_NUM_OF_RECORD];
+    static uint8_t    u8Index;
+    static uint8_t    u8MaxRecordIndex;
+    tenButtonState    enUpBtnState   = BTN_enGetState(eBUTTON_UP);
+    tenButtonState    enDownBtnState = BTN_enGetState(eBUTTON_DOWN);
+    tenButtonState    enBackBtnState = BTN_enGetState(eBUTTON_BACK);
+
+    /* Get record history */
+    if (bFlagGetHistory == true)
+    {
+        STO_voGetRecords(astStorage, STO_u8GetNumOfRecords());
+        u8Index = STO_u8GetNumOfRecords() - 1;
+        u8MaxRecordIndex = u8Index;
+
+        /* Display lastest record*/
+        DPL_enDisplayRecordHistory(&astStorage[u8Index], u8Index + 1);
+
+        bFlagGetHistory = false;
+    }
+
+    /* Increase record when button up is pressed or held */
+    if (enUpBtnState != eNONE)
+    {
+        enAdjustValueU8(&u8Index, u8MaxRecordIndex, OLDEST_RECORD, eINCREASE);
+    }
+
+    /* Decrease record when button down is pressed or held */
+    if (enDownBtnState != eNONE)
+    {
+        enAdjustValueU8(&u8Index, u8MaxRecordIndex, OLDEST_RECORD, eDECREASE);
+    }
+
+    /* Display current record */
+    if ((enUpBtnState != eNONE) || (enDownBtnState != eNONE))
+    {
+        DPL_enDisplayRecordHistory(&astStorage[u8Index], u8Index + 1);
+    }
+
+    /* Even when button back is pressed*/
+    if (enBackBtnState == ePRESSED)
+    {
+        return eCOMPLETED;
+    }
+    return ePROCESSING;
 }
 
-static void APP_voMenuSetDate(void)
+static tenProcessStatus APP_enMenuSetDate(void)
 {
     static bool              bFlagGetDate = true;
     static tstTime           stSetDate;
     static tenDateSetupState enState          = eDAY;
-    tenButtonState           enUpBtnState     = BTN_voGetState(eBUTTON_UP);
-    tenButtonState           enDownBtnState   = BTN_voGetState(eBUTTON_DOWN);
-    tenButtonState           enSelectBtnState = BTN_voGetState(eBUTTON_SELECT);
+    tenButtonState           enUpBtnState     = BTN_enGetState(eBUTTON_UP);
+    tenButtonState           enDownBtnState   = BTN_enGetState(eBUTTON_DOWN);
+    tenButtonState           enSelectBtnState = BTN_enGetState(eBUTTON_SELECT);
 
     /* Get current date */
     if (bFlagGetDate == true)
     {
         RTC_enGetDateTime(&stSetDate);
-        trace("%d %d %d\r\n", stSetDate.u8Day, stSetDate.u8Month, stSetDate.u16Year);
+        DPL_enDisplaySetupDate(&stSetDate, enState);
         bFlagGetDate = false;
     }
 
@@ -383,24 +499,26 @@ static void APP_voMenuSetDate(void)
             trace("Save date: Done \r\n");
             enState      = eDAY;
             bFlagGetDate = true;
+            return eCOMPLETED;
         }
     }
+    return ePROCESSING;
 }
 
-static void APP_voMenuSetTime(void)
+static tenProcessStatus APP_enMenuSetTime(void)
 {
     static bool              bFlagGetTime = true;
     static tstTime           stSetTime;
     static tenTimeSetupState enState          = eHOUR;
-    tenButtonState           enUpBtnState     = BTN_voGetState(eBUTTON_UP);
-    tenButtonState           enDownBtnState   = BTN_voGetState(eBUTTON_DOWN);
-    tenButtonState           enSelectBtnState = BTN_voGetState(eBUTTON_SELECT);
+    tenButtonState           enUpBtnState     = BTN_enGetState(eBUTTON_UP);
+    tenButtonState           enDownBtnState   = BTN_enGetState(eBUTTON_DOWN);
+    tenButtonState           enSelectBtnState = BTN_enGetState(eBUTTON_SELECT);
 
     /* Get current time */
     if (bFlagGetTime == true)
     {
         RTC_enGetDateTime(&stSetTime);
-        trace("%d %d %d\r\n", stSetTime.u8Hour, stSetTime.u8Minute, stSetTime.u8Second);
+        DPL_enDisplaySetupTime(&stSetTime, enState);
         bFlagGetTime = false;
     }
 
@@ -473,11 +591,45 @@ static void APP_voMenuSetTime(void)
             trace("Save time: Done \r\n");
             enState      = eHOUR;
             bFlagGetTime = true;
+            return eCOMPLETED;
         }
+    }
+    return ePROCESSING;
+}
+
+static void APP_voMenuCreateAll(tstPreMenu *pastPreMenu)
+{
+    uint8_t i = 0;
+    while ((pastPreMenu + i)->pstMenuVal != NULL)
+    {
+        MENU_enCreate((pastPreMenu + i)->pstMenuVal, (pastPreMenu + i)->cName, (pastPreMenu + i)->pvoDoWork);
+        i++;
     }
 }
 
-static tenStatus enAdjustValueU16(uint16_t *pu16Value, uint8_t u8Max, uint8_t u8Min, tenOperator enOperator)
+/* Linking a parent option to child options*/
+static void APP_voMenuAddLinks(tstMenu **pastMenu)
+{
+    uint8_t i = 1;
+    while (*(pastMenu + i) != NULL)
+    {
+        MENU_enAddLink(*pastMenu, *(pastMenu + i));
+        i++;
+    }
+}
+
+/* Linking all parent options to their child options*/
+static void APP_voMenuAddAllLinks(tstMenu *apstAllMenuLink[][MAX_MENU_LIST + 1])
+{
+    uint8_t i = 0;
+    while ((apstAllMenuLink[i][MAX_MENU_LIST + 1]) != NULL)
+    {
+        APP_voMenuAddLinks(apstAllMenuLink[i]);
+        i++;
+    }
+}
+
+static tenStatus enAdjustValueU16(uint16_t *pu16Value, uint16_t u8Max, uint16_t u8Min, tenOperator enOperator)
 {
     if (enOperator == eINCREASE)
     {
@@ -502,6 +654,7 @@ static tenStatus enAdjustValueU16(uint16_t *pu16Value, uint8_t u8Max, uint8_t u8
             (*pu16Value)--;
         }
     }
+    return eSUCCESS;
 }
 
 static tenStatus enAdjustValueU8(uint8_t *pu8Value, uint8_t u8Max, uint8_t u8Min, tenOperator enOperator)
@@ -529,4 +682,5 @@ static tenStatus enAdjustValueU8(uint8_t *pu8Value, uint8_t u8Max, uint8_t u8Min
             (*pu8Value)--;
         }
     }
+    return eSUCCESS;
 }
