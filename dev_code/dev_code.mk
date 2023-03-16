@@ -1,7 +1,6 @@
 DEV_CODE_SOURCES = \
 dev_code/entry/src/entry.c \
 dev_code/task/driver_task/src/driver_task.c \
-dev_code/task/app_task/src/app_task.c \
 dev_code/component/led/src/led.c \
 dev_code/component/trace/src/trace.c \
 dev_code/component/glcd/src/glcd.c \
@@ -12,11 +11,12 @@ dev_code/unit_test/test_glcd/src/test_glcd.c \
 dev_code/component/rtc/src/rtc.c \
 dev_code/unit_test/test_rtc/src/test_rtc.c \
 dev_code/component/button/src/button.c \
-dev_code/component/menu/src/menu.c \
-dev_code/unit_test/test_menu/src/test_menu.c \
-dev_code/component/stub/display.c \
-dev_code/component/stub/blood_pressure.c \
-dev_code/component/stub/storage.c
+dev_code/component/st7789/src/st7789.c \
+dev_code/component/st7789/src/st7789_port.c \
+dev_code/component/st7789/src/image.c \
+dev_code/component/st7789/src/fonts.c \
+dev_code/component/tft/display/src/display.c \
+dev_code/unit_test/test_display_2/src/test_display_2.c 
 
 DEV_CODE_INCLUDES = \
 -Idev_code/entry/inc \
@@ -33,6 +33,8 @@ DEV_CODE_INCLUDES = \
 -Idev_code/component/button/inc \
 -Idev_code/component/menu/inc \
 -Idev_code/unit_test/test_menu/inc \
--Idev_code/component/display/inc \
+-Idev_code/unit_test/test_display_2/inc \
+-Idev_code/component/tft/display/inc \
 -Idev_code/component/blood_pressure/inc \
+-Idev_code/component/st7789/inc \
 -Idev_code/component/storage/inc
