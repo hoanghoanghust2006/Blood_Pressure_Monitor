@@ -1,8 +1,8 @@
 /*
  * Title : display.h
  * Copyright : HCL
- * Author : < Name of the author. >
- * Creation Date : < Date in DD/MMM/YY format >
+ * Author : Le Hieu, Nguyen Duc
+ * Creation Date : Mar 06,2023
  * ------- ---------- --------
  */
 
@@ -48,7 +48,8 @@ typedef enum
 /* Export Function Declarations -----------------------------------------------------------*/
 tenStatus DPL_enInit(void);
 void      DPL_voMainFunction(void);
-tenStatus DPL_enDisplayProcessMeasurement(uint8_t          u8AirPressure,
+tenStatus DPL_enDisplayProcessMeasurement(const tstTime*   stTime,
+                                          uint8_t          u8AirPressure,
                                           tenPressureState enPressureState,
                                           bool             bRefreshAll);
 tenStatus DPL_enDisplayResults(const tstBloodPressureResult* stResult);
@@ -56,4 +57,6 @@ tenStatus DPL_enDisplayMenu(const tstMenu* stMenu);
 tenStatus DPL_enDisplayRecordHistory(const tstStorage* stStorage, uint8_t u8Index);
 tenStatus DPL_enDisplaySetupDate(const tstTime* stTime, tenDateSetupState enDateSetupState);
 tenStatus DPL_enDisplaySetupTime(const tstTime* stTime, tenTimeSetupState enTimeSetupState);
+tenStatus DPL_enSetupDateSuccess(void);
+tenStatus DPL_enSetupTimeSuccess(void);
 #endif

@@ -19,6 +19,8 @@
 #include "rtc.h"
 #include "glcd.h"
 #include "trace.h"
+#include "st7789.h"
+#include "display.h"
 
 /* Private define constants -------------------------------------------------------------*/
 #define DRV_TASK_DELAY_TIME_MS 5
@@ -44,7 +46,7 @@ static void DRIV_voTask(void *pvoArgument)
     LED_voInit();
     RTC_enInit();
     BTN_enInit();
-    GLCD_enInit();
+    ST7789_enInit();
 
     for (;;)
     {

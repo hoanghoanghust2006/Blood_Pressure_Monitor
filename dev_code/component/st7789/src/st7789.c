@@ -198,12 +198,12 @@ static void ST7789_voDrawPixel(uint16_t u16X, uint16_t u16Y, uint16_t u16Color)
 tenStatus ST7789_enInit(void)
 {
     ST7789_enInitIO();
-
+    osDelay(20);
     ST7789_voRstClear();
-    osDelay(25);
+    osDelay(50);
 
     ST7789_voRstSet();
-    osDelay(25);
+    osDelay(50);
 
     /*Interface Pixel Format*/
     ST7789_voWriteCommand(ST7789_COLMOD);
@@ -273,6 +273,9 @@ tenStatus ST7789_enInit(void)
     ST7789_voWriteCommand(ST7789_DISPON);
     osDelay(50);
     ST7789_voFillColor(WHITE);
+
+    trace_line();
+
     return eSUCCESS;
 }
 

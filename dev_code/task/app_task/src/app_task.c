@@ -18,6 +18,7 @@
 #include "storage.h"
 #include "rtc.h"
 #include "menu.h"
+#include "st7789.h"
 
 /* Private define constants -------------------------------------------------------------*/
 #define APP_TASK_DELAY_TIME_MS 10
@@ -188,6 +189,7 @@ static void APP_voInProcessStateHandler(void)
     static tenPressureState enPressureState   = eINFLATE;
     static bool             bRefreshAll       = false;
     tstStorage              stNewRecord;
+    static tstTime          stCurrentTime;
     tstBloodPressureResult  stResult;
 
     u16InProcessCount++;
@@ -240,6 +242,7 @@ static void APP_voInProcessStateHandler(void)
                 PRE_voRequestCancelProcess();
                 u16InProcessCount = 0;
                 bRefreshAll       = true;
+                ST7789_voFillColor(WHITE);
                 enAppState        = eIDLE;
             }
 
@@ -266,10 +269,12 @@ static void APP_voInProcessStateHandler(void)
                 bRefreshAll = false;
             }
 
+            RTC_enGetDateTime(&stCurrentTime);
+
             /* Display process measurement */
             if (stValueMeasurement.u8Pressure % 10 == 0)
             {
-                DPL_enDisplayProcessMeasurement(stValueMeasurement.u8Pressure, enPressureState, bRefreshAll);
+                DPL_enDisplayProcessMeasurement(&stCurrentTime, stValueMeasurement.u8Pressure, enPressureState, bRefreshAll);
             }
         }
         else
@@ -346,8 +351,16 @@ static void APP_voMenuStateHandler(void)
 
         if (BTN_enGetState(eBUTTON_BACK) == ePRESSED)
         {
-            MENU_enBack(&stCurrentMenu);
-            DPL_enDisplayMenu(stCurrentMenu);
+            if (stCurrentMenu == &stMainMenu)
+            {
+                ST7789_voFillColor(WHITE);
+                enAppState = eIDLE;
+            }
+            else
+            {
+                MENU_enBack(&stCurrentMenu);
+                DPL_enDisplayMenu(stCurrentMenu);
+            }
         }
 
         if (BTN_enGetState(eBUTTON_UP) == ePRESSED)
