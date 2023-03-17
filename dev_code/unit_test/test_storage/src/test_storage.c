@@ -21,9 +21,7 @@
 #include "storage.h"
 #include "trace.h"
 
-#if defined(STM32H735xx)
-#include "stm32h7xx_hal.h"
-#elif defined(STM32H7B3xxQ)
+#if defined(STM32H735xx) || defined(STM32H7B3xxQ)
 #include "stm32h7xx_hal.h"
 #elif defined(STM32L496xx)
 #include "stm32l4xx_hal.h"
@@ -128,7 +126,7 @@ static void STO_voTestCreateRecords()
     trace("Request Random New Records\r\n");
     stNewRecordTemp.stRecordTime.u8Day    = (uint8_t)rand();
     stNewRecordTemp.stRecordTime.u8Month  = (uint8_t)rand();
-    stNewRecordTemp.stRecordTime.u16Year  = (uint8_t)rand();
+    stNewRecordTemp.stRecordTime.u16Year  = (uint16_t)rand();
     stNewRecordTemp.stRecordTime.u8Hour   = (uint8_t)rand();
     stNewRecordTemp.stRecordTime.u8Minute = (uint8_t)rand();
     stNewRecordTemp.stRecordTime.u8Second = (uint8_t)rand();

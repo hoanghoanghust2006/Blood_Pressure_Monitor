@@ -32,7 +32,7 @@ extern "C"
         uint8_t u8Sys;
         uint8_t u8Dia;
         uint8_t u8HeartRate;
-    } tstStorage;
+    } __attribute__((packed, aligned(8))) tstStorage;
 
     /* Export Function Declarations -----------------------------------------------------------*/
     void    STO_voInit(void);
