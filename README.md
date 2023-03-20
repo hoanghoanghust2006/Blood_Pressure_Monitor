@@ -71,4 +71,10 @@ make -j12
 make clean
 make -j12 test=-DTEST_BUTTON
 make -j12 test=-DTEST_GLCD
+
+## Make different display component
+make clean
+make -j12 display=tft
+make -j12 display=glcd
+make -j12 display=stub
 ```

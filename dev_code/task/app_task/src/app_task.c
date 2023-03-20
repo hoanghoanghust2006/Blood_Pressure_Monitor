@@ -188,6 +188,7 @@ static void APP_voInProcessStateHandler(void)
     static tenPressureState enPressureState   = eINFLATE;
     static bool             bRefreshAll       = false;
     tstStorage              stNewRecord;
+    static tstTime          stCurrentTime;
     tstBloodPressureResult  stResult;
 
     u16InProcessCount++;
@@ -240,6 +241,7 @@ static void APP_voInProcessStateHandler(void)
                 PRE_voRequestCancelProcess();
                 u16InProcessCount = 0;
                 bRefreshAll       = true;
+                DPL_enDisplayScreenSaver();
                 enAppState        = eIDLE;
             }
 
@@ -266,10 +268,12 @@ static void APP_voInProcessStateHandler(void)
                 bRefreshAll = false;
             }
 
+            RTC_enGetDateTime(&stCurrentTime);
+
             /* Display process measurement */
             if (stValueMeasurement.u8Pressure % 10 == 0)
             {
-                DPL_enDisplayProcessMeasurement(stValueMeasurement.u8Pressure, enPressureState, bRefreshAll);
+                DPL_enDisplayProcessMeasurement(&stCurrentTime, stValueMeasurement.u8Pressure, enPressureState, bRefreshAll);
             }
         }
         else
@@ -346,8 +350,16 @@ static void APP_voMenuStateHandler(void)
 
         if (BTN_enGetState(eBUTTON_BACK) == ePRESSED)
         {
-            MENU_enBack(&stCurrentMenu);
-            DPL_enDisplayMenu(stCurrentMenu);
+            if (stCurrentMenu == &stMainMenu)
+            {
+                DPL_enDisplayScreenSaver();
+                enAppState = eIDLE;
+            }
+            else
+            {
+                MENU_enBack(&stCurrentMenu);
+                DPL_enDisplayMenu(stCurrentMenu);
+            }
         }
 
         if (BTN_enGetState(eBUTTON_UP) == ePRESSED)
