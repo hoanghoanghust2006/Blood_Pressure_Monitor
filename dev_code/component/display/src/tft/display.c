@@ -89,10 +89,9 @@ tenStatus DPL_enDisplayProcessMeasurement(const tstTime*   stTime,
     {
         /* Clear entire screen */
         DPL_enClearScreen();
-
-        /* Redisplay the home page */
-        DPL_enHomePage();
     }
+    
+    /* Redisplay the home page */   
     DPL_enHomePage();
 
     /* Display time */
