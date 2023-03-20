@@ -59,4 +59,5 @@ tenStatus DPL_enDisplaySetupDate(const tstTime* stTime, tenDateSetupState enDate
 tenStatus DPL_enDisplaySetupTime(const tstTime* stTime, tenTimeSetupState enTimeSetupState);
 tenStatus DPL_enSetupDateSuccess(void);
 tenStatus DPL_enSetupTimeSuccess(void);
+tenStatus DPL_enDisplayScreenSaver(void);
 #endif

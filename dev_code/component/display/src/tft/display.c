@@ -330,3 +330,12 @@ tenStatus DPL_enSetupTimeSuccess(void)
     ST7789_voWriteString(25, 110, "Successfully", stFont16x26, BLACK, WHITE);
     return eSUCCESS;
 }
+
+/**
+ * Display screen saver.
+ */
+tenStatus DPL_enDisplayScreenSaver(void)
+{
+    ST7789_voFillColor(WHITE);
+    return eSUCCESS;
+}

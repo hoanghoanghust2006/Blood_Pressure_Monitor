@@ -18,7 +18,6 @@
 #include "storage.h"
 #include "rtc.h"
 #include "menu.h"
-#include "st7789.h"
 
 /* Private define constants -------------------------------------------------------------*/
 #define APP_TASK_DELAY_TIME_MS 10
@@ -242,7 +241,7 @@ static void APP_voInProcessStateHandler(void)
                 PRE_voRequestCancelProcess();
                 u16InProcessCount = 0;
                 bRefreshAll       = true;
-                ST7789_voFillColor(WHITE);
+                DPL_enDisplayScreenSaver();
                 enAppState        = eIDLE;
             }
 
@@ -353,7 +352,7 @@ static void APP_voMenuStateHandler(void)
         {
             if (stCurrentMenu == &stMainMenu)
             {
-                ST7789_voFillColor(WHITE);
+                DPL_enDisplayScreenSaver();
                 enAppState = eIDLE;
             }
             else
