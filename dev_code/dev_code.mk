@@ -1,3 +1,5 @@
+display = tft
+
 DEV_CODE_SOURCES = \
 dev_code/entry/src/entry.c \
 dev_code/task/driver_task/src/driver_task.c \
@@ -18,11 +20,10 @@ dev_code/component/st7789/src/image.c \
 dev_code/component/st7789/src/fonts.c \
 dev_code/component/stub/blood_pressure/blood_pressure.c \
 dev_code/component/stub/storage/storage.c \
-dev_code/component/display/src/st7789/display.c \
+dev_code/component/display/src/$(display)/display.c \
 dev_code/component/menu/src/menu.c \
 dev_code/unit_test/test_menu/src/test_menu.c \
 dev_code/unit_test/test_display/src/test_display.c \
-dev_code/unit_test/test_display_2/src/test_display_2.c
 
 DEV_CODE_INCLUDES = \
 -Idev_code/entry/inc \

@@ -22,7 +22,6 @@
 #include "test_rtc.h"
 #include "test_glcd.h"
 #include "test_display.h"
-#include "test_display_2.h"
 
 /* Private define constants -------------------------------------------------------------*/
 
@@ -65,9 +64,6 @@ void ENTRY_voInit(void)
 #elif defined(TEST_DISPLAY)
     printf("Unit test for DISPLAY component\r\n");
     DISPLAY_voTaskTestInit();
-#elif defined(TEST_DISPLAY_2)
-    printf("Unit test for DISPLAY 2 component\r\n");
-    DISPLAY_2_voTaskTestInit();
 #else
     APP_enInitTask();
 #endif
