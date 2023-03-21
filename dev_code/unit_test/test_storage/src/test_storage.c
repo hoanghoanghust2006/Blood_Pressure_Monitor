@@ -1,12 +1,12 @@
 /*
  * Title : test_storage.c
  * Copyright : HCL
- * Author : Vu Hieu
- * Creation Date : 01/03/2023
+ * Author : hoang.le
+ * Creation Date : 31/08/2022
  * Description : < Briefly describe the purpose of the file. >
  * Limitations : < Any limitations. >
  * Dependencies : < H/W, S/W( Operating System, Compiler) >
- * Modifications History : VERSION WHO WHEN WHY
+ * Modifications History : 2.0 Vu Hieu 01/03/2023: Add: STM32L496
  * ------- ---------- --------
  */
 
@@ -16,16 +16,16 @@
 #include <stdlib.h>
 #include <ctype.h>
 /* Local Include ------------------------------------------------------------------------*/
-#include "cmsis_os.h"
-#include "test_storage.h"
-#include "storage.h"
-#include "trace.h"
-
 #if defined(STM32H735xx) || defined(STM32H7B3xxQ)
 #include "stm32h7xx_hal.h"
 #elif defined(STM32L496xx)
 #include "stm32l4xx_hal.h"
 #endif
+
+#include "cmsis_os.h"
+#include "test_storage.h"
+#include "storage.h"
+#include "trace.h"
 
 /* Private define constants -------------------------------------------------------------*/
 

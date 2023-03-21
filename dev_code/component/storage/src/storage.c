@@ -1,12 +1,12 @@
 /*
  * Title : storage.c
  * Copyright : HCL
- * Author : Vu Hieu
- * Creation Date : 01/03/2023
+ * Author : hoang.le
+ * Creation Date : 31/08/2022
  * Description : < Briefly describe the purpose of the file. >
  * Limitations : < Any limitations. >
  * Dependencies : < H/W, S/W( Operating System, Compiler) >
- * Modifications History : VERSION WHO WHEN WHY
+ * Modifications History : 2.0 Vu Hieu 01/03/2023: Add: STM32L496
  * ------- ---------- --------
  */
 
@@ -14,15 +14,15 @@
 #include <string.h>
 
 /* Local Include ------------------------------------------------------------------------*/
-#include "storage.h"
-#include "common.h"
-#include "trace.h"
-
 #if defined(STM32H735xx) || defined(STM32H7B3xxQ)
 #include "stm32h7xx_hal.h"
 #elif defined(STM32L496xx)
 #include "stm32l4xx_hal.h"
 #endif
+
+#include "storage.h"
+#include "common.h"
+#include "trace.h"
 
 /* Private define constants -------------------------------------------------------------*/
 #if defined(STM32H735xx)
@@ -64,7 +64,6 @@ static tstStorage STO_tstGetOneRecordFromMemory(uint32_t u32address);
 static void       STO_voGetRecordsFromMemory(tstStorage stStorage[], uint8_t u8Length, uint32_t u32Address);
 
 /* Private functions definition   -------------------------------------------------------*/
-
 static uint32_t STO_u32GetSegment(uint32_t u32Address)
 {
 #if defined(STM32H735xx) || defined(STM32H7B3xxQ)
@@ -110,9 +109,10 @@ static void STO_voEraseMemory(uint32_t u32address)
     HAL_FLASHEx_Erase(&EraseInitStruct, &u32SegmentError);
 
 #if defined(STM32H735xx) || defined(STM32H7B3xxQ)
-    /* TODO: Fake write 0xFF to memory */
     uint8_t arrErase[FLASH_WORD];
     memset(arrErase, ERASE_DATA, FLASH_WORD);
+
+    /* TODO: Fake write 0xFF to memory */
     for (uint8_t i = 0; i < MAX_NUM_OF_RECORDS; i++)
     {
         HAL_FLASH_Program(FLASH_TYPEPROGRAM_FLASHWORD, u32address, (uint32_t)arrErase);
@@ -127,20 +127,20 @@ static void STO_voEraseMemory(uint32_t u32address)
 /* Write data to storage */
 static void STO_voSaveOneRecord(uint32_t u32address, const tstStorage *stStorage)
 {
-    /* Unlock the Flash */
+    /* Unlock the Flash to enable the flash control register access */
     HAL_FLASH_Unlock();
 
 #if defined(STM32H735xx) || defined(STM32H7B3xxQ)
     uint32_t *ptr = (uint32_t *)stStorage;
-    for (uint8_t u8index = 0; u8index < (sizeof(tstStorage) / FLASH_WORD); u8index++)
+    for (uint8_t u8Index = 0; u8Index < (sizeof(tstStorage) / FLASH_WORD); u8Index++)
     {
-        HAL_FLASH_Program(TYPEPROGRAM, u32address, (uint32_t)(ptr + u8index));
+        HAL_FLASH_Program(TYPEPROGRAM, u32address, (uint32_t)(ptr + u8Index));
     }
 #elif defined(STM32L496xx)
     uint64_t *ptr                = (uint64_t *)stStorage;
-    for (uint8_t u8index = 0; u8index < (sizeof(tstStorage) / FLASH_WORD); u8index++)
+    for (uint8_t u8Index = 0; u8Index < (sizeof(tstStorage) / FLASH_WORD); u8Index++)
     {
-        HAL_FLASH_Program(TYPEPROGRAM, u32address + 8 * u8index, *(ptr + u8index));
+        HAL_FLASH_Program(TYPEPROGRAM, u32address + 8 * u8Index, *(ptr + u8Index));
     }
 #endif
 
