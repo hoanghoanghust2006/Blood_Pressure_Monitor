@@ -19,11 +19,12 @@ dev_code/component/st7789/src/st7789_port.c \
 dev_code/component/st7789/src/image.c \
 dev_code/component/st7789/src/fonts.c \
 dev_code/component/stub/blood_pressure/blood_pressure.c \
-dev_code/component/stub/storage/storage.c \
 dev_code/component/display/src/$(display)/display.c \
 dev_code/component/menu/src/menu.c \
 dev_code/unit_test/test_menu/src/test_menu.c \
-dev_code/unit_test/test_display/src/test_display.c \
+dev_code/component/storage/src/storage.c \
+dev_code/unit_test/test_storage/src/test_storage.c \
+dev_code/unit_test/test_display/src/test_display.c
 
 DEV_CODE_INCLUDES = \
 -Idev_code/entry/inc \
@@ -43,5 +44,6 @@ DEV_CODE_INCLUDES = \
 -Idev_code/unit_test/test_display/inc \
 -Idev_code/component/display/inc \
 -Idev_code/component/blood_pressure/inc \
+-Idev_code/unit_test/test_storage/inc \
 -Idev_code/component/st7789/inc \
 -Idev_code/component/storage/inc
