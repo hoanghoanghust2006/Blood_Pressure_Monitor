@@ -3,7 +3,8 @@
 #include "button.h"
 #include "menu.h"
 
-tenStatus DPL_enDisplayProcessMeasurement(uint8_t          u8AirPressure,
+tenStatus DPL_enDisplayProcessMeasurement(const tstTime*   stTime,
+                                          uint8_t          u8AirPressure,
                                           tenPressureState enPressureState,
                                           bool             bRefreshAll)
 {

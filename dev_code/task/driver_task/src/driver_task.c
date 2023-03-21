@@ -20,6 +20,8 @@
 #include "glcd.h"
 #include "trace.h"
 #include "storage.h"
+#include "st7789.h"
+#include "display.h"
 
 /* Private define constants -------------------------------------------------------------*/
 #define DRV_TASK_DELAY_TIME_MS 5
@@ -47,6 +49,7 @@ static void DRIV_voTask(void *pvoArgument)
     BTN_enInit();
     GLCD_enInit();
     STO_voInit();
+    ST7789_enInit();
 
     for (;;)
     {

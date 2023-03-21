@@ -28,7 +28,7 @@
 #define PRESS_TIME_DETECT 50
 #define HOLD_TIME_DETECT  2000
 
-#define COUNTER_DELAY 100
+#define COUNTER_DELAY 20
 
 /* Private macros -----------------------------------------------------------------------*/
 
@@ -129,7 +129,7 @@ void BTN_voMainFunction(uint32_t u32LoopTime)
     }
 }
 
-tenButtonState BTN_voGetState(tenButtonType enButton)
+tenButtonState BTN_enGetState(tenButtonType enButton)
 {
     tenButtonState enResult = eNONE;
     for (uint8_t u8Index = 0; u8Index < (sizeof(astButton) / sizeof(tstButton)); u8Index++)

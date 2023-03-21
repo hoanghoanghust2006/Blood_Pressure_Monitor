@@ -57,7 +57,7 @@ static void BTN_voTask(void *pvoArgument)
         tenButtonState enCheckState = eNONE;
         for (uint8_t u8Index = 0; u8Index < sizeof(astBtnCheck) / sizeof(tstButtonCheck); u8Index++)
         {
-            enCheckState = BTN_voGetState(astBtnCheck[u8Index].enButtonName);
+            enCheckState = BTN_enGetState(astBtnCheck[u8Index].enButtonName);
             if (enCheckState == ePRESSED)
             {
                 trace("Button %s is pressed\r\n", astBtnCheck[u8Index].cString);
