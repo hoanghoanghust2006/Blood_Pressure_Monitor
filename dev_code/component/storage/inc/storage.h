@@ -23,6 +23,14 @@ extern "C"
 #include "common.h"
 
 /* Define constants -----------------------------------------------------------------------*/
+#if defined(STM32H735xx)
+#define FLASH_WORD 32
+#elif defined(STM32H7B3xxQ)
+#define FLASH_WORD 16
+#elif defined(STM32L496xx)
+#define FLASH_WORD 8
+#endif
+
 #define MAX_NUM_OF_RECORDS 90
 
     /* Type definitions (Typedef, enum, struct) -----------------------------------------------*/
@@ -32,7 +40,7 @@ extern "C"
         uint8_t u8Sys;
         uint8_t u8Dia;
         uint8_t u8HeartRate;
-    } __attribute__((packed, aligned(8))) tstStorage;
+    } __attribute__((packed, aligned(FLASH_WORD))) tstStorage;
 
     /* Export Function Declarations -----------------------------------------------------------*/
     void    STO_voInit(void);

@@ -12,7 +12,6 @@
 
 /* System Include -----------------------------------------------------------------------*/
 #include <string.h>
-#include <stdlib.h>
 
 /* Local Include ------------------------------------------------------------------------*/
 #include "storage.h"
@@ -27,17 +26,14 @@
 
 /* Private define constants -------------------------------------------------------------*/
 #if defined(STM32H735xx)
-#define FLASH_WORD             32
 #define ADDRESS_STORAGE_MEMORY 0x080E0000
 #define FLASH_BANK_NUM         FLASH_BANK_1
 #define TYPEPROGRAM            FLASH_TYPEPROGRAM_FLASHWORD
 #elif defined(STM32H7B3xxQ)
-#define FLASH_WORD             16
 #define ADDRESS_STORAGE_MEMORY 0x081E0000
 #define FLASH_BANK_NUM         FLASH_BANK_2
 #define TYPEPROGRAM            FLASH_TYPEPROGRAM_FLASHWORD
 #elif defined(STM32L496xx)
-#define FLASH_WORD             16
 #define ADDRESS_STORAGE_MEMORY 0x0807F800
 #define FLASH_BANK_NUM         FLASH_BANK_1
 #define TYPEPROGRAM            FLASH_TYPEPROGRAM_DOUBLEWORD
@@ -51,6 +47,13 @@
 /* Private file-local global variables   ------------------------------------------------*/
 static tstStorage stStorage[MAX_NUM_OF_RECORDS];
 static uint8_t    u8NumOfRecord = 0;
+
+/*
+ * Calculate the size of block that stores one record.
+ * The size of block has to be mutiple of FLASH_WORD
+ */
+static const uint8_t u8Check     = ((sizeof(tstStorage) % FLASH_WORD) == 0) ? 0 : 1;
+static const uint8_t u8SizeBlock = (sizeof(tstStorage) / FLASH_WORD + u8Check) * FLASH_WORD;
 
 /* Private function prototypes declarations   -------------------------------------------*/
 static uint32_t   STO_u32GetSegment(uint32_t u32Address);
@@ -124,14 +127,22 @@ static void STO_voEraseMemory(uint32_t u32address)
 /* Write data to storage */
 static void STO_voSaveOneRecord(uint32_t u32address, const tstStorage *stStorage)
 {
-    uint64_t *ptr = malloc(16);
-    memcpy(ptr, stStorage, 16);
-
+    /* Unlock the Flash */
     HAL_FLASH_Unlock();
 
-    HAL_FLASH_Program(TYPEPROGRAM, u32address, *ptr);
-    HAL_FLASH_Program(TYPEPROGRAM, u32address + 8, *(ptr + 1));
-    free(ptr);
+#if defined(STM32H735xx) || defined(STM32H7B3xxQ)
+    uint32_t *ptr = (uint32_t *)stStorage;
+    for (uint8_t u8index = 0; u8index < (sizeof(tstStorage) / FLASH_WORD); u8index++)
+    {
+        HAL_FLASH_Program(TYPEPROGRAM, u32address, (uint32_t)(ptr + u8index));
+    }
+#elif defined(STM32L496xx)
+    uint64_t *ptr                = (uint64_t *)stStorage;
+    for (uint8_t u8index = 0; u8index < (sizeof(tstStorage) / FLASH_WORD); u8index++)
+    {
+        HAL_FLASH_Program(TYPEPROGRAM, u32address + 8 * u8index, *(ptr + u8index));
+    }
+#endif
 
     /* Lock the Flash to disable the flash control register access */
     HAL_FLASH_Lock();
@@ -165,7 +176,7 @@ static void STO_voSaveRecordsToMemory(tstStorage stStorage[], uint8_t u8Length, 
     for (uint8_t u8Index = 0; u8Index < u8NumTotalRecord; u8Index++)
     {
         STO_voSaveOneRecord(u32Address, &stStorage[u8Index]);
-        u32Address += FLASH_WORD;
+        u32Address += u8SizeBlock;
     }
     __enable_irq();
 }
@@ -221,7 +232,7 @@ static void STO_voGetRecordsFromMemory(tstStorage stStorage[], uint8_t u8Length,
     for (uint8_t u8Index = 0; u8Index < u8Length; u8Index++)
     {
         stTemp = STO_tstGetOneRecordFromMemory(u32Address);
-        u32Address += FLASH_WORD;
+        u32Address += u8SizeBlock;
         if (stTemp.stRecordTime.u8Day != ERASE_DATA)
         {
             stStorage[u8Index] = stTemp;
